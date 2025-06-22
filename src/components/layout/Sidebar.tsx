@@ -5,7 +5,6 @@ import {
   BarChart3,
   FileSpreadsheet,
   Settings,
-  Home,
   Users,
   LayoutDashboard,
   Search,
@@ -84,7 +83,12 @@ const Sidebar = () => {
   return isMobile ? (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          aria-label="Open menu"
+        >
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>

@@ -473,11 +473,7 @@ export default function FeaturedToolsSection() {
                           <CardTitle>{tool.name}</CardTitle>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge
-                            variant={
-                              tool.status === "active" ? "default" : "secondary"
-                            }
-                          >
+                          <Badge variant="secondary">
                             {tool.status === "active" ? "Active" : "Beta"}
                           </Badge>
                           <Badge variant="outline">v{tool.version}</Badge>

@@ -267,6 +267,7 @@ export default function FbaCalculator() {
                   <input
                     type="file"
                     accept=".csv"
+                    aria-label="Upload CSV file"
                     onChange={handleFileUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     ref={fileInputRef}
