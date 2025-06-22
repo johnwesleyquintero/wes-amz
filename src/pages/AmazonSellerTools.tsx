@@ -28,11 +28,15 @@ import {
   Key,
   ShieldAlert,
   Mail,
+  Cloud, // Adding Cloud icon for Google Workspace
 } from "lucide-react";
 
 // Lazy load components
 const FbaCalculator = lazy(
   () => import("../components/amazon-seller-tools/fba-calculator"),
+);
+const GoogleWorkspaceIntegration = lazy(
+  () => import("../components/amazon-seller-tools/google-workspace-integration"),
 );
 const KeywordAnalyzer = lazy(
   () => import("../components/amazon-seller-tools/keyword-analyzer"),
@@ -404,6 +408,21 @@ export default function FeaturedToolsSection() {
         </Suspense>
       ),
       category: "Financial Analysis",
+    },
+    {
+      id: "google-workspace-integration",
+      name: "Google Workspace Integration",
+      description:
+        "Integrate with Google Sheets and Google Drive for data management.",
+      icon: <Cloud className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Google Workspace Integration...</div>}>
+          <GoogleWorkspaceIntegration />
+        </Suspense>
+      ),
+      category: "Operations & Automation",
     },
   ];
 

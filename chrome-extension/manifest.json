@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Alerion Quick Access",
+  "version": "1.0",
+  "description": "Quick access to Alerion features.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.svg",
+      "48": "images/icon48.svg",
+      "128": "images/icon128.svg"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.svg",
+    "48": "images/icon48.svg",
+    "128": "images/icon128.svg"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://alerion.vercel.app/*"
+  ]
+}
