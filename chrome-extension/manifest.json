@@ -16,11 +16,6 @@
     "48": "images/icon48.svg",
     "128": "images/icon128.svg"
   },
-  "permissions": [
-    "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://alerion.vercel.app/*"
-  ]
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://alerion.vercel.app/*"]
 }

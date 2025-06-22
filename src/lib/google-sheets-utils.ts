@@ -12,7 +12,11 @@ export const readGoogleSheet = (spreadsheetId: string, range: string) => {
   return [];
 };
 
-export const writeGoogleSheet = (spreadsheetId: string, range: string, values: unknown[][]) => {
+export const writeGoogleSheet = (
+  spreadsheetId: string,
+  range: string,
+  _values: unknown[][],
+) => {
   console.log(`Writing to spreadsheet: ${spreadsheetId}, range: ${range}`);
   // Placeholder for writing data to Google Sheet
   return true;

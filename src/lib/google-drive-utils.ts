@@ -6,8 +6,14 @@ export const initializeGoogleDrive = () => {
   // Placeholder for Google Drive API initialization
 };
 
-export const uploadFileToDrive = (fileName: string, fileContent: string, mimeType: string) => {
-  console.log(`Uploading file: ${fileName} with mime type: ${mimeType} to Google Drive`);
+export const uploadFileToDrive = (
+  fileName: string,
+  fileContent: string,
+  mimeType: string,
+) => {
+  console.log(
+    `Uploading file: ${fileName} with mime type: ${mimeType} to Google Drive`,
+  );
   // Placeholder for uploading a file to Google Drive
   return true;
 };

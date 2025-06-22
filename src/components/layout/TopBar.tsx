@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Bell, Search, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import Sidebar from "./Sidebar"; // Import Sidebar for the mobile menu trigger
 import { ModeToggle } from "@/components/theme/mode-toggle";
 
 const TopBar = () => {
@@ -12,9 +11,13 @@ const TopBar = () => {
   return (
     <header className="border-b border-border bg-background dark:bg-sidebar h-16 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
-        {isMobile && <Sidebar />}{" "}
-        {/* Render Sidebar's SheetTrigger on mobile */}
-        <h2 className="text-xl font-semibold">Dashboard</h2>
+        {/* Placeholder for Breadcrumb and Project Selector */}
+        <div className="flex items-center gap-2">
+          {/* Breadcrumb will go here */}
+          <span className="text-xl font-semibold">Seller Dashboard</span>
+          {/* Project Selector will go here */}
+          {/* <Button variant="ghost" size="icon"><ChevronDown className="h-4 w-4" /></Button> */}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
