@@ -1,6 +1,6 @@
 import {
   BarChart3,
-  FileSpreadsheet,
+  //FileSpreadsheet,
   Settings,
   // Removed unused imports: Users, LayoutDashboard, AlertTriangle, Folder
   Search,
@@ -26,8 +26,26 @@ import {
   Wrench, // Added Wrench icon for Amazon Seller Tools
 } from "lucide-react";
 
+export interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+}
 
-export const mainNavigation = [
+export interface NavigationCategory {
+  name: string;
+  icon: React.ElementType;
+  children: NavigationItem[];
+}
+
+export interface MainNavigationItem {
+  name: string;
+  icon: React.ElementType;
+  href?: string;
+  children?: NavigationCategory[];
+}
+
+export const mainNavigation: MainNavigationItem[] = [
   {
     name: "Amazon Seller Tools",
     icon: Wrench, // Using Wrench for Amazon Seller Tools
@@ -37,77 +55,148 @@ export const mainNavigation = [
         name: "Analytics & Reporting",
         icon: BarChart3,
         children: [
-          { name: 'ACOS Calculator', href: '/tools/acos-calculator', icon: Calculator },
-          { name: 'Competitor Analyzer', href: '/tools/competitor-analyzer', icon: UsersIcon },
-          { name: 'Market Share Analysis', href: '/tools/market-share-analysis', icon: PieChart },
-          { name: 'PPC Campaign Auditor', href: '/tools/ppc-campaign-auditor', icon: DollarSign },
-          { name: 'Profit Margin Calculator', href: '/tools/profit-margin-calculator', icon: DollarSign },
-          { name: 'Sales Estimator', href: '/tools/sales-estimator', icon: Activity },
-          { name: 'Sales Trend Analyzer', href: '/tools/sales-trend-analyzer', icon: Activity },
-        ]
+          {
+            name: "ACOS Calculator",
+            href: "/tools/acos-calculator",
+            icon: Calculator,
+          },
+          {
+            name: "Competitor Analyzer",
+            href: "/tools/competitor-analyzer",
+            icon: UsersIcon,
+          },
+          {
+            name: "Market Share Analysis",
+            href: "/tools/market-share-analysis",
+            icon: PieChart,
+          },
+          {
+            name: "PPC Campaign Auditor",
+            href: "/tools/ppc-campaign-auditor",
+            icon: DollarSign,
+          },
+          {
+            name: "Profit Margin Calculator",
+            href: "/tools/profit-margin-calculator",
+            icon: DollarSign,
+          },
+          {
+            name: "Sales Estimator",
+            href: "/tools/sales-estimator",
+            icon: Activity,
+          },
+          {
+            name: "Sales Trend Analyzer",
+            href: "/tools/sales-trend-analyzer",
+            icon: Activity,
+          },
+        ],
       },
       {
         name: "Listing & Keyword Tools",
         icon: Search,
         children: [
-          { name: 'Description Editor', href: '/tools/description-editor', icon: Edit },
-          { name: 'Keyword Analyzer', href: '/tools/keyword-analyzer', icon: Key },
-          { name: 'Keyword Deduplicator', href: '/tools/keyword-deduplicator', icon: Minimize },
-          { name: 'Keyword Index Checker', href: '/tools/keyword-index-checker', icon: CheckCircle },
-          { name: 'Keyword Trend Analyzer', href: '/tools/keyword-trend-analyzer', icon: TrendingUp },
-          { name: 'Listing Quality Checker', href: '/tools/listing-quality-checker', icon: Award },
-          { name: 'Opportunity Finder', href: '/tools/opportunity-finder', icon: Lightbulb },
-          { name: 'Reverse ASIN Keyword Miner', href: '/tools/reverse-asin-keyword-miner', icon: Drill },
-        ]
+          {
+            name: "Description Editor",
+            href: "/tools/description-editor",
+            icon: Edit,
+          },
+          {
+            name: "Keyword Analyzer",
+            href: "/tools/keyword-analyzer",
+            icon: Key,
+          },
+          {
+            name: "Keyword Deduplicator",
+            href: "/tools/keyword-deduplicator",
+            icon: Minimize,
+          },
+          {
+            name: "Keyword Index Checker",
+            href: "/tools/keyword-index-checker",
+            icon: CheckCircle,
+          },
+          {
+            name: "Keyword Trend Analyzer",
+            href: "/tools/keyword-trend-analyzer",
+            icon: TrendingUp,
+          },
+          {
+            name: "Listing Quality Checker",
+            href: "/tools/listing-quality-checker",
+            icon: Award,
+          },
+          {
+            name: "Opportunity Finder",
+            href: "/tools/opportunity-finder",
+            icon: Lightbulb,
+          },
+          {
+            name: "Reverse ASIN Keyword Miner",
+            href: "/tools/reverse-asin-keyword-miner",
+            icon: Drill,
+          },
+        ],
       },
       {
         name: "Operations & Management",
         icon: ShoppingBag,
         children: [
-          { name: 'Automated Email Follow-up', href: '/tools/automated-email-followup', icon: Mail },
-          { name: 'FBA Calculator', href: '/tools/fba-calculator', icon: Package },
-          { name: 'Inventory Management', href: '/tools/inventory-management', icon: Warehouse },
-          { name: 'Webhook Manager', href: '/tools/webhook-manager', icon: Webhook },
-        ]
+          {
+            name: "Automated Email Follow-up",
+            href: "/tools/automated-email-followup",
+            icon: Mail,
+          },
+          {
+            name: "FBA Calculator",
+            href: "/tools/fba-calculator",
+            icon: Package,
+          },
+          {
+            name: "Inventory Management",
+            href: "/tools/inventory-management",
+            icon: Warehouse,
+          },
+          {
+            name: "Webhook Manager",
+            href: "/tools/webhook-manager",
+            icon: Webhook,
+          },
+        ],
       },
       {
         name: "Integrations",
         icon: Cloud,
         children: [
-          { name: 'Google Workspace Integration', href: '/tools/google-workspace-integration', icon: Cloud },
-          { name: 'Google Sheets', href: '/tools/sheets-integration', icon: FileSpreadsheet },
-        ]
+          {
+            name: "Google Workspace Integration",
+            href: "/tools/google-workspace-integration",
+            icon: Cloud,
+          },
+        ],
       },
-    ]
+    ],
   },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
+export const getFlattenedNavigation = (
+  navigationItems: NavigationCategory[],
+) => {
+  let flattened: NavigationItem[] = [];
+  navigationItems.forEach((item) => {
+    if (item.children) {
+      flattened = flattened.concat(item.children);
+    }
+  });
+  return flattened;
+};
+
 export const secondaryNavigation = {
   "/tools": {
     title: "Amazon Seller Tools",
-    navigation: [
-      { name: 'ACOS Calculator', href: '/tools/acos-calculator', icon: Calculator },
-      { name: 'Competitor Analyzer', href: '/tools/competitor-analyzer', icon: UsersIcon },
-      { name: 'Market Share Analysis', href: '/tools/market-share-analysis', icon: PieChart },
-      { name: 'PPC Campaign Auditor', href: '/tools/ppc-campaign-auditor', icon: DollarSign },
-      { name: 'Profit Margin Calculator', href: '/tools/profit-margin-calculator', icon: DollarSign },
-      { name: 'Sales Estimator', href: '/tools/sales-estimator', icon: Activity },
-      { name: 'Sales Trend Analyzer', href: '/tools/sales-trend-analyzer', icon: Activity },
-      { name: 'Description Editor', href: '/tools/description-editor', icon: Edit },
-      { name: 'Keyword Analyzer', href: '/tools/keyword-analyzer', icon: Key },
-      { name: 'Keyword Deduplicator', href: '/tools/keyword-deduplicator', icon: Minimize },
-      { name: 'Keyword Index Checker', href: '/tools/keyword-index-checker', icon: CheckCircle },
-      { name: 'Keyword Trend Analyzer', href: '/tools/keyword-trend-analyzer', icon: TrendingUp },
-      { name: 'Listing Quality Checker', href: '/tools/listing-quality-checker', icon: Award },
-      { name: 'Opportunity Finder', href: '/tools/opportunity-finder', icon: Lightbulb },
-      { name: 'Reverse ASIN Keyword Miner', href: '/tools/reverse-asin-keyword-miner', icon: Drill },
-      { name: 'Automated Email Follow-up', href: '/tools/automated-email-followup', icon: Mail },
-      { name: 'FBA Calculator', href: '/tools/fba-calculator', icon: Package },
-      { name: 'Inventory Management', href: '/tools/inventory-management', icon: Warehouse },
-      { name: 'Webhook Manager', href: '/tools/webhook-manager', icon: Webhook },
-      { name: 'Google Workspace Integration', href: '/tools/google-workspace-integration', icon: Cloud },
-      { name: 'Google Sheets', href: '/tools/sheets-integration', icon: FileSpreadsheet },
-    ],
+    navigation: getFlattenedNavigation(
+      mainNavigation[0].children as NavigationCategory[],
+    ),
   },
 };

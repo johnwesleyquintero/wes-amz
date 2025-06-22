@@ -1,20 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, Search, Wrench } from "lucide-react";
+import { Bell, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ModeToggle } from "@/components/theme/mode-toggle";
+import MobileSidebar from "./MobileSidebar";
+import Breadcrumb from "./Breadcrumb";
 
 const TopBar = () => {
   const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [notificationCount] = useState(3); // Simulate unread notifications
 
   return (
     <header className="border-b border-border bg-background dark:bg-sidebar h-16 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
+        {isMobile && <MobileSidebar />}
         {/* Placeholder for Breadcrumb and Project Selector */}
         <div className="flex items-center gap-2">
-          {/* Breadcrumb will go here */}
-          <span className="text-xl font-semibold">Seller Dashboard</span>
+          <Breadcrumb />
           {/* Project Selector will go here */}
           {/* <Button variant="ghost" size="icon"><ChevronDown className="h-4 w-4" /></Button> */}
         </div>
@@ -29,33 +33,39 @@ const TopBar = () => {
             type="text"
             placeholder="Search..."
             className="pl-10 pr-4 py-2 border border-input rounded-md bg-background w-full focus:outline-none focus:ring-2 focus:ring-primary/20"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
+          {searchTerm && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => setSearchTerm("")}
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+              <span className="sr-only">Clear search</span>
+            </Button>
+          )}
         </div>
 
         {!isMobile && (
           <>
-            <Button variant="outline" size="icon" className="relative">
+            <Button
+              variant="outline"
+              size="icon"
+              className="relative"
+              onClick={() => alert("Navigate to notifications!")}
+            >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary"></span>
+              {notificationCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 flex items-center justify-center text-xs text-primary-foreground bg-primary rounded-full -mt-1 -mr-1">
+                  {notificationCount}
+                </span>
+              )}
             </Button>
 
             <ModeToggle />
-            <Link to="/tools">
-              <Button
-                variant="outline"
-                className="bg-accent text-foreground hover:bg-accent/90"
-              >
-                <Wrench className="mr-2 h-4 w-4" />
-                Seller Tools
-              </Button>
-            </Link>
-
-            <Button
-              variant="outline"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Connect Google Sheets
-            </Button>
 
             <Link to="/">
               <Button

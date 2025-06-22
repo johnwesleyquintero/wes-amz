@@ -1,28 +1,30 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Wrench } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 import Footer from "@/components/layout/Footer";
 
-const Landing: React.FC = () => {
+/**
+ * Landing page component.
+ * Displays introductory information and calls to action for the application.
+ */
+const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      {/* Navigation Bar */}
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" className="h-8 w-8" alt="Alerion Logo" />
-            <span className="text-2xl font-bold text-foreground hover:text-primary transition-colors">
-              Alerion
-            </span>
+            {/* Logo and App Name - Adjust if the logo/name should be a link */}
+            <img
+              src="/logo.svg"
+              className="h-8 w-8"
+              alt="Alerion application logo"
+            />
+            <span className="text-2xl font-bold text-foreground">Alerion</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to={ROUTES.TOOLS}>
-              <Button size="lg" className="w-full sm:w-fit">
-                Seller Tools
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
             <Link to={ROUTES.DASHBOARD}>
               <Button size="lg" variant="outline" className="w-full sm:w-fit">
                 Go to Dashboard
@@ -32,12 +34,14 @@ const Landing: React.FC = () => {
         </div>
       </nav>
 
-      <main className="container mx-auto px-6 py-20">
-        <div className="text-center max-w-4xl mx-auto space-y-8">
-          <h1 className="text-6xl font-bold mb-6 text-primary">
+      {/* Main Content Area */}
+      <main className="flex-grow container mx-auto px-6 py-20">
+        {/* Hero Section */}
+        <section className="text-center max-w-4xl mx-auto space-y-8">
+          <h1 className="text-6xl font-bold text-primary">
             Transform Your Amazon Ads Data
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+          <p className="text-xl text-muted-foreground leading-relaxed">
             Powerful analytics dashboard for monitoring and optimizing your
             Amazon advertising performance. Get started today and unlock the
             potential of your data.
@@ -46,24 +50,17 @@ const Landing: React.FC = () => {
             <Link to={ROUTES.DASHBOARD}>
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-foreground font-bold px-8 py-6 text-lg"
+                className="bg-accent hover:bg-accent/90 text-foreground font-bold px-8 py-6 text-lg" // Specific styling for primary CTA
               >
                 Open Dashboard <ArrowRight className="ml-2 w-6 h-6" />
               </Button>
             </Link>
-            <Link to={ROUTES.TOOLS}>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 py-3 text-lg"
-              >
-                Explore Seller Tools <Wrench className="ml-2 w-6 h-6" />
-              </Button>
-            </Link>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Features Section */}
+        <section className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Feature Card 1 */}
           <div className="bg-card p-8 rounded-xl hover:bg-muted transition-colors duration-300 border border-border shadow-lg">
             <h3 className="text-xl font-bold text-primary mb-4">
               Real-time Analytics
@@ -73,6 +70,7 @@ const Landing: React.FC = () => {
               with our intuitive dashboard.
             </p>
           </div>
+          {/* Feature Card 2 */}
           <div className="bg-card p-8 rounded-xl hover:bg-muted transition-colors duration-300 border border-border shadow-lg">
             <h3 className="text-xl font-bold text-accent mb-4">
               Custom Reports
@@ -82,6 +80,7 @@ const Landing: React.FC = () => {
               deeper insights.
             </p>
           </div>
+          {/* Feature Card 3 */}
           <div className="bg-card p-8 rounded-xl hover:bg-muted transition-colors duration-300 border border-border shadow-lg">
             <h3 className="text-xl font-bold text-accent mb-4">
               Seller Tools Suite
@@ -91,9 +90,10 @@ const Landing: React.FC = () => {
               sellers to optimize listings and increase profits.
             </p>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-16 pt-16 border-t border-border">
+        {/* Final Call to Action Section */}
+        <section className="mt-16 pt-16 border-t border-border">
           <div className="text-center">
             <h2 className="text-4xl font-bold text-primary mb-8">
               Start Optimizing Your Amazon Ads Today
@@ -104,15 +104,12 @@ const Landing: React.FC = () => {
                   Launch Dashboard
                 </Button>
               </Link>
-              <Link to={ROUTES.TOOLS}>
-                <Button className="bg-accent hover:bg-accent/90 text-foreground font-bold px-6 py-3 text-lg">
-                  View Seller Tools
-                </Button>
-              </Link>
             </div>
           </div>
-        </div>
+        </section>
       </main>
+
+      {/* Footer */}
       <Footer />
     </div>
   );

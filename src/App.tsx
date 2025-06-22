@@ -2,15 +2,33 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React, { Suspense, lazy } from "react";
+import React, {
+  Suspense,
+  lazy,
+  ComponentType,
+  LazyExoticComponent,
+} from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import { SidebarProvider } from "./context/sidebar-context";
 import MainLayout from "./components/layout/MainLayout";
 
-const AmazonSellerTools = lazy(() => import("./pages/AmazonSellerTools"));
+// Define types for route configuration
+type LazyComponent = LazyExoticComponent<ComponentType<unknown>>;
+
+interface AppRouteConfig {
+  path: string;
+  component: LazyComponent;
+  props?: Record<string, unknown>; // Optional props for components
+}
+
+// Define default suspense fallback
+const DEFAULT_SUSPENSE_FALLBACK = <div>Loading...</div>; // A generic loading message is often sufficient
+
+// Lazy-load components
+const Dashboard = lazy(() => import("./pages/index"));
+const Tools = lazy(() => import("./pages/Tools"));
 const AcosCalculator = lazy(
   () => import("./components/amazon-seller-tools/acos-calculator"),
 );
@@ -75,6 +93,61 @@ const WebhookManager = lazy(
   () => import("./components/amazon-seller-tools/webhook-manager"),
 );
 
+// Define routes that use the MainLayout
+const appRoutes: AppRouteConfig[] = [
+  { path: "/dashboard", component: Dashboard },
+  {
+    path: "/tools",
+    component: Tools,
+    props: {
+      showCategories: true,
+      showTable: true,
+      showDetails: true,
+      showCTA: true,
+    },
+  },
+  { path: "/tools/acos-calculator", component: AcosCalculator },
+  {
+    path: "/tools/automated-email-followup",
+    component: AutomatedEmailFollowup,
+  },
+  { path: "/tools/competitor-analyzer", component: CompetitorAnalyzer },
+  { path: "/tools/description-editor", component: DescriptionEditor },
+  { path: "/tools/fba-calculator", component: FbaCalculator },
+  {
+    path: "/tools/google-workspace-integration",
+    component: GoogleWorkspaceIntegration,
+  },
+  { path: "/tools/inventory-management", component: InventoryManagement },
+  { path: "/tools/keyword-analyzer", component: KeywordAnalyzer },
+  { path: "/tools/keyword-deduplicator", component: KeywordDeduplicator },
+  { path: "/tools/keyword-index-checker", component: KeywordIndexChecker },
+  { path: "/tools/keyword-trend-analyzer", component: KeywordTrendAnalyzer },
+  { path: "/tools/listing-hijack-alerts", component: ListingHijackAlerts },
+  { path: "/tools/listing-quality-checker", component: ListingQualityChecker },
+  { path: "/tools/market-share-analysis", component: MarketShareAnalysis },
+  { path: "/tools/opportunity-finder", component: OpportunityFinder },
+  { path: "/tools/ppc-campaign-auditor", component: PpcCampaignAuditor },
+  {
+    path: "/tools/profit-margin-calculator",
+    component: ProfitMarginCalculator,
+  },
+  {
+    path: "/tools/reverse-asin-keyword-miner",
+    component: ReverseASINKeywordMiner,
+  },
+  { path: "/tools/sales-estimator", component: SalesEstimator },
+  { path: "/tools/sales-trend-analyzer", component: SalesTrendAnalyzer },
+  { path: "/tools/webhook-manager", component: WebhookManager },
+  // Routes that point to the Dashboard component
+  { path: "/search-analytics", component: Dashboard },
+  { path: "/campaign-manager", component: Dashboard },
+  { path: "/products", component: Dashboard },
+  { path: "/sheets-integration", component: Dashboard },
+  { path: "/team", component: Dashboard },
+  { path: "/settings", component: Dashboard },
+];
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -89,241 +162,20 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<Index />} />
-              <Route
-                path="/tools"
-                element={
-                  <Suspense
-                    fallback={<div>Loading Amazon Seller Tools...</div>}
-                  >
-                    <AmazonSellerTools />
-                  </Suspense>
-                }
-              >
-                {/* Nested routes for Amazon Seller Tools */}
+              {/* Dynamically generate routes using the configuration array */}
+              {appRoutes.map(({ path, component: Component, props }) => (
                 <Route
-                  path="acos-calculator"
+                  key={path} // Use path as a key for unique routes
+                  path={path}
                   element={
-                    <Suspense fallback={<div>Loading ACOS Calculator...</div>}>
-                      <AcosCalculator />
+                    <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                      <Component {...props} />
                     </Suspense>
                   }
                 />
-                <Route
-                  path="automated-email-followup"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Automated Email Follow-up...</div>}
-                    >
-                      <AutomatedEmailFollowup />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="competitor-analyzer"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Competitor Analyzer...</div>}
-                    >
-                      <CompetitorAnalyzer />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="description-editor"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Description Editor...</div>}
-                    >
-                      <DescriptionEditor />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="fba-calculator"
-                  element={
-                    <Suspense fallback={<div>Loading FBA Calculator...</div>}>
-                      <FbaCalculator />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="google-workspace-integration"
-                  element={
-                    <Suspense
-                      fallback={
-                        <div>Loading Google Workspace Integration...</div>
-                      }
-                    >
-                      <GoogleWorkspaceIntegration />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="inventory-management"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Inventory Management...</div>}
-                    >
-                      <InventoryManagement />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="keyword-analyzer"
-                  element={
-                    <Suspense fallback={<div>Loading Keyword Analyzer...</div>}>
-                      <KeywordAnalyzer />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="keyword-deduplicator"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Keyword Deduplicator...</div>}
-                    >
-                      <KeywordDeduplicator />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="keyword-index-checker"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Keyword Index Checker...</div>}
-                    >
-                      <KeywordIndexChecker />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="keyword-trend-analyzer"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Keyword Trend Analyzer...</div>}
-                    >
-                      <KeywordTrendAnalyzer />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="listing-hijack-alerts"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Listing Hijack Alerts...</div>}
-                    >
-                      <ListingHijackAlerts />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="listing-quality-checker"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Listing Quality Checker...</div>}
-                    >
-                      <ListingQualityChecker />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="market-share-analysis"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Market Share Analysis...</div>}
-                    >
-                      <MarketShareAnalysis />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="opportunity-finder"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Opportunity Finder...</div>}
-                    >
-                      <OpportunityFinder />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="ppc-campaign-auditor"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading PPC Campaign Auditor...</div>}
-                    >
-                      <PpcCampaignAuditor />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="profit-margin-calculator"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Profit Margin Calculator...</div>}
-                    >
-                      <ProfitMarginCalculator />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="reverse-asin-keyword-miner"
-                  element={
-                    <Suspense
-                      fallback={
-                        <div>Loading Reverse ASIN Keyword Miner...</div>
-                      }
-                    >
-                      <ReverseASINKeywordMiner />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="sales-estimator"
-                  element={
-                    <Suspense fallback={<div>Loading Sales Estimator...</div>}>
-                      <SalesEstimator />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="sales-trend-analyzer"
-                  element={
-                    <Suspense
-                      fallback={<div>Loading Sales Trend Analyzer...</div>}
-                    >
-                      <SalesTrendAnalyzer />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="webhook-manager"
-                  element={
-                    <Suspense fallback={<div>Loading Webhook Manager...</div>}>
-                      <WebhookManager />
-                    </Suspense>
-                  }
-                />
-                {/* Set a default child route for /tools */}
-                <Route
-                  index
-                  element={
-                    <Suspense fallback={<div>Loading FBA Calculator...</div>}>
-                      <FbaCalculator />
-                    </Suspense>
-                  }
-                />
-              </Route>
-              <Route path="/search-analytics" element={<Index />} />
-              <Route path="/campaign-manager" element={<Index />} />
-              <Route path="/products" element={<Index />} />
-              <Route path="/sheets-integration" element={<Index />} />
-              <Route path="/team" element={<Index />} />
-              <Route path="/settings" element={<Index />} />
-              {/* Remove the duplicate /amazon-seller-tools route as /tools now handles it */}
+              ))}
             </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* The catch-all route should be the last one */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
