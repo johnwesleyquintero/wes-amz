@@ -4,6 +4,7 @@ import { Bell, Search, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "./Sidebar"; // Import Sidebar for the mobile menu trigger
+import { ModeToggle } from "@/components/theme/mode-toggle";
 
 const TopBar = () => {
   const isMobile = useIsMobile();
@@ -35,6 +36,7 @@ const TopBar = () => {
               <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-burnt-sienna"></span>
             </Button>
 
+            <ModeToggle />
             <Link to="/tools">
               <Button
                 variant="outline"
