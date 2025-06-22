@@ -1,0 +1,26 @@
+{
+  "name": "My Amazon Analytics",
+  "short_name": "MyAmzAnalytics",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#ED595B",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "description": "Enterprise-Grade Amazon Advertising Analytics Platform",
+  "orientation": "portrait",
+  "scope": "/",
+  "prefer_related_applications": false
+}
