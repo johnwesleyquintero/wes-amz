@@ -93,20 +93,6 @@ const Landing = () => {
         </section>
 
         {/* Final Call to Action Section */}
-        <section className="mt-16 pt-16 border-t border-border">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-primary mb-8">
-              Start Optimizing Your Amazon Ads Today
-            </h2>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link to={ROUTES.DASHBOARD}>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 py-3 text-lg">
-                  Launch Dashboard
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
