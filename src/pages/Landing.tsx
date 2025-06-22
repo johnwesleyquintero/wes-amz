@@ -1,10 +1,13 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Wrench } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
+import Footer from "@/components/layout/Footer";
 
-const Landing = () => {
+const Landing: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen flex flex-col bg-white text-gray-900">
       <nav className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -18,14 +21,14 @@ const Landing = () => {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/tools">
-              <Button className="bg-gold text-black hover:bg-gold/90 font-bold">
-                <Wrench className="mr-2 h-4 w-4" />
+            <Link to={ROUTES.TOOLS}>
+              <Button size="lg" className="w-full sm:w-fit">
                 Seller Tools
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/dashboard">
-              <Button className="bg-shakespeare hover:bg-shakespeare/90 text-white font-bold">
+            <Link to={ROUTES.DASHBOARD}>
+              <Button size="lg" variant="outline" className="w-full sm:w-fit">
                 Go to Dashboard
               </Button>
             </Link>
@@ -44,7 +47,7 @@ const Landing = () => {
             potential of your data.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/dashboard">
+            <Link to={ROUTES.DASHBOARD}>
               <Button
                 size="lg"
                 className="bg-gold hover:bg-gold/90 text-black font-bold px-8 py-6 text-lg"
@@ -52,7 +55,7 @@ const Landing = () => {
                 Open Dashboard <ArrowRight className="ml-2 w-6 h-6" />
               </Button>
             </Link>
-            <Link to="/tools">
+            <Link to={ROUTES.TOOLS}>
               <Button
                 size="lg"
                 variant="outline"
@@ -100,12 +103,12 @@ const Landing = () => {
               Start Optimizing Your Amazon Ads Today
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link to="/dashboard">
+              <Link to={ROUTES.DASHBOARD}>
                 <Button className="bg-burnt-sienna hover:bg-burnt-sienna/90 text-white font-bold px-6 py-3 text-lg">
                   Launch Dashboard
                 </Button>
               </Link>
-              <Link to="/tools">
+              <Link to={ROUTES.TOOLS}>
                 <Button className="bg-gold hover:bg-gold/90 text-black font-bold px-6 py-3 text-lg">
                   View Seller Tools
                 </Button>
@@ -114,6 +117,7 @@ const Landing = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

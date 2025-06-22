@@ -30,4 +30,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  worker: {
+    format: "es", // Ensure workers are output as ES modules
+  },
 }));
