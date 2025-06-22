@@ -259,7 +259,7 @@ export default function PpcCampaignAuditor() {
     <div className="space-y-6">
       <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg flex items-start gap-3">
         <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-        <div className="text-sm text-primary-foreground dark:text-primary-foreground">
+        <div className="text-sm text-foreground dark:text-primary-foreground">
           <p className="font-medium">CSV Format Requirements:</p>
           <p>
             Your CSV file should have the following columns: <code>name</code>,{" "}
