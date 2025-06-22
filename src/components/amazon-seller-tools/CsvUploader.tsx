@@ -19,17 +19,13 @@ type CsvUploaderProps<T> = {
   fileName: string;
 };
 
-interface CsvRow {
-  date: string;
-  [keyword: string]: string;
-  id?: string;
-  impressions?: string;
-  clicks?: string;
+export interface GenericCsvRow {
+  [key: string]: unknown;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export default function CsvUploader<T extends CsvRow>({
+export default function CsvUploader<T extends GenericCsvRow>({
   onUploadSuccess,
   isLoading,
   onClear,
@@ -108,10 +104,13 @@ export default function CsvUploader<T extends CsvRow>({
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      setParsingError(null); // Clear previous errors
       if (acceptedFiles.length === 0) {
+        const errorMessage = "No file selected";
+        setParsingError(errorMessage);
         toast({
           title: "Error",
-          description: "No file selected",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -120,29 +119,35 @@ export default function CsvUploader<T extends CsvRow>({
       const file = acceptedFiles[0];
 
       if (!file.name.endsWith(".csv")) {
+        const errorMessage = "Only CSV files are supported";
+        setParsingError(errorMessage);
         toast({
           title: "Error",
-          description: "Only CSV files are supported",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
+        const errorMessage = `File size exceeds the maximum limit of ${
+          MAX_FILE_SIZE / (1024 * 1024)
+        }MB`;
+        setParsingError(errorMessage);
         toast({
           title: "Error",
-          description: `File size exceeds the maximum limit of ${
-            MAX_FILE_SIZE / (1024 * 1024)
-          }MB`,
+          description: errorMessage,
           variant: "destructive",
         });
         return;
       }
 
       if (file.size === 0) {
+        const errorMessage = "The file is empty";
+        setParsingError(errorMessage);
         toast({
           title: "Error",
-          description: "The file is empty",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -186,7 +191,7 @@ export default function CsvUploader<T extends CsvRow>({
         )}
         {(isLoading || isParsing) && (
           <div className="w-full mt-4">
-            <Progress value={50} className="h-2" />
+            <Progress className="h-2" />
           </div>
         )}
         {parsingError && (

@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import Papa from "papaparse";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import CsvUploader, { GenericCsvRow } from "./CsvUploader";
 import {
   Bar,
   BarChart,
@@ -64,127 +65,6 @@ export default function AcosCalculator() {
     adSpend: "",
     sales: "",
   });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Interface for raw CSV data before type conversion
-  interface RawCampaignData {
-    campaign: string;
-    adSpend: string | number | null | undefined;
-    sales: string | number | null | undefined;
-    impressions?: string | number | null | undefined;
-    clicks?: string | number | null | undefined;
-  }
-
-  // Helper function to validate CSV data
-  const isValidCsvRow = (item: RawCampaignData): boolean => {
-    return (
-      typeof item.campaign === "string" &&
-      item.campaign.trim() !== "" &&
-      !isNaN(Number(item.adSpend)) &&
-      !isNaN(Number(item.sales))
-    );
-  };
-
-  // Helper function to process a single CSV row
-  const processCsvRow = (item: RawCampaignData): CampaignData => {
-    const adSpend = Number(item.adSpend);
-    const sales = Number(item.sales);
-    const impressions = item.impressions ? Number(item.impressions) : undefined;
-    const clicks = item.clicks ? Number(item.clicks) : undefined;
-
-    return {
-      campaign: String(item.campaign),
-      adSpend,
-      sales,
-      impressions,
-      clicks,
-      ...calculateMetrics({ adSpend, sales, impressions, clicks }),
-    };
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    Papa.parse<CampaignData>(file, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        if (result.errors.length > 0) {
-          setError(
-            `Error parsing CSV file: ${result.errors[0].message}. Please check the format.`,
-          );
-          toast({
-            title: "CSV Error",
-            description: `Error parsing CSV file: ${result.errors[0].message}. Please check the format.`,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        try {
-          const processedData: CampaignData[] = result.data
-            .filter(isValidCsvRow)
-            .map(processCsvRow);
-
-          if (processedData.length === 0) {
-            setError(
-              "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
-            );
-            toast({
-              title: "CSV Error",
-              description:
-                "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-
-          setCampaigns(processedData);
-          toast({
-            title: "CSV Processed",
-            description: `Loaded ${processedData.length} campaign data`,
-            variant: "default",
-          });
-        } catch (err) {
-          setError(
-            `Failed to process CSV data: ${
-              err instanceof Error ? err.message : String(err)
-            }. Please ensure your CSV has the correct format`,
-          );
-          toast({
-            title: "Processing Failed",
-            description: `Failed to process CSV data: ${
-              err instanceof Error ? err.message : String(err)
-            }. Please ensure your CSV has the correct format`,
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      error: (error) => {
-        setError(`Error parsing CSV file: ${error.message}`);
-        toast({
-          title: "CSV Error",
-          description: `Error parsing CSV file: ${error.message}`,
-          variant: "destructive",
-        });
-        setIsLoading(false);
-      },
-    });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
 
   const handleManualCalculate = () => {
     // Validate input
@@ -314,14 +194,70 @@ export default function AcosCalculator() {
   const clearData = () => {
     setCampaigns([]);
     setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
     toast({
       title: "Data Cleared",
       description: "Campaign data cleared",
       variant: "default",
     });
+  };
+
+  const handleUploadSuccess = (data: GenericCsvRow[]) => {
+    try {
+      const processedData: CampaignData[] = data
+        .filter(
+          (item: GenericCsvRow) =>
+            typeof item.campaign === "string" &&
+            item.campaign.trim() !== "" &&
+            !isNaN(Number(item.adSpend)) &&
+            !isNaN(Number(item.sales)),
+        )
+        .map((item: GenericCsvRow) => {
+          const adSpend = Number(item.adSpend);
+          const sales = Number(item.sales);
+          const impressions = item.impressions
+            ? Number(item.impressions)
+            : undefined;
+          const clicks = item.clicks ? Number(item.clicks) : undefined;
+
+          return {
+            campaign: String(item.campaign),
+            adSpend,
+            sales,
+            impressions,
+            clicks,
+            ...calculateMetrics({ adSpend, sales, impressions, clicks }),
+          };
+        });
+
+      if (processedData.length === 0) {
+        setError(
+          "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
+        );
+        toast({
+          title: "CSV Error",
+          description:
+            "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setCampaigns(processedData);
+      setError(null); // Clear any previous errors
+    } catch (err) {
+      setError(
+        `Failed to process CSV data: ${
+          err instanceof Error ? err.message : String(err)
+        }. Please ensure your CSV has the correct format`,
+      );
+      toast({
+        title: "Processing Failed",
+        description: `Failed to process CSV data: ${
+          err instanceof Error ? err.message : String(err)
+        }. Please ensure your CSV has the correct format`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -347,54 +283,18 @@ export default function AcosCalculator() {
         </div>
       </div>
       <div className="flex flex-col gap-4 sm:flex-row">
-        {/* CSV upload card */}
+        {/* CsvUploader Integration */}
         <Card className="flex-1">
           <CardContent className="p-4">
-            <div className="flex flex-col items-center justify-center gap-4 p-6 text-center">
-              <div className="rounded-full bg-primary/10 p-3">
-                <Upload className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Upload CSV</h3>
-                <p className="text-sm text-muted-foreground">
-                  Upload a CSV file with your campaign data
-                </p>
-              </div>
-              <div className="w-full">
-                <label className="relative flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary/40 bg-background p-6 text-center hover:bg-primary/5">
-                  <FileText className="mb-2 h-8 w-8 text-primary/60" />
-                  <span className="text-sm font-medium">
-                    Click to upload CSV
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    (CSV with campaign name, ad spend, and sales)
-                  </span>
-                  <input
-                    type="file"
-                    accept=".csv"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={isLoading}
-                    ref={fileInputRef}
-                  />
-                </label>
-                <div className="flex justify-center mt-4">
-                  <SampleCsvButton
-                    dataType="acos"
-                    fileName="sample-acos-calculator.csv"
-                  />
-                </div>
-                {campaigns.length > 0 && (
-                  <Button
-                    variant="outline"
-                    className="w-full mt-4"
-                    onClick={clearData}
-                  >
-                    Clear Data
-                  </Button>
-                )}
-              </div>
-            </div>
+            <CsvUploader
+              onUploadSuccess={handleUploadSuccess}
+              isLoading={isLoading}
+              onClear={clearData}
+              hasData={campaigns.length > 0}
+              requiredColumns={["campaign", "adSpend", "sales"]}
+              dataType="acos"
+              fileName="sample-acos-calculator.csv"
+            />
           </CardContent>
         </Card>
 
@@ -463,15 +363,6 @@ export default function AcosCalculator() {
         <div className="flex items-center gap-2 rounded-lg bg-red-100 p-3 text-red-800 dark:bg-red-900/30 dark:text-red-400">
           <AlertCircle className="h-5 w-5" />
           <span>{error}</span>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="space-y-2 py-4 text-center">
-          <Progress value={45} className="h-2" />
-          <p className="text-sm text-muted-foreground">
-            Analyzing campaign performance...
-          </p>
         </div>
       )}
 
