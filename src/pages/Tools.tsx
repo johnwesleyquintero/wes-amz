@@ -1,14 +1,26 @@
 import AmazonSellerTools from "@/pages/AmazonSellerTools";
 import MainLayout from "@/components/layout/MainLayout";
 
-const Tools = () => {
+interface ToolsProps {
+  showCategories: boolean;
+  showTable: boolean;
+  showDetails: boolean;
+  showCTA: boolean;
+}
+
+const Tools = ({
+  showCategories,
+  showTable,
+  showDetails,
+  showCTA,
+}: ToolsProps) => {
   return (
     <MainLayout>
       <AmazonSellerTools
-        showCategories={true}
-        showTable={true}
-        showDetails={true}
-        showCTA={true}
+        showCategories={showCategories}
+        showTable={showTable}
+        showDetails={showDetails}
+        showCTA={showCTA}
       />
     </MainLayout>
   );

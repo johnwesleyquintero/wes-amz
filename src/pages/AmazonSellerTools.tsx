@@ -73,7 +73,19 @@ interface Tool {
   category: string;
 }
 
-export default function FeaturedToolsSection() {
+interface AmazonSellerToolsProps {
+  showCategories: boolean;
+  showTable: boolean;
+  showDetails: boolean;
+  showCTA: boolean;
+}
+
+export default function FeaturedToolsSection({
+  showCategories,
+  showTable,
+  showDetails,
+  showCTA,
+}: AmazonSellerToolsProps) {
   const [activeTab, setActiveTab] = useState<string>("fba-calculator");
 
   const tools: Tool[] = [
