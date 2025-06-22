@@ -8,6 +8,7 @@ import { AlertCircle } from "lucide-react";
 
 interface ToolContainerProps {
   title: string;
+  description?: string;
   status?: string;
   progress?: number;
   error?: string | null;
@@ -17,6 +18,7 @@ interface ToolContainerProps {
 
 export function ToolContainer({
   title,
+  description,
   status,
   progress = 0,
   error = null,
@@ -34,6 +36,7 @@ export function ToolContainer({
             </Badge>
           )}
         </div>
+        {description && <p className="text-gray-600 mb-4">{description}</p>}
 
         {isLoading && (
           <div className="mb-4">

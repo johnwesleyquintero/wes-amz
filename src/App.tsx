@@ -10,7 +10,6 @@ import NotFound from "./pages/NotFound";
 import Tools from "./pages/Tools";
 
 const AmazonSellerTools = lazy(() => import("./pages/AmazonSellerTools"));
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -22,7 +21,17 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Index />} />
-          <Route path="/tools" element={<Tools />} />
+          <Route
+            path="/tools"
+            element={
+              <Tools
+                showCategories={false}
+                showTable={false}
+                showDetails={false}
+                showCTA={false}
+              />
+            }
+          />
           <Route path="/search-analytics" element={<Index />} />
           <Route path="/campaign-manager" element={<Index />} />
           <Route path="/products" element={<Index />} />

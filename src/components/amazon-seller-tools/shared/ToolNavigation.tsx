@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Calculator,
@@ -13,6 +13,13 @@ import {
   TrendingUp,
   LineChart,
   DollarSign,
+  Lightbulb,
+  AreaChart,
+  Key,
+  ShieldAlert,
+  Package,
+  Mail,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface Tool {
@@ -87,15 +94,79 @@ const tools: Tool[] = [
     icon: <DollarSign className="w-5 h-5" />,
     description: "Calculate profit margins",
   },
+  {
+    id: "opportunity-finder",
+    name: "Opportunity Finder",
+    path: "/tools/opportunity-finder",
+    icon: <Lightbulb className="w-5 h-5" />,
+    description: "Scan the Amazon catalog to find profitable products",
+  },
+  {
+    id: "sales-trend-analyzer",
+    name: "Sales Trend Analyzer",
+    path: "/tools/sales-trend-analyzer",
+    icon: <AreaChart className="w-5 h-5" />,
+    description: "Analyze historical sales and price data for any ASIN",
+  },
+  {
+    id: "reverse-asin-keyword-miner",
+    name: "Reverse ASIN Keyword Miner",
+    path: "/tools/reverse-asin-keyword-miner",
+    icon: <Key className="w-5 h-5" />,
+    description: "Extract keywords competitors are ranking for",
+  },
+  {
+    id: "market-share-analysis",
+    name: "Market Share Analysis",
+    path: "/tools/market-share-analysis",
+    icon: <Users className="w-5 h-5" />,
+    description: "Analyze market share for a primary keyword",
+  },
+  {
+    id: "keyword-index-checker",
+    name: "Keyword Index Checker",
+    path: "/tools/keyword-index-checker",
+    icon: <Search className="w-5 h-5" />,
+    description: "Check if your product is indexed for target keywords",
+  },
+  {
+    id: "listing-hijack-alerts",
+    name: "Listing Hijack & Change Alerts",
+    path: "/tools/listing-hijack-alerts",
+    icon: <ShieldAlert className="w-5 h-5" />,
+    description: "Monitor listings for critical changes and hijack attempts",
+  },
+  {
+    id: "inventory-management",
+    name: "Inventory Management & Forecasting",
+    path: "/tools/inventory-management",
+    icon: <Package className="w-5 h-5" />,
+    description: "Track inventory, sales velocity, and forecast stock-outs",
+  },
+  {
+    id: "automated-email-followup",
+    name: "Automated Email Follow-up",
+    path: "/tools/automated-email-followup",
+    icon: <Mail className="w-5 h-5" />,
+    description: "Create automated email campaigns for reviews and feedback",
+  },
+  {
+    id: "holistic-profits-dashboard",
+    name: "Holistic Profits Dashboard",
+    path: "/dashboard/holistic-profits-dashboard",
+    icon: <LayoutDashboard className="w-5 h-5" />,
+    description: "Central hub for real-time net profit and margin",
+  },
 ];
 
 export function ToolNavigation() {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
 
   return (
     <nav className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {tools.map((tool) => (
-        <Link key={tool.id} href={tool.path} className="block">
+        <Link key={tool.id} to={tool.path} className="block">
           <Button
             variant={pathname === tool.path ? "default" : "outline"}
             className="w-full h-full p-4 flex items-center gap-3 justify-start text-left"

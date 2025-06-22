@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "../components/ui/badge";
 import {
-  Calculator,
   Search,
   CheckSquare,
   TrendingUp,
@@ -24,7 +23,11 @@ import {
   Percent,
   Package,
   LayoutDashboard,
-  Target,
+  Lightbulb,
+  AreaChart,
+  Key,
+  ShieldAlert,
+  Mail,
 } from "lucide-react";
 
 // Lazy load components
@@ -61,6 +64,33 @@ const KeywordTrendAnalyzer = lazy(
 const ProfitMarginCalculator = lazy(
   () => import("../components/amazon-seller-tools/profit-margin-calculator"),
 );
+const OpportunityFinder = lazy(
+  () => import("../components/amazon-seller-tools/opportunity-finder"),
+);
+const SalesTrendAnalyzer = lazy(
+  () => import("../components/amazon-seller-tools/sales-trend-analyzer"),
+);
+const ReverseASINKeywordMiner = lazy(
+  () => import("../components/amazon-seller-tools/reverse-asin-keyword-miner"),
+);
+const MarketShareAnalysis = lazy(
+  () => import("../components/amazon-seller-tools/market-share-analysis"),
+);
+const KeywordIndexChecker = lazy(
+  () => import("../components/amazon-seller-tools/keyword-index-checker"),
+);
+const ListingHijackAlerts = lazy(
+  () => import("../components/amazon-seller-tools/listing-hijack-alerts"),
+);
+const InventoryManagement = lazy(
+  () => import("../components/amazon-seller-tools/inventory-management"),
+);
+const AutomatedEmailFollowup = lazy(
+  () => import("../components/amazon-seller-tools/automated-email-followup"),
+);
+const HolisticProfitsDashboard = lazy(
+  () => import("../components/dashboard/holistic-profits-dashboard"),
+);
 
 interface Tool {
   id: string;
@@ -73,19 +103,7 @@ interface Tool {
   category: string;
 }
 
-interface AmazonSellerToolsProps {
-  showCategories: boolean;
-  showTable: boolean;
-  showDetails: boolean;
-  showCTA: boolean;
-}
-
-export default function FeaturedToolsSection({
-  showCategories,
-  showTable,
-  showDetails,
-  showCTA,
-}: AmazonSellerToolsProps) {
+export default function FeaturedToolsSection() {
   const [activeTab, setActiveTab] = useState<string>("fba-calculator");
 
   const tools: Tool[] = [
@@ -248,6 +266,144 @@ export default function FeaturedToolsSection({
         </Suspense>
       ),
       category: "Market Analysis",
+    },
+    {
+      id: "opportunity-finder",
+      name: "Opportunity Finder",
+      description: "Scan the Amazon catalog to find profitable products.",
+      icon: <Lightbulb className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Opportunity Finder...</div>}>
+          <OpportunityFinder />
+        </Suspense>
+      ),
+      category: "Product Research",
+    },
+    {
+      id: "sales-trend-analyzer",
+      name: "Sales Trend Analyzer",
+      description:
+        "Input any ASIN and see its historical sales and price data visualized over time.",
+      icon: <AreaChart className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Sales Trend Analyzer...</div>}>
+          <SalesTrendAnalyzer />
+        </Suspense>
+      ),
+      category: "Product Research",
+    },
+    {
+      id: "reverse-asin-keyword-miner",
+      name: "Reverse ASIN Keyword Miner",
+      description:
+        "Input one or more competitor ASINs and extract all the organic and sponsored keywords they are ranking for.",
+      icon: <Key className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Reverse ASIN Keyword Miner...</div>}>
+          <ReverseASINKeywordMiner />
+        </Suspense>
+      ),
+      category: "Keyword Optimization",
+    },
+    {
+      id: "market-share-analysis",
+      name: "Market Share Analysis",
+      description:
+        "Display the top 10-20 products for a primary keyword, their estimated monthly sales, review velocity, and calculated market share percentage.",
+      icon: <Users className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Market Share Analysis...</div>}>
+          <MarketShareAnalysis />
+        </Suspense>
+      ),
+      category: "Market Analysis",
+    },
+    {
+      id: "keyword-index-checker",
+      name: "Keyword Index Checker",
+      description:
+        "Input your ASIN and a list of keywords to check if your product appears in the search results for each term.",
+      icon: <Search className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Keyword Index Checker...</div>}>
+          <KeywordIndexChecker />
+        </Suspense>
+      ),
+      category: "Listing Optimization",
+    },
+    {
+      id: "listing-hijack-alerts",
+      name: "Listing Hijack & Change Alerts",
+      description:
+        "Monitor your key listings for critical changes and receive immediate notifications.",
+      icon: <ShieldAlert className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense
+          fallback={<div>Loading Listing Hijack & Change Alerts...</div>}
+        >
+          <ListingHijackAlerts />
+        </Suspense>
+      ),
+      category: "Listing Monitoring",
+    },
+    {
+      id: "inventory-management",
+      name: "Inventory Management & Forecasting",
+      description:
+        "Track inventory levels, calculate sales velocity, and forecast stock-out dates.",
+      icon: <Package className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense
+          fallback={<div>Loading Inventory Management & Forecasting...</div>}
+        >
+          <InventoryManagement />
+        </Suspense>
+      ),
+      category: "Operations & Automation",
+    },
+    {
+      id: "automated-email-followup",
+      name: "Automated Email Follow-up",
+      description:
+        "Create automated email campaigns to buyers to request product reviews or seller feedback.",
+      icon: <Mail className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Automated Email Follow-up...</div>}>
+          <AutomatedEmailFollowup />
+        </Suspense>
+      ),
+      category: "Operations & Automation",
+    },
+    {
+      id: "holistic-profits-dashboard",
+      name: "Holistic Profits Dashboard",
+      description:
+        "A central hub for a seller's financial health, showing real-time Net Profit and Margin with trends over time.",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      status: "beta",
+      version: "0.1.0",
+      component: (
+        <Suspense fallback={<div>Loading Holistic Profits Dashboard...</div>}>
+          <HolisticProfitsDashboard />
+        </Suspense>
+      ),
+      category: "Financial Analysis",
     },
   ];
 
