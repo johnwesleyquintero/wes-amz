@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "build": {
+    "env": {
+      "VITE_APP_BASE_URL": "https://wes-amz.vercel.app"
+    }
+  },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "outputDirectory": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ]
+}
