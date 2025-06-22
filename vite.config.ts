@@ -17,4 +17,17 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          recharts: ["recharts"],
+          papaparse: ["papaparse"],
+          // You can add more large dependencies here if needed
+          // For example, if @radix-ui/react-tabs is large and used in a specific section:
+          // 'radix-tabs': ['@radix-ui/react-tabs'],
+        },
+      },
+    },
+  },
 }));

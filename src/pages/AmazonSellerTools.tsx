@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -10,17 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "../components/ui/badge";
-import FbaCalculator from "../components/amazon-seller-tools/fba-calculator";
-import KeywordAnalyzer from "../components/amazon-seller-tools/keyword-analyzer";
-import ListingQualityChecker from "../components/amazon-seller-tools/listing-quality-checker";
-import PpcCampaignAuditor from "../components/amazon-seller-tools/ppc-campaign-auditor";
-import DescriptionEditor from "../components/amazon-seller-tools/description-editor";
-import KeywordDeduplicator from "../components/amazon-seller-tools/keyword-deduplicator";
-import AcosCalculator from "../components/amazon-seller-tools/acos-calculator";
-import SalesEstimator from "../components/amazon-seller-tools/sales-estimator";
-import CompetitorAnalyzer from "../components/amazon-seller-tools/competitor-analyzer";
-import KeywordTrendAnalyzer from "../components/amazon-seller-tools/keyword-trend-analyzer";
-import ProfitMarginCalculator from "../components/amazon-seller-tools/profit-margin-calculator";
 import {
   Calculator,
   Search,
@@ -37,6 +26,41 @@ import {
   LayoutDashboard,
   Target,
 } from "lucide-react";
+
+// Lazy load components
+const FbaCalculator = lazy(
+  () => import("../components/amazon-seller-tools/fba-calculator"),
+);
+const KeywordAnalyzer = lazy(
+  () => import("../components/amazon-seller-tools/keyword-analyzer"),
+);
+const ListingQualityChecker = lazy(
+  () => import("../components/amazon-seller-tools/listing-quality-checker"),
+);
+const PpcCampaignAuditor = lazy(
+  () => import("../components/amazon-seller-tools/ppc-campaign-auditor"),
+);
+const DescriptionEditor = lazy(
+  () => import("../components/amazon-seller-tools/description-editor"),
+);
+const KeywordDeduplicator = lazy(
+  () => import("../components/amazon-seller-tools/keyword-deduplicator"),
+);
+const AcosCalculator = lazy(
+  () => import("../components/amazon-seller-tools/acos-calculator"),
+);
+const SalesEstimator = lazy(
+  () => import("../components/amazon-seller-tools/sales-estimator"),
+);
+const CompetitorAnalyzer = lazy(
+  () => import("../components/amazon-seller-tools/competitor-analyzer"),
+);
+const KeywordTrendAnalyzer = lazy(
+  () => import("../components/amazon-seller-tools/keyword-trend-analyzer"),
+);
+const ProfitMarginCalculator = lazy(
+  () => import("../components/amazon-seller-tools/profit-margin-calculator"),
+);
 
 interface Tool {
   id: string;
@@ -61,7 +85,11 @@ export default function FeaturedToolsSection() {
       icon: <Users className="h-5 w-5" />,
       status: "beta", // Changed to "beta"
       version: "0.9.0", // Updated version
-      component: <CompetitorAnalyzer />,
+      component: (
+        <Suspense fallback={<div>Loading Competitor Analyzer...</div>}>
+          <CompetitorAnalyzer />
+        </Suspense>
+      ),
       category: "Market Analysis",
     },
     {
@@ -71,7 +99,11 @@ export default function FeaturedToolsSection() {
       icon: <LineChart className="h-5 w-5" />,
       status: "active",
       version: "1.0.0",
-      component: <KeywordTrendAnalyzer />,
+      component: (
+        <Suspense fallback={<div>Loading Keyword Trend Analyzer...</div>}>
+          <KeywordTrendAnalyzer />
+        </Suspense>
+      ),
       category: "Keyword Optimization",
     },
     {
@@ -82,7 +114,11 @@ export default function FeaturedToolsSection() {
       icon: <Percent className="h-5 w-5" />,
       status: "active",
       version: "1.0.0",
-      component: <ProfitMarginCalculator />,
+      component: (
+        <Suspense fallback={<div>Loading Profit Margin Calculator...</div>}>
+          <ProfitMarginCalculator />
+        </Suspense>
+      ),
       category: "Financial Analysis",
     },
     {
@@ -93,7 +129,11 @@ export default function FeaturedToolsSection() {
       icon: <Package className="h-5 w-5" />,
       status: "active",
       version: "1.0.0",
-      component: <FbaCalculator />,
+      component: (
+        <Suspense fallback={<div>Loading FBA Calculator...</div>}>
+          <FbaCalculator />
+        </Suspense>
+      ),
       category: "Financial Analysis",
     },
     {
@@ -103,7 +143,11 @@ export default function FeaturedToolsSection() {
       icon: <Search className="h-5 w-5" />,
       status: "active",
       version: "1.1.0",
-      component: <KeywordAnalyzer />,
+      component: (
+        <Suspense fallback={<div>Loading Keyword Analyzer...</div>}>
+          <KeywordAnalyzer />
+        </Suspense>
+      ),
       category: "Keyword Optimization",
     },
     {
@@ -113,7 +157,11 @@ export default function FeaturedToolsSection() {
       icon: <CheckSquare className="h-5 w-5" />,
       status: "beta",
       version: "0.9.0",
-      component: <ListingQualityChecker />,
+      component: (
+        <Suspense fallback={<div>Loading Listing Quality Checker...</div>}>
+          <ListingQualityChecker />
+        </Suspense>
+      ),
       category: "Listing Optimization",
     },
     {
@@ -123,7 +171,11 @@ export default function FeaturedToolsSection() {
       icon: <TrendingUp className="h-5 w-5" />,
       status: "active",
       version: "1.2.0",
-      component: <PpcCampaignAuditor />,
+      component: (
+        <Suspense fallback={<div>Loading PPC Campaign Auditor...</div>}>
+          <PpcCampaignAuditor />
+        </Suspense>
+      ),
       category: "PPC Management",
     },
     {
@@ -133,7 +185,11 @@ export default function FeaturedToolsSection() {
       icon: <FileText className="h-5 w-5" />,
       status: "active",
       version: "1.0.1",
-      component: <DescriptionEditor />,
+      component: (
+        <Suspense fallback={<div>Loading Description Editor...</div>}>
+          <DescriptionEditor />
+        </Suspense>
+      ),
       category: "Listing Optimization",
     },
     {
@@ -144,7 +200,11 @@ export default function FeaturedToolsSection() {
       icon: <Filter className="h-5 w-5" />,
       status: "active",
       version: "1.0.0",
-      component: <KeywordDeduplicator />,
+      component: (
+        <Suspense fallback={<div>Loading Keyword Deduplicator...</div>}>
+          <KeywordDeduplicator />
+        </Suspense>
+      ),
       category: "Keyword Optimization",
     },
     {
@@ -155,7 +215,11 @@ export default function FeaturedToolsSection() {
       icon: <DollarSign className="h-5 w-5" />,
       status: "active",
       version: "1.0.0",
-      component: <AcosCalculator />,
+      component: (
+        <Suspense fallback={<div>Loading ACoS Calculator...</div>}>
+          <AcosCalculator />
+        </Suspense>
+      ),
       category: "PPC Management",
     },
     {
@@ -166,7 +230,11 @@ export default function FeaturedToolsSection() {
       icon: <BarChart3 className="h-5 w-5" />,
       status: "beta",
       version: "0.8.0",
-      component: <SalesEstimator />,
+      component: (
+        <Suspense fallback={<div>Loading Sales Estimator...</div>}>
+          <SalesEstimator />
+        </Suspense>
+      ),
       category: "Market Analysis",
     },
   ];

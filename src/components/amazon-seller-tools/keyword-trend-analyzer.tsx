@@ -51,8 +51,12 @@ const KeywordTrendAnalyzer: React.FC = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            // Ensure server-side compression (e.g., Gzip) is enabled for responses.
+            // Client-side fetch API typically handles Accept-Encoding automatically.
           },
           body: JSON.stringify({ csvData: data }),
+          // For very large CSVs, consider implementing pagination for the request payload
+          // and corresponding backend changes to process data in chunks.
         });
 
         if (!response.ok) {

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import Papa from "papaparse";
 import { Button } from "@/components/ui/button";
 import { FileText, Info, AlertCircle } from "lucide-react";
 import SampleCsvButton from "./sample-csv-button";
@@ -37,35 +36,26 @@ export default function CsvUploader<T extends GenericCsvRow>({
   const { toast } = useToast();
   const [parsingError, setParsingError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const workerRef = useRef<Worker>();
 
-  const parseCsv = useCallback(
-    (file: File) => {
-      setIsParsing(true);
-      setParsingError(null);
+  useEffect(() => {
+    workerRef.current = new Worker(
+      new URL("../../src/workers/csvParser.worker.ts", import.meta.url),
+      { type: "module" },
+    );
 
-      Papa.parse<T>(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
+    workerRef.current.onmessage = (event: MessageEvent) => {
+      const { type, data, message, progress } = event.data;
+      switch (type) {
+        case "progress":
+          setProgress(progress);
+          break;
+        case "complete": {
           setIsParsing(false);
-          if (results.errors.length > 0) {
-            setParsingError(
-              `CSV parsing errors: ${results.errors
-                .map((e) => e.message)
-                .join(", ")}`,
-            );
-            toast({
-              title: "Error",
-              description: `CSV parsing errors: ${results.errors
-                .map((e) => e.message)
-                .join(", ")}`,
-              variant: "destructive",
-            });
-            return;
-          }
-
+          setProgress(100);
           const missingColumns = requiredColumns.filter(
-            (col) => !results.meta.fields.includes(col),
+            (col) => !Object.keys(data[0] || {}).includes(col),
           );
           if (missingColumns.length > 0) {
             setParsingError(
@@ -80,27 +70,49 @@ export default function CsvUploader<T extends GenericCsvRow>({
             });
             return;
           }
-
-          onUploadSuccess(results.data);
+          onUploadSuccess(data);
           toast({
             title: "Success",
-            description: `${file.name} processed successfully`,
+            description: `File processed successfully`,
             variant: "default",
           });
-        },
-        error: (error) => {
+          break;
+        }
+        case "error":
           setIsParsing(false);
-          setParsingError(`Error parsing CSV: ${error.message}`);
+          setParsingError(message);
           toast({
             title: "Error",
-            description: `Error parsing CSV: ${error.message}`,
+            description: message,
             variant: "destructive",
           });
-        },
+          break;
+      }
+    };
+
+    workerRef.current.onerror = (error: ErrorEvent) => {
+      setIsParsing(false);
+      setParsingError(`Worker error: ${error.message}`);
+      toast({
+        title: "Error",
+        description: `Worker error: ${error.message}`,
+        variant: "destructive",
       });
-    },
-    [onUploadSuccess, requiredColumns, toast],
-  );
+    };
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, [onUploadSuccess, requiredColumns, toast]);
+
+  const parseCsv = useCallback((file: File) => {
+    setIsParsing(true);
+    setParsingError(null);
+    setProgress(0);
+    workerRef.current?.postMessage({ file });
+  }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -191,7 +203,8 @@ export default function CsvUploader<T extends GenericCsvRow>({
         )}
         {(isLoading || isParsing) && (
           <div className="w-full mt-4">
-            <Progress className="h-2" />
+            <Progress value={progress} className="h-2" />
+            <p className="text-sm text-gray-500 mt-1">Parsing: {progress}%</p>
           </div>
         )}
         {parsingError && (

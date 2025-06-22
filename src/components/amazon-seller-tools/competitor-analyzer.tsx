@@ -30,10 +30,15 @@ import {
 } from "../ui/tooltip";
 import { Info, FileText } from "lucide-react";
 import { useIsMobile } from "../../hooks/use-mobile";
-import { ProcessedRow, ChartDataPoint } from "@/lib/amazon-types";
+import { ChartDataPoint } from "@/lib/amazon-types";
 import { Progress } from "../ui/progress";
 import { cn } from "@/lib/utils";
-import { CsvRow, processCsvData, parseAndValidateCsv } from "@/lib/csv-utils";
+import {
+  CsvRow,
+  processCsvData,
+  parseAndValidateCsv,
+  ProcessedRow,
+} from "@/lib/csv-utils";
 
 // Constants
 const COMPETITOR_ANALYSIS_ENDPOINT = "/api/amazon/competitor-analysis";
@@ -100,7 +105,9 @@ export default function CompetitorAnalyzer() {
   const handleFileUpload = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
-      setData: (data: ProcessedRow | ProcessedRow[]) => void,
+      setData: React.Dispatch<
+        React.SetStateAction<ProcessedRow | ProcessedRow[] | null>
+      >,
       type: "seller" | "competitor",
     ) => {
       const file = event.target.files?.[0];
@@ -188,37 +195,24 @@ export default function CompetitorAnalyzer() {
 
     setIsAnalyzing(true);
     try {
-      // Process CSV data if uploaded
-      let processedSellerData = sellerData;
-      let processedCompetitorData = competitorData;
-
-      if (Array.isArray(sellerData)) {
-        processedSellerData = processCsvData(sellerData);
-      }
-
-      if (Array.isArray(competitorData)) {
-        processedCompetitorData = processCsvData(competitorData);
-      }
-
+      // Data is already processed by handleFileUpload, no need to re-process here.
       // If no API call needed (using uploaded CSV data)
-      if (processedSellerData && processedCompetitorData) {
-        const formattedData = processedCompetitorData.map(
-          (row: { asin?: string; sales_rank?: number }) => {
-            const competitor = row.asin ?? row.niche ?? "N/A";
-            const dataPoint: ChartDataPoint = {
-              name: competitor,
-            };
+      if (sellerData && competitorData) {
+        const formattedData = competitorData.map((row: ProcessedRow) => {
+          const competitor = row.asin ?? row.niche ?? "N/A";
+          const dataPoint: ChartDataPoint = {
+            name: competitor,
+          };
 
-            metrics.forEach((metric) => {
-              const value = row[metric as keyof ProcessedRow];
-              if (value !== undefined) {
-                dataPoint[metric] = value;
-              }
-            });
+          metrics.forEach((metric) => {
+            const value = row[metric as keyof ProcessedRow];
+            if (value !== undefined) {
+              dataPoint[metric] = value;
+            }
+          });
 
-            return dataPoint;
-          },
-        );
+          return dataPoint;
+        });
 
         if (formattedData.length > 0) {
           setChartData(formattedData);
@@ -232,12 +226,16 @@ export default function CompetitorAnalyzer() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          // Ensure server-side compression (e.g., Gzip) is enabled for responses.
+          // Client-side fetch API typically handles Accept-Encoding automatically.
         },
         body: JSON.stringify({
           asin,
           metrics,
-          sellerData: processedSellerData,
-          competitorData: processedCompetitorData,
+          sellerData: sellerData,
+          competitorData: competitorData,
+          // For very large datasets, consider implementing pagination for the request payload
+          // and corresponding backend changes to process data in chunks.
         }),
       });
 
@@ -396,10 +394,10 @@ export default function CompetitorAnalyzer() {
                 <input
                   type="checkbox"
                   id={metric}
-                  checked={metrics.includes(metric)}
+                  checked={metrics.includes(metric as MetricType)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setMetrics([...metrics, metric]);
+                      setMetrics([...metrics, metric as MetricType]);
                     } else {
                       setMetrics(metrics.filter((m) => m !== metric));
                     }
