@@ -13,6 +13,9 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "check": "node scripts/code-checker.mjs",
+    "deploy": "npx vercel deploy",
+    "deploy:prod": "npx vercel --prod",
+    "x": "bash .cli.sh",
     "git-commit": "node scripts/git-commit.mjs"
   },
   "dependencies": {
