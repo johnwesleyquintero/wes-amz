@@ -38,12 +38,28 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ data }) => {
         >
           <defs>
             <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#4FBBDA" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#4FBBDA" stopOpacity={0.1} />
+              <stop
+                offset="5%"
+                stopColor="hsl(var(--primary))"
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor="hsl(var(--primary))"
+                stopOpacity={0.1}
+              />
             </linearGradient>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ED595B" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#ED595B" stopOpacity={0.1} />
+              <stop
+                offset="5%"
+                stopColor="hsl(var(--accent))"
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor="hsl(var(--accent))"
+                stopOpacity={0.1}
+              />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -58,14 +74,14 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ data }) => {
           <Area
             type="monotone"
             dataKey="impressions"
-            stroke="#4FBBDA"
+            stroke="hsl(var(--primary))"
             fillOpacity={1}
             fill="url(#colorImpressions)"
           />
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke="#ED595B"
+            stroke="hsl(var(--accent))"
             fillOpacity={1}
             fill="url(#colorRevenue)"
           />

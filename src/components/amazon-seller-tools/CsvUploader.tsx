@@ -3,7 +3,7 @@
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
-import { FileText, Info, AlertCircle } from "lucide-react";
+import { FileText, Info, AlertCircle, CheckCircle2 } from "lucide-react";
 import SampleCsvButton from "./sample-csv-button";
 import { Progress } from "../ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +37,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
   const [parsingError, setParsingError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [fileNameDisplay, setFileNameDisplay] = useState<string | null>(null);
   const workerRef = useRef<Worker>();
 
   useEffect(() => {
@@ -111,12 +112,14 @@ export default function CsvUploader<T extends GenericCsvRow>({
     setIsParsing(true);
     setParsingError(null);
     setProgress(0);
+    setFileNameDisplay(file.name); // Set file name for display
     workerRef.current?.postMessage({ file });
   }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setParsingError(null); // Clear previous errors
+      setFileNameDisplay(null); // Clear previous file name display
       if (acceptedFiles.length === 0) {
         const errorMessage = "No file selected";
         setParsingError(errorMessage);
@@ -191,15 +194,22 @@ export default function CsvUploader<T extends GenericCsvRow>({
         {...getRootProps()}
         className="relative flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary/40 bg-background p-6 text-center hover:bg-primary/5"
       >
-        <FileText className="mb-2 h-8 w-8 text-primary/60" />
-        <span className="text-sm font-medium">Click to upload CSV</span>
+        {fileNameDisplay && !isParsing && !parsingError && (
+          <CheckCircle2 className="mb-2 h-8 w-8 text-green-500" />
+        )}
+        {!fileNameDisplay && (
+          <FileText className="mb-2 h-8 w-8 text-primary/60" />
+        )}
+        <span className="text-sm font-medium">
+          {fileNameDisplay && !isParsing && !parsingError
+            ? `File uploaded: ${fileNameDisplay}`
+            : "Click to upload CSV"}
+        </span>
         <input {...getInputProps()} disabled={isLoading || isParsing} />
         {isDragActive ? (
           <p>Drop the files here ...</p>
         ) : (
-          <p>
-            Drag &apos;n&apos; drop some files here, or click to select files
-          </p>
+          <p>Drag 'n' drop some files here, or click to select files</p>
         )}
         {(isLoading || isParsing) && (
           <div className="w-full mt-4">

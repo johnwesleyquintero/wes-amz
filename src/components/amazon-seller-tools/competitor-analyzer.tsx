@@ -72,7 +72,7 @@ const getChartColor = (metric: MetricType): string => {
     case "click_through_rate":
       return "#7ac5d8";
     default:
-      return "#000000";
+      return "hsl(var(--foreground))";
   }
 };
 

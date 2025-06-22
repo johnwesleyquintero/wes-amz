@@ -10,7 +10,7 @@ const TopBar = () => {
   const isMobile = useIsMobile();
 
   return (
-    <header className="border-b border-border bg-white dark:bg-sidebar h-16 px-6 flex items-center justify-between">
+    <header className="border-b border-border bg-background dark:bg-sidebar h-16 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
         {isMobile && <Sidebar />}{" "}
         {/* Render Sidebar's SheetTrigger on mobile */}
@@ -33,14 +33,14 @@ const TopBar = () => {
           <>
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-burnt-sienna"></span>
+              <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary"></span>
             </Button>
 
             <ModeToggle />
             <Link to="/tools">
               <Button
                 variant="outline"
-                className="bg-gold text-black hover:bg-gold/90"
+                className="bg-accent text-foreground hover:bg-accent/90"
               >
                 <Wrench className="mr-2 h-4 w-4" />
                 Seller Tools
@@ -49,7 +49,7 @@ const TopBar = () => {
 
             <Button
               variant="outline"
-              className="bg-shakespeare text-white hover:bg-shakespeare/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Connect Google Sheets
             </Button>
@@ -57,7 +57,7 @@ const TopBar = () => {
             <Link to="/">
               <Button
                 variant="outline"
-                className="bg-burnt-sienna text-white hover:bg-burnt-sienna/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 Landing Page
               </Button>

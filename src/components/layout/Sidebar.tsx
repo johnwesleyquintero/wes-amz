@@ -39,12 +39,8 @@ const Sidebar = () => {
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <img
-            src="/logo.svg"
-            className="h-8 w-8"
-            alt="Amazon Analytics Logo"
-          />
-          <h1 className="text-xl font-bold">My Amazon Analytics</h1>
+          <img src="/logo.svg" className="h-8 w-8" alt="Alerion Logo" />
+          <h1 className="text-xl font-bold">Alerion</h1>
         </div>
       </div>
 
@@ -97,7 +93,7 @@ const Sidebar = () => {
       </SheetContent>
     </Sheet>
   ) : (
-    <aside className="w-64 border-r border-border bg-white dark:bg-sidebar hidden lg:block">
+    <aside className="w-64 border-r border-border bg-background dark:bg-sidebar hidden lg:block">
       {sidebarContent}
     </aside>
   );

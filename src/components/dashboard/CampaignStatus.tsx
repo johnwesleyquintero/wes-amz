@@ -18,11 +18,11 @@ const CampaignStatus: React.FC<CampaignStatusProps> = ({ campaigns }) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "active":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-primary" />;
       case "paused":
-        return <XCircle className="h-4 w-4 text-burnt-sienna" />;
+        return <XCircle className="h-4 w-4 text-secondary" />;
       case "warning":
-        return <AlertCircle className="h-4 w-4 text-amber-500" />;
+        return <AlertCircle className="h-4 w-4 text-accent" />;
       default:
         return null;
     }
@@ -45,7 +45,7 @@ const CampaignStatus: React.FC<CampaignStatusProps> = ({ campaigns }) => {
     <div className="analytics-card">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium">Campaign Status</h3>
-        <button className="text-xs text-shakespeare hover:underline">
+        <button className="text-xs text-primary hover:underline">
           View All
         </button>
       </div>
@@ -71,10 +71,10 @@ const CampaignStatus: React.FC<CampaignStatusProps> = ({ campaigns }) => {
                       className={cn(
                         "text-xs",
                         campaign.status === "active"
-                          ? "text-green-500"
+                          ? "text-primary"
                           : campaign.status === "paused"
-                            ? "text-burnt-sienna"
-                            : "text-amber-500",
+                            ? "text-secondary"
+                            : "text-accent",
                       )}
                     >
                       {getStatusText(campaign.status)}
@@ -99,10 +99,10 @@ const CampaignStatus: React.FC<CampaignStatusProps> = ({ campaigns }) => {
                   className={cn(
                     "h-full rounded-full",
                     campaign.status === "active"
-                      ? "bg-green-500"
+                      ? "bg-primary"
                       : campaign.status === "paused"
-                        ? "bg-burnt-sienna"
-                        : "bg-amber-500",
+                        ? "bg-secondary"
+                        : "bg-accent",
                   )}
                   style={{
                     width: `${Math.min(100, (campaign.spent / campaign.budget) * 100)}%`,

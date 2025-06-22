@@ -4,12 +4,7 @@ import { CampaignData } from "./ppc-campaign-auditor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils"; // Assuming you have a utility for class name merging
-import {
-  AlertCircle,
-  CheckCircle,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { AlertCircle, CheckCircle, TrendingDown } from "lucide-react";
 
 interface CampaignCardProps {
   campaign: CampaignData;
@@ -52,7 +47,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
 
         {/* Issues and Recommendations */}
         {campaign.issues && campaign.issues.length > 0 && (
-          <div className="rounded-lg border border-red-500 bg-red-50 p-3 text-red-800">
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive-foreground">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
               <h4 className="font-medium">Issues Detected:</h4>
@@ -105,15 +100,17 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           <div className="rounded-lg border p-3">
             <div className="text-sm text-muted-foreground flex items-center gap-1">
               ACoS
-              {isAcosHigh && <TrendingDown className="h-4 w-4 text-red-500" />}
+              {isAcosHigh && (
+                <TrendingDown className="h-4 w-4 text-destructive" />
+              )}
               {!isAcosHigh && campaign.acos !== undefined && (
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-primary" />
               )}
             </div>
             <div
               className={cn(
                 "text-xl font-semibold",
-                isAcosHigh && "text-red-500",
+                isAcosHigh && "text-destructive",
               )}
             >
               {campaign.acos !== undefined ? campaign.acos.toFixed(2) : "N/A"}%
@@ -124,15 +121,17 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           <div className="rounded-lg border p-3">
             <div className="text-sm text-muted-foreground flex items-center gap-1">
               CTR
-              {isCtrLow && <TrendingDown className="h-4 w-4 text-red-500" />}
+              {isCtrLow && (
+                <TrendingDown className="h-4 w-4 text-destructive" />
+              )}
               {!isCtrLow && campaign.ctr !== undefined && (
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-primary" />
               )}
             </div>
             <div
               className={cn(
                 "text-xl font-semibold",
-                isCtrLow && "text-red-500",
+                isCtrLow && "text-destructive",
               )}
             >
               {campaign.ctr !== undefined ? campaign.ctr.toFixed(2) : "N/A"}%
@@ -144,17 +143,17 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             <div className="text-sm text-muted-foreground flex items-center gap-1">
               Conversion Rate
               {isConversionRateLow && (
-                <TrendingDown className="h-4 w-4 text-red-500" />
+                <TrendingDown className="h-4 w-4 text-destructive" />
               )}
               {!isConversionRateLow &&
                 campaign.conversionRate !== undefined && (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                 )}
             </div>
             <div
               className={cn(
                 "text-xl font-semibold",
-                isConversionRateLow && "text-red-500",
+                isConversionRateLow && "text-destructive",
               )}
             >
               {campaign.conversionRate !== undefined

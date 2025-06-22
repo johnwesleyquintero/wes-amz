@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient"; // Adjust path if needed
 import { subDays, format } from "date-fns"; // Great library for date manipulation
+import { DataChart } from "./amazon-seller-tools/shared/DataChart"; // Import DataChart
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"; // Import Card components
 
 // Define a TypeScript type for the data returned by our RPC function.
 // This gives us type safety and autocompletion.
@@ -26,27 +28,20 @@ const MetricCard = ({
   value: string;
   isPositive?: boolean;
 }) => (
-  <div
-    style={{
-      border: "1px solid #ddd",
-      padding: "16px",
-      borderRadius: "8px",
-      flex: "1",
-      minWidth: "200px",
-    }}
-  >
-    <h4 style={{ margin: "0 0 8px 0", color: "#555" }}>{title}</h4>
-    <p
-      style={{
-        margin: 0,
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: isPositive ? "#28a745" : "#dc3545",
-      }}
-    >
-      {value}
-    </p>
-  </div>
+  <Card className="flex-1 min-w-[200px]">
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p
+        className={`text-2xl font-bold ${
+          isPositive ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {value}
+      </p>
+    </CardContent>
+  </Card>
 );
 
 const ProfitsDashboard = () => {
@@ -101,7 +96,7 @@ const ProfitsDashboard = () => {
   }
 
   if (error) {
-    return <div style={{ color: "#ED595B" }}>Error: {error}</div>;
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   if (!summary) {
@@ -121,24 +116,28 @@ const ProfitsDashboard = () => {
     summary.total_other_expenses +
     summary.total_periodic_fees;
 
+  // Dummy data for chart visualization (replace with actual time-series data from backend)
+  const chartData = [
+    { name: "Day 1", revenue: 4000, profit: 2400, cogs: 1000, ppc: 600 },
+    { name: "Day 2", revenue: 3000, profit: 1398, cogs: 800, ppc: 800 },
+    { name: "Day 3", revenue: 2000, profit: 980, cogs: 500, ppc: 520 },
+    { name: "Day 4", revenue: 2780, profit: 3908, cogs: 700, ppc: 600 },
+    { name: "Day 5", revenue: 1890, profit: 4800, cogs: 400, ppc: 300 },
+    { name: "Day 6", revenue: 2390, profit: 3800, cogs: 600, ppc: 400 },
+    { name: "Day 7", revenue: 3490, profit: 4300, cogs: 900, ppc: 700 },
+  ];
+
   return (
-    <div style={{ fontFamily: "sans-serif", padding: "20px" }}>
-      <h2 style={{ borderBottom: "2px solid #EDF2F7", paddingBottom: "10px" }}>
+    <div className="p-6 space-y-6">
+      <h2 className="text-3xl font-bold tracking-tight">
         Unified Profits Dashboard
       </h2>
-      <p>
+      <p className="text-muted-foreground">
         Showing data from {format(dateRange.start, "MMM d, yyyy")} to{" "}
         {format(dateRange.end, "MMM d, yyyy")}
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "16px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Revenue"
           value={formatCurrency(summary.total_revenue)}
@@ -160,8 +159,25 @@ const ProfitsDashboard = () => {
         />
       </div>
 
-      <h3 style={{ marginTop: "30px" }}>Cost Breakdown</h3>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Profit Trend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataChart
+            data={chartData}
+            xAxisKey="name"
+            yAxisKeys={["revenue", "profit"]}
+            type="line"
+            title="Revenue and Profit Over Time"
+          />
+        </CardContent>
+      </Card>
+
+      <h3 className="text-2xl font-semibold tracking-tight mt-6">
+        Cost Breakdown
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
           title="Cost of Goods (COGS)"
           value={formatCurrency(summary.total_cogs)}

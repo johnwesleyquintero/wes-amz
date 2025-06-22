@@ -52,7 +52,9 @@ const StatCard = ({
           )}
         </div>
 
-        <div className="p-2 rounded-md bg-iceberg">{icon}</div>
+        <div className="p-2 rounded-md bg-secondary/20 text-secondary">
+          {icon}
+        </div>
       </div>
     </div>
   );

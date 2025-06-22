@@ -12,13 +12,9 @@ const Footer: React.FC = () => {
               to={ROUTES.LANDING}
               className="flex items-center justify-center md:justify-start gap-2"
             >
-              <img
-                src="/logo.svg"
-                className="h-8 w-8"
-                alt="Amazon Analytics Logo"
-              />
+              <img src="/logo.svg" className="h-8 w-8" alt="Alerion Logo" />
               <span className="text-2xl font-bold text-white hover:text-burnt-sienna transition-colors">
-                My Amazon Analytics
+                Alerion
               </span>
             </Link>
           </div>
@@ -44,8 +40,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
         <div className="border-t border-gray-700 pt-6 text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} My Amazon Analytics. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} Alerion. All rights reserved.
         </div>
       </div>
     </footer>

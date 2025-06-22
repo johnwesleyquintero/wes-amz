@@ -4,38 +4,36 @@
 
 @layer base {
   :root {
-    --background: 220 80% 98%; /* Solid color */
-    --catskill-white: 220 80% 98%; /* ED F2 F7 in HSL */
-    --foreground: 222 47% 11%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 359 80% 64%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 199 65% 58%;
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 48 100% 50%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 84% 5%;
+    --primary: 216 100% 40%; /* #0052cc */
+    --secondary: 210 90% 45%; /* #0770dd */
+    --accent: 32 92% 63%; /* #f7a04a */
+    --foreground: 210 10% 14%; /* #212529 */
+    --muted-foreground: 208 8% 38%; /* #5a6268 */
+    --background: 210 17% 98%; /* #f8f9fa */
+    --card: 0 0% 100%; /* #ffffff */
+    --border: 210 14% 90%; /* #dee2e6 */
+    --input: 210 14% 90%; /* #dee2e6 */
+    --code-bg: 210 17% 93%; /* #e9ecef */
+    --quote-bg: 217 100% 95%; /* #e7f1ff */
+    --quote-text: 210 22% 24%; /* #2c3e50 */
+    --date-text: 210 9% 45%; /* #6c757d */
+    --testimonial-bg: 0 0% 98%; /* #f9f9f9 */
+    --testimonial-quote: 0 0% 33%; /* #555 */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 220 80% 98%; /* Solid color */
+    /* Existing variables that need to be re-evaluated or removed if not used */
+    --catskill-white: 220 80% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 222 84% 5%;
+    --sidebar-background: 220 80% 98%;
     --sidebar-foreground: 240 5% 26%;
     --sidebar-primary: 240 6% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -46,35 +44,31 @@
   }
 
   .dark {
-    --background: 222 47% 11%; /* Dark mode background */
-    --foreground: 210 40% 98%;
+    --primary: 216 100% 70%; /* #66aaff */
+    --secondary: 210 100% 65%; /* #4da6ff */
+    --accent: 32 92% 75%; /* #f7c38a */
+    --foreground: 210 17% 93%; /* #e9ecef */
+    --muted-foreground: 210 17% 85%; /* #ced4da */
+    --background: 220 20% 13%; /* #1a202c */
+    --card: 218 20% 23%; /* #2d3748 */
+    --border: 218 17% 28%; /* #4a5568 */
+    --input: 218 17% 28%; /* #4a5568 */
+    --code-bg: 218 17% 28%; /* #4a5568 */
+    --date-text: 216 17% 63%; /* #a0aec0 */
+    --testimonial-bg: 220 17% 30%; /* #3a445d */
+    --testimonial-quote: 210 17% 90%; /* #e0e6ed */
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-
+    /* Existing variables that need to be re-evaluated or removed if not used */
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 359 80% 64%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 199 65% 58%;
     --secondary-foreground: 222 47% 11%;
-
     --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 48 100% 50%;
     --accent-foreground: 222 47% 11%;
-
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
     --ring: 213 27% 84%;
-
-    --sidebar-background: 240 6% 10%; /* Dark mode sidebar */
+    --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 240 5% 96%;
     --sidebar-primary: 224 76% 48%;
     --sidebar-primary-foreground: 0 0% 100%;

@@ -1,20 +1,19 @@
 <div align="center">
-  <img src="public/logo.svg" width="100" alt="My Amazon Analytics Logo" />
+  <img src="public/logo.svg" width="100" alt="Alerion Logo" />
 
-# My Amazon Analytics
+# Alerion
 
 ### Enterprise-Grade Amazon Advertising Analytics Platform
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/0d302c72-98c3-402a-b452-dd9a680ab17f/deploy-status)](https://app.netlify.com/sites/my-amazon-analytics/deploys)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2+-61DAFB.svg)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fjohnwesleyquintero%2Fmy-amazon-analytics)](https://twitter.com/intent/tweet?text=Check%20out%20My%20Amazon%20Analytics%20-%20The%20ultimate%20Amazon%20Advertising%20dashboard&url=https%3A%2F%2Fgithub.com%2Fjohnwesleyquintero%2Fmy-amazon-analytics)
+[![Twitter](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Fjohnwesleyquintero%2Falerion)](https://twitter.com/intent/tweet?text=Check%20out%20My%20Amazon%20Analytics%20-%20The%20ultimate%20Amazon%20Advertising%20dashboard&url=https%3A%2F%2Fgithub.com%2Fjohnwesleyquintero%2Falerion)
 
 **Transform Your Amazon Advertising Strategy with Data-Driven Insights**
 
-[🚀 Live Demo](https://myamazonanalytics.vercel.app/) • [Production Domain](https://myamazonanalytics.vercel.app/) • [📚 Documentation](https://github.com/johnwesleyquintero/my-amazon-analytics/tree/8892d351e1ac4f1d2f5b1fdacecef628a819c68e/docs) • [🐞 Report Issue](https://github.com/johnwesleyquintero/my-amazon-analytics/issues)
+[🚀 Live Demo](https://alerion.vercel.app/) • [Production Domain](https://alerion.vercel.app/) • [📚 Documentation](https://github.com/johnwesleyquintero/alerion/tree/8892d351e1ac4f1d2f5b1fdacecef628a819c68e/docs) • [🐞 Report Issue](https://github.com/johnwesleyquintero/alerion/issues)
 
 </div>
 
@@ -65,8 +64,8 @@ graph TD
 ### Installation
 
 ```bash
-git clone https://github.com/johnwesleyquintero/my-amazon-analytics.git
-cd my-amazon-analytics
+git clone https://github.com/johnwesleyquintero/alerion.git
+cd alerion
 npm install
 cp .env.example .env
 ```
@@ -123,7 +122,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 John Wesley Quintero - [@wescode](https://twitter.com/wescode) - info.wescode@gmail.com
 
-Project Link: [https://github.com/johnwesleyquintero/my-amazon-analytics](https://github.com/johnwesleyquintero/my-amazon-analytics)
+Project Link: [https://github.com/johnwesleyquintero/alerion](https://github.com/johnwesleyquintero/alerion)
 
 ---
 

@@ -18,7 +18,7 @@ const TopSearchTerms: React.FC<TopSearchTermsProps> = ({ terms }) => {
     <div className="analytics-card">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-shakespeare" />
+          <BarChart3 className="h-5 w-5 text-primary" />
           <span>Top Search Terms</span>
         </h3>
         <span className="text-xs px-2 py-1 bg-muted rounded-md">

@@ -4,23 +4,14 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Upload,
-  FileText,
-  AlertCircle,
-  Download,
-  TrendingUp,
-  TrendingDown,
-  Info,
-} from "lucide-react";
+import { Upload, FileText, AlertCircle, Download, Info } from "lucide-react";
 import Papa from "papaparse";
 import SampleCsvButton from "./sample-csv-button";
 import CampaignCard from "./CampaignCard";
 import { useToast } from "@/hooks/use-toast";
 
-type CampaignData = {
+export type CampaignData = {
   name: string;
   type: string;
   spend: number;
@@ -266,9 +257,9 @@ export default function PpcCampaignAuditor() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start gap-3">
-        <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-        <div className="text-sm text-blue-700 dark:text-blue-300">
+      <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg flex items-start gap-3">
+        <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+        <div className="text-sm text-primary-foreground dark:text-primary-foreground">
           <p className="font-medium">CSV Format Requirements:</p>
           <p>
             Your CSV file should have the following columns: <code>name</code>,{" "}
@@ -338,7 +329,7 @@ export default function PpcCampaignAuditor() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-100 p-3 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+        <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-destructive-foreground dark:bg-destructive/30 dark:text-destructive-foreground">
           <AlertCircle className="h-5 w-5" />
           <span>{error}</span>
         </div>
