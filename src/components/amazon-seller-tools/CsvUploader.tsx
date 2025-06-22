@@ -41,7 +41,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
 
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("../../src/workers/csvParser.worker.ts", import.meta.url),
+      new URL("../../../workers/csvParser.worker.ts", import.meta.url),
       { type: "module" },
     );
 
