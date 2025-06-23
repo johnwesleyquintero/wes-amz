@@ -20,23 +20,17 @@ const Footer: React.FC = () => {
           </div>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-lg">
             <Link
-              to={ROUTES.DASHBOARD}
+              to="/privacy-policy"
               className="hover:text-burnt-sienna transition-colors"
             >
-              Dashboard
+              Privacy Policy
             </Link>
             <Link
-              to={ROUTES.TOOLS}
+              to="/terms-of-service"
               className="hover:text-burnt-sienna transition-colors"
             >
-              Seller Tools
-            </Link>
-            <a href="#" className="hover:text-burnt-sienna transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-burnt-sienna transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
         <div className="border-t border-gray-700 pt-6 text-gray-500 text-sm">

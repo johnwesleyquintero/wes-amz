@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { FixedSizeList as List } from "react-window";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Upload, FileUp, AlertCircle, Download, Info } from "lucide-react";
@@ -388,67 +389,77 @@ export default function FbaCalculator() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      {item.product}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.cost.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.price.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {item.fees.toFixed(2)}
-                    </TableCell>
-                    <TableCell
-                      className={`text-right font-semibold ${
-                        item.profit && item.profit < 0
-                          ? "text-red-500"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {item.profit?.toFixed(2)}
-                    </TableCell>
-                    <TableCell
-                      className={`text-right ${
-                        item.roi && item.roi < 0
-                          ? "text-red-500"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {item.roi?.toFixed(2)}%
-                    </TableCell>
-                    <TableCell
-                      className={`text-right ${
-                        item.margin && item.margin < 0
-                          ? "text-red-500"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {item.margin?.toFixed(2)}%
-                    </TableCell>
-                    <TableCell>
-                      <div className="w-full">
-                        <Progress
-                          value={
-                            item.margin && item.margin > 0
-                              ? Math.min(item.margin, 100)
-                              : 0
-                          }
-                          className={`h-2 ${
-                            item.margin && item.margin < 15
-                              ? "bg-red-200"
-                              : item.margin && item.margin < 30
-                                ? "bg-yellow-200"
-                                : "bg-green-200"
+                <List
+                  height={300}
+                  itemCount={products.length}
+                  itemSize={40}
+                  width="100%"
+                >
+                  {({ index, style }) => {
+                    const item = products[index];
+                    return (
+                      <TableRow key={index} style={style}>
+                        <TableCell className="font-medium">
+                          {item.product}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.cost.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.price.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.fees.toFixed(2)}
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-semibold ${
+                            item.profit && item.profit < 0
+                              ? "text-red-500"
+                              : "text-green-500"
                           }`}
-                        />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        >
+                          {item.profit?.toFixed(2)}
+                        </TableCell>
+                        <TableCell
+                          className={`text-right ${
+                            item.roi && item.roi < 0
+                              ? "text-red-500"
+                              : "text-green-500"
+                          }`}
+                        >
+                          {item.roi?.toFixed(2)}%
+                        </TableCell>
+                        <TableCell
+                          className={`text-right ${
+                            item.margin && item.margin < 0
+                              ? "text-red-500"
+                              : "text-green-500"
+                          }`}
+                        >
+                          {item.margin?.toFixed(2)}%
+                        </TableCell>
+                        <TableCell>
+                          <div className="w-full">
+                            <Progress
+                              value={
+                                item.margin && item.margin > 0
+                                  ? Math.min(item.margin, 100)
+                                  : 0
+                              }
+                              className={`h-2 ${
+                                item.margin && item.margin < 15
+                                  ? "bg-red-200"
+                                  : item.margin && item.margin < 30
+                                    ? "bg-yellow-200"
+                                    : "bg-green-200"
+                              }`}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }}
+                </List>
               </TableBody>
             </Table>
           </div>

@@ -2,6 +2,7 @@ import {
   BarChart3,
   //FileSpreadsheet,
   Settings,
+  Scale,
   // Removed unused imports: Users, LayoutDashboard, AlertTriangle, Folder
   Search,
   ShoppingBag,
@@ -177,7 +178,28 @@ export const mainNavigation: MainNavigationItem[] = [
       },
     ],
   },
-  { name: "Settings", href: "/settings", icon: Settings },
+  {
+    name: "Settings",
+    icon: Settings,
+    children: [
+      {
+        name: "Legal",
+        icon: Scale,
+        children: [
+          {
+            name: "Privacy Policy",
+            href: "/privacy-policy",
+            icon: Scale,
+          },
+          {
+            name: "Terms of Service",
+            href: "/terms-of-service",
+            icon: Scale,
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const getFlattenedNavigation = (
@@ -197,6 +219,12 @@ export const secondaryNavigation = {
     title: "Amazon Seller Tools",
     navigation: getFlattenedNavigation(
       mainNavigation[0].children as NavigationCategory[],
+    ),
+  },
+  "/settings": {
+    title: "Settings",
+    navigation: getFlattenedNavigation(
+      mainNavigation[1].children as NavigationCategory[],
     ),
   },
 };

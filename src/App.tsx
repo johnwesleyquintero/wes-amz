@@ -92,6 +92,17 @@ const SalesTrendAnalyzer = lazy(
 const WebhookManager = lazy(
   () => import("./components/amazon-seller-tools/webhook-manager"),
 );
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const Register = lazy(() => import("./pages/auth/register"));
+const Login = lazy(() => import("./pages/auth/login"));
+const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
+const UpdatePassword = lazy(() => import("./pages/auth/update-password"));
+const ProfileManagement = lazy(() => import("./pages/settings/profile"));
+const OrganizationSettings = lazy(
+  () => import("./pages/settings/organization"),
+);
+const TeamManagement = lazy(() => import("./pages/settings/team"));
 
 // Define routes that use the MainLayout
 const appRoutes: AppRouteConfig[] = [
@@ -139,6 +150,8 @@ const appRoutes: AppRouteConfig[] = [
   { path: "/tools/sales-estimator", component: SalesEstimator },
   { path: "/tools/sales-trend-analyzer", component: SalesTrendAnalyzer },
   { path: "/tools/webhook-manager", component: WebhookManager },
+  { path: "/privacy-policy", component: PrivacyPolicy },
+  { path: "/terms-of-service", component: TermsOfService },
   // Routes that point to the Dashboard component
   { path: "/search-analytics", component: Dashboard },
   { path: "/campaign-manager", component: Dashboard },
@@ -161,6 +174,41 @@ const App = () => (
         >
           <Routes>
             <Route path="/" element={<Landing />} />
+            {/* Authentication Routes - No MainLayout */}
+            <Route
+              path="/auth/register"
+              element={
+                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                  <Register />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/login"
+              element={
+                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                  <Login />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/forgot-password"
+              element={
+                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                  <ForgotPassword />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/update-password"
+              element={
+                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                  <UpdatePassword />
+                </Suspense>
+              }
+            />
+
+            {/* Routes that use the MainLayout */}
             <Route element={<MainLayout />}>
               {/* Dynamically generate routes using the configuration array */}
               {appRoutes.map(({ path, component: Component, props }) => (
@@ -174,6 +222,31 @@ const App = () => (
                   }
                 />
               ))}
+              {/* New Settings Routes */}
+              <Route
+                path="/settings/profile"
+                element={
+                  <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                    <ProfileManagement />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/settings/organization"
+                element={
+                  <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                    <OrganizationSettings />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/settings/team"
+                element={
+                  <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                    <TeamManagement />
+                  </Suspense>
+                }
+              />
             </Route>
             {/* The catch-all route should be the last one */}
             <Route path="*" element={<NotFound />} />

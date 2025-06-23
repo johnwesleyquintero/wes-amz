@@ -1,15 +1,21 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, AlertCircle, Download, Info } from "lucide-react";
+import { Download, Info } from "lucide-react";
 import Papa from "papaparse";
-import SampleCsvButton from "./sample-csv-button";
 import CampaignCard from "./CampaignCard";
 import { useToast } from "@/hooks/use-toast";
+import CsvUploader, { GenericCsvRow } from "./CsvUploader";
+import {
+  MIN_CLICKS_FOR_ANALYSIS,
+  MAX_ACOS_THRESHOLD,
+  MIN_CTR_THRESHOLD,
+  MIN_CONVERSION_RATE_THRESHOLD,
+} from "@/lib/constants";
 
 export type CampaignData = {
   name: string;
@@ -35,11 +41,6 @@ const DEFAULT_CAMPAIGN_DATA: CampaignData = {
   impressions: 0,
   clicks: 0,
 };
-
-const MIN_CLICKS_FOR_ANALYSIS = 100;
-const MAX_ACOS_THRESHOLD = 30;
-const MIN_CTR_THRESHOLD = 0.3;
-const MIN_CONVERSION_RATE_THRESHOLD = 8;
 
 const analyzeCampaign = (campaign: CampaignData): CampaignData => {
   const { spend, sales, impressions, clicks, type } = campaign;
@@ -93,117 +94,61 @@ export default function PpcCampaignAuditor() {
   const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (campaigns.length > 0) {
-      setError(null);
-    }
-  }, [campaigns]);
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const handleUploadSuccess = (data: GenericCsvRow[]) => {
     setIsLoading(true);
-    setError(null);
+    try {
+      const processedData: CampaignData[] = data
+        .filter(
+          (item) =>
+            item.name &&
+            item.type &&
+            !isNaN(Number(item.spend)) &&
+            !isNaN(Number(item.sales)) &&
+            !isNaN(Number(item.impressions)) &&
+            !isNaN(Number(item.clicks)),
+        )
+        .map((item) => ({
+          ...DEFAULT_CAMPAIGN_DATA,
+          name: String(item.name),
+          type: String(item.type),
+          spend: Number(item.spend),
+          sales: Number(item.sales),
+          adSpend: Number(item.spend),
+          impressions: Number(item.impressions),
+          clicks: Number(item.clicks),
+        }))
+        .map(analyzeCampaign);
 
-    Papa.parse<CampaignData>(file, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        if (result.errors.length > 0) {
-          setError(
-            `Error parsing CSV file: ${result.errors[0].message}. Please check the format.`,
-          );
-          toast({
-            title: "CSV Error",
-            description: `Error parsing CSV file: ${result.errors[0].message}. Please check the format.`,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        try {
-          const processedData: CampaignData[] = result.data
-            .filter(
-              (item) =>
-                item.name &&
-                item.type &&
-                !isNaN(Number(item.spend)) &&
-                !isNaN(Number(item.sales)) &&
-                !isNaN(Number(item.impressions)) &&
-                !isNaN(Number(item.clicks)),
-            )
-            .map((item) => ({
-              ...DEFAULT_CAMPAIGN_DATA,
-              name: String(item.name),
-              type: String(item.type),
-              spend: Number(item.spend),
-              sales: Number(item.sales),
-              adSpend: Number(item.spend),
-              impressions: Number(item.impressions),
-              clicks: Number(item.clicks),
-            }))
-            .map(analyzeCampaign);
-
-          if (processedData.length === 0) {
-            setError(
-              "No valid data found in CSV. Please ensure your CSV has columns: name, type, spend, sales, impressions, clicks",
-            );
-            toast({
-              title: "CSV Error",
-              description:
-                "No valid data found in CSV. Please ensure your CSV has columns: name, type, spend, sales, impressions, clicks",
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-
-          setCampaigns(processedData);
-          toast({
-            title: "CSV Processed",
-            description: `Loaded ${processedData.length} campaign data`,
-            variant: "default",
-          });
-          setIsLoading(false);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Failed to process CSV data. Please ensure your CSV has the correct format";
-          setError(errorMessage);
-          toast({
-            title: "Processing Failed",
-            description: errorMessage,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-        }
-      },
-      error: (error) => {
-        setError(`Error parsing CSV file: ${error.message}`);
+      if (processedData.length === 0) {
         toast({
           title: "CSV Error",
-          description: `Error parsing CSV file: ${error.message}`,
+          description:
+            "No valid data found in CSV. Please ensure your CSV has columns: name, type, spend, sales, impressions, clicks",
           variant: "destructive",
         });
         setIsLoading(false);
-      },
-    });
+        return;
+      }
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      setCampaigns(processedData);
+      setIsLoading(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to process CSV data. Please ensure your CSV has the correct format";
+      toast({
+        title: "Processing Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setIsLoading(false);
     }
   };
 
   const handleExport = () => {
     if (campaigns.length === 0) {
-      setError("No data to export");
       toast({
         title: "Export Error",
         description: "No data to export",
@@ -244,10 +189,6 @@ export default function PpcCampaignAuditor() {
 
   const clearData = () => {
     setCampaigns([]);
-    setError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
     toast({
       title: "Data Cleared",
       description: "Campaign data cleared",
@@ -279,70 +220,25 @@ export default function PpcCampaignAuditor() {
       <div className="flex flex-col gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex flex-col items-center justify-center gap-4 p-6 text-center">
-              <div className="rounded-full bg-primary/10 p-3">
-                <Upload className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium">Upload Campaign Data</h3>
-                <p className="text-sm text-muted-foreground">
-                  Upload a CSV file with your Amazon PPC campaign data
-                </p>
-              </div>
-              <div className="w-full">
-                <label className="relative flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary/40 bg-background p-6 text-center hover:bg-primary/5">
-                  <FileText className="mb-2 h-8 w-8 text-primary/60" />
-                  <span className="text-sm font-medium">
-                    Click to upload CSV
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    (Download campaign report from Amazon Ads and upload here)
-                  </span>
-                  <input
-                    type="file"
-                    accept=".csv"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={isLoading}
-                    ref={fileInputRef}
-                  />
-                </label>
-                <div className="flex justify-center mt-4">
-                  <SampleCsvButton
-                    dataType="ppc"
-                    fileName="sample-ppc-campaign.csv"
-                  />
-                </div>
-                {campaigns.length > 0 && (
-                  <Button
-                    variant="outline"
-                    className="w-full mt-4"
-                    onClick={clearData}
-                  >
-                    Clear Data
-                  </Button>
-                )}
-              </div>
-            </div>
+            <CsvUploader
+              onUploadSuccess={handleUploadSuccess}
+              isLoading={isLoading}
+              onClear={clearData}
+              hasData={campaigns.length > 0}
+              requiredColumns={[
+                "name",
+                "type",
+                "spend",
+                "sales",
+                "impressions",
+                "clicks",
+              ]}
+              dataType="ppc"
+              fileName="sample-ppc-campaign.csv"
+            />
           </CardContent>
         </Card>
       </div>
-
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-destructive-foreground dark:bg-destructive/30 dark:text-destructive-foreground">
-          <AlertCircle className="h-5 w-5" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="space-y-2 py-4 text-center">
-          <Progress value={45} className="h-2" />
-          <p className="text-sm text-muted-foreground">
-            Analyzing campaign performance...
-          </p>
-        </div>
-      )}
 
       {campaigns.length > 0 && (
         <>

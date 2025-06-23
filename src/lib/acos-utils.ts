@@ -126,12 +126,14 @@ export const getAcosRating = (acos: number): string => {
   return "Critical";
 };
 
-export const getAcosColor = (acos: number): string => {
-  if (acos < 15) return "text-green-600 dark:text-green-400";
-  if (acos < 25) return "text-emerald-600 dark:text-emerald-400";
-  if (acos < 35) return "text-yellow-600 dark:text-yellow-400";
-  if (acos < 45) return "text-orange-600 dark:text-orange-400";
-  return "text-red-600 dark:text-red-400";
+export const getAcosColor = (
+  acos: number,
+): "green" | "emerald" | "yellow" | "orange" | "red" => {
+  if (acos < 15) return "green";
+  if (acos < 25) return "emerald";
+  if (acos < 35) return "yellow";
+  if (acos < 45) return "orange";
+  return "red";
 };
 
 export const chartConfig = {
@@ -157,22 +159,22 @@ export const acosRatingGuide = [
   {
     label: "Excellent",
     range: "<15%",
-    color: "text-green-600 dark:text-green-400",
+    color: "green",
   },
   {
     label: "Good",
     range: "15-25%",
-    color: "text-emerald-600 dark:text-emerald-400",
+    color: "emerald",
   },
   {
     label: "Average",
     range: "25-35%",
-    color: "text-yellow-600 dark:text-yellow-400",
+    color: "yellow",
   },
   {
     label: "Poor",
     range: "35-45%",
-    color: "text-orange-600 dark:text-orange-400",
+    color: "orange",
   },
-  { label: "Critical", range: ">45%", color: "text-red-600 dark:text-red-400" },
+  { label: "Critical", range: ">45%", color: "red" },
 ] as const;

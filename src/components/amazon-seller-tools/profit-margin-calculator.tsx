@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { FixedSizeList as List } from "react-window";
 import {
   Card,
   CardContent,
@@ -21,7 +22,7 @@ import {
   CardDescription,
 } from "../ui/card";
 import { Progress } from "../ui/progress";
-import { Upload, AlertCircle, Download, Percent, Info } from "lucide-react";
+import { Upload, AlertCircle, Download, Percent } from "lucide-react";
 import Papa from "papaparse";
 import SampleCsvButton from "./sample-csv-button";
 import {
@@ -36,9 +37,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { ChartContainer } from "../ui/chart";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 // Define a more comprehensive ProductData type
 type ProductData = {
@@ -125,7 +124,6 @@ const AmazonAlgorithms = {
 
 export default function ProfitMarginCalculator() {
   const { toast } = useToast();
-  const [csvData, setCsvData] = useState<ProductData[]>([]);
   const [results, setResults] = useState<ProductData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [manualProduct, setManualProduct] = useState<ProductData>({
@@ -189,7 +187,6 @@ export default function ProfitMarginCalculator() {
             throw new Error("No valid data found in CSV");
           }
 
-          setCsvData(processedData);
           calculateResults(processedData);
         } catch (err) {
           setError(`Error processing CSV file: ${err.message}`);
@@ -583,18 +580,27 @@ export default function ProfitMarginCalculator() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {results.map((result, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{result.product}</TableCell>
-                    <TableCell className="text-right">
-                      ${result.profit?.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {result.margin}%
-                    </TableCell>
-                    <TableCell className="text-right">{result.roi}%</TableCell>
-                  </TableRow>
-                ))}
+                <List
+                  height={300}
+                  itemCount={results.length}
+                  itemSize={40}
+                  width="100%"
+                >
+                  {({ index, style }) => (
+                    <TableRow key={index} style={style}>
+                      <TableCell>{results[index].product}</TableCell>
+                      <TableCell className="text-right">
+                        ${results[index].profit?.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {results[index].margin}%
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {results[index].roi}%
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </List>
               </TableBody>
             </Table>
 

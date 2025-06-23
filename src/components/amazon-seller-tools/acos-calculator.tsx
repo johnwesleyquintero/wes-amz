@@ -14,14 +14,7 @@ import {
   getAcosRating,
   type CampaignData,
 } from "@/lib/acos-utils";
-import {
-  AlertCircle,
-  Calculator,
-  Download,
-  FileText,
-  Info,
-  Upload,
-} from "lucide-react";
+import { AlertCircle, Calculator, Download, Info } from "lucide-react";
 import Papa from "papaparse";
 import type React from "react";
 import { useState } from "react";
@@ -38,12 +31,8 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import SampleCsvButton from "./sample-csv-button";
 import { useToast } from "@/hooks/use-toast";
-
-// Constants for ACoS ratings
-const ACOS_EXCELLENT_THRESHOLD = 25;
-const ACOS_GOOD_THRESHOLD = 35;
+import { ACOS_EXCELLENT_THRESHOLD, ACOS_GOOD_THRESHOLD } from "@/lib/constants";
 
 // Interface for manual campaign input
 interface ManualCampaignInput {
@@ -65,50 +54,42 @@ export default function AcosCalculator() {
     adSpend: "",
     sales: "",
   });
+  const [manualErrors, setManualErrors] = useState({
+    campaign: "",
+    adSpend: "",
+    sales: "",
+  });
 
   const handleManualCalculate = () => {
-    // Validate input
+    let hasError = false;
+    const newErrors = { campaign: "", adSpend: "", sales: "" };
+
     if (!manualCampaign.campaign.trim()) {
-      setError("Please enter a campaign name");
-      toast({
-        title: "Input Error",
-        description: "Please enter a campaign name",
-        variant: "destructive",
-      });
-      return;
+      newErrors.campaign = "Campaign name is required";
+      hasError = true;
     }
 
     const adSpend = Number.parseFloat(manualCampaign.adSpend);
-    const sales = Number.parseFloat(manualCampaign.sales);
-
     if (isNaN(adSpend) || adSpend < 0) {
-      setError("Ad Spend must be a valid positive number");
-      toast({
-        title: "Input Error",
-        description: "Ad Spend must be a valid positive number",
-        variant: "destructive",
-      });
-      return;
+      newErrors.adSpend = "Ad Spend must be a valid positive number";
+      hasError = true;
     }
 
+    const sales = Number.parseFloat(manualCampaign.sales);
     if (isNaN(sales) || sales < 0) {
-      setError("Sales amount must be a valid positive number");
-      toast({
-        title: "Input Error",
-        description: "Sales amount must be a valid positive number",
-        variant: "destructive",
-      });
-      return;
+      newErrors.sales = "Sales amount must be a valid positive number";
+      hasError = true;
+    } else if (sales === 0) {
+      newErrors.sales = "Sales amount cannot be zero";
+      hasError = true;
     }
 
-    if (sales === 0) {
-      setError(
-        "Sales amount cannot be zero as it would result in invalid ACOS calculation",
-      );
+    setManualErrors(newErrors);
+
+    if (hasError) {
       toast({
         title: "Input Error",
-        description:
-          "Sales amount cannot be zero as it would result in invalid ACOS calculation",
+        description: "Please correct the errors in the manual input form.",
         variant: "destructive",
       });
       return;
@@ -308,14 +289,23 @@ export default function AcosCalculator() {
                   <label className="text-sm font-medium">Campaign Name</label>
                   <Input
                     value={manualCampaign.campaign}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setManualCampaign({
                         ...manualCampaign,
                         campaign: e.target.value,
-                      })
-                    }
+                      });
+                      setManualErrors((prev) => ({ ...prev, campaign: "" }));
+                    }}
                     placeholder="Enter campaign name"
+                    className={
+                      manualErrors.campaign ? "border-destructive" : ""
+                    }
                   />
+                  {manualErrors.campaign && (
+                    <p className="text-destructive text-xs mt-1">
+                      {manualErrors.campaign}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium">Ad Spend ($)</label>
@@ -324,14 +314,21 @@ export default function AcosCalculator() {
                     min="0"
                     step="0.01"
                     value={manualCampaign.adSpend}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setManualCampaign({
                         ...manualCampaign,
                         adSpend: e.target.value,
-                      })
-                    }
+                      });
+                      setManualErrors((prev) => ({ ...prev, adSpend: "" }));
+                    }}
                     placeholder="Enter ad spend amount"
+                    className={manualErrors.adSpend ? "border-destructive" : ""}
                   />
+                  {manualErrors.adSpend && (
+                    <p className="text-destructive text-xs mt-1">
+                      {manualErrors.adSpend}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium">Sales ($)</label>
@@ -340,14 +337,21 @@ export default function AcosCalculator() {
                     min="0"
                     step="0.01"
                     value={manualCampaign.sales}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setManualCampaign({
                         ...manualCampaign,
                         sales: e.target.value,
-                      })
-                    }
+                      });
+                      setManualErrors((prev) => ({ ...prev, sales: "" }));
+                    }}
                     placeholder="Enter sales amount"
+                    className={manualErrors.sales ? "border-destructive" : ""}
                   />
+                  {manualErrors.sales && (
+                    <p className="text-destructive text-xs mt-1">
+                      {manualErrors.sales}
+                    </p>
+                  )}
                 </div>
                 <Button onClick={handleManualCalculate} className="w-full">
                   <Calculator className="mr-2 h-4 w-4" />
@@ -410,9 +414,15 @@ export default function AcosCalculator() {
                         ${campaign.sales.toFixed(2)}
                       </td>
                       <td
-                        className={`px-4 py-3 text-right text-sm font-medium ${getAcosColor(
-                          campaign.acos || 0,
-                        )}`}
+                        className={`px-4 py-3 text-right text-sm font-medium ${
+                          {
+                            green: "text-green-600 dark:text-green-400",
+                            emerald: "text-emerald-600 dark:text-emerald-400",
+                            yellow: "text-yellow-600 dark:text-yellow-400",
+                            orange: "text-orange-600 dark:text-orange-400",
+                            red: "text-red-600 dark:text-red-400",
+                          }[getAcosColor(campaign.acos || 0)]
+                        }`}
                       >
                         {campaign.acos?.toFixed(2)}%
                       </td>

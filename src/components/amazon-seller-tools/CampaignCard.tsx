@@ -3,8 +3,14 @@
 import { CampaignData } from "./ppc-campaign-auditor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils"; // Assuming you have a utility for class name merging
+import { cn } from "@/lib/utils";
 import { AlertCircle, CheckCircle, TrendingDown } from "lucide-react";
+import {
+  MAX_ACOS_THRESHOLD,
+  MIN_CTR_THRESHOLD,
+  MIN_CONVERSION_RATE_THRESHOLD,
+} from "@/lib/constants";
+import { getAcosColor } from "@/lib/acos-utils";
 
 interface CampaignCardProps {
   campaign: CampaignData;
@@ -33,9 +39,10 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
   }
 
   const roas = campaign.sales / campaign.adSpend;
-  const isAcosHigh = campaign.acos > 30;
-  const isCtrLow = campaign.ctr < 0.3;
-  const isConversionRateLow = campaign.conversionRate < 8;
+  const isAcosHigh = campaign.acos > MAX_ACOS_THRESHOLD;
+  const isCtrLow = campaign.ctr < MIN_CTR_THRESHOLD;
+  const isConversionRateLow =
+    campaign.conversionRate < MIN_CONVERSION_RATE_THRESHOLD;
 
   return (
     <Card>
@@ -110,7 +117,13 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             <div
               className={cn(
                 "text-xl font-semibold",
-                isAcosHigh && "text-destructive",
+                {
+                  green: "text-green-600 dark:text-green-400",
+                  emerald: "text-emerald-600 dark:text-emerald-400",
+                  yellow: "text-yellow-600 dark:text-yellow-400",
+                  orange: "text-orange-600 dark:text-orange-400",
+                  red: "text-red-600 dark:text-red-400",
+                }[getAcosColor(campaign.acos || 0)],
               )}
             >
               {campaign.acos !== undefined ? campaign.acos.toFixed(2) : "N/A"}%

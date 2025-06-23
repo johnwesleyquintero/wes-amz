@@ -1,0 +1,7 @@
+export const MIN_CLICKS_FOR_ANALYSIS = 100;
+export const MAX_ACOS_THRESHOLD = 30;
+export const MIN_CTR_THRESHOLD = 0.3;
+export const MIN_CONVERSION_RATE_THRESHOLD = 8;
+
+export const ACOS_EXCELLENT_THRESHOLD = 25;
+export const ACOS_GOOD_THRESHOLD = 35;
