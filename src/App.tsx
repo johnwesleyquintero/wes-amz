@@ -30,7 +30,7 @@ interface AppRouteConfig {
 const DEFAULT_SUSPENSE_FALLBACK = <div>Loading...</div>; // A generic loading message is often sufficient
 
 // Lazy-load components
-const LandingPage = lazy(() => import("./pages/index.tsx"));
+const LandingPage = lazy(() => import("@/pages/index.tsx"));
 const DashboardContent = lazy(() => import("./pages/DashboardContent.tsx"));
 const Tools = lazy(() => import("./pages/Tools"));
 const AcosCalculator = lazy(
@@ -142,13 +142,7 @@ const authenticatedAppRoutes: AppRouteConfig[] = [
   { path: "tools/sales-estimator", component: SalesEstimator },
   { path: "tools/sales-trend-analyzer", component: SalesTrendAnalyzer },
   { path: "tools/webhook-manager", component: WebhookManager },
-  // These routes were previously pointing to the landing page, now point to the actual dashboard (Tools)
-  { path: "search-analytics", component: Tools },
-  { path: "campaign-manager", component: Tools },
-  { path: "products", component: Tools },
-  { path: "sheets-integration", component: Tools },
-  { path: "team", component: Tools },
-  { path: "settings", component: Tools },
+
 ];
 
 const queryClient = new QueryClient();
