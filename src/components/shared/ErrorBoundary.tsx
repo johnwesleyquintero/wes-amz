@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children?: ReactNode;
@@ -10,7 +10,7 @@ interface State {
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(_: Error): State {
@@ -26,8 +26,13 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-          <h1 className="text-2xl font-bold text-red-600">Oops! Something went wrong.</h1>
-          <p className="mt-2 text-gray-700">We're sorry, but an unexpected error occurred. Please try refreshing the page or contact support if the issue persists.</p>
+          <h1 className="text-2xl font-bold text-red-600">
+            Oops! Something went wrong.
+          </h1>
+          <p className="mt-2 text-gray-700">
+            We're sorry, but an unexpected error occurred. Please try refreshing
+            the page or contact support if the issue persists.
+          </p>
           <button
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             onClick={() => window.location.reload()}

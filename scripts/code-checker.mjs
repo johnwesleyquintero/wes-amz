@@ -85,12 +85,22 @@ async function runCommand(command, name) {
   console.log(chalk.blue(`\n▶ Starting ${name}...`));
 
   try {
-    const { stderr } = await execPromise(command);
+    const { stdout, stderr } = await execPromise(command);
 
-    // If stderr contains output, treat it as a warning/error and return false
+    if (stdout.trim()) {
+      console.log(
+        chalk.gray(`
+${name} output:`),
+      );
+      console.log(stdout);
+    }
+
     if (stderr.trim()) {
-      console.error(chalk.yellow(`⚠ ${name} warnings:`));
-      console.error(formatErrorOutput(stderr));
+      console.warn(
+        chalk.yellow(`
+⚠ ${name} warnings:`),
+      );
+      console.warn(formatErrorOutput(stderr));
       return false; // Treat warnings as failures
     }
 
@@ -105,6 +115,7 @@ async function runCommand(command, name) {
       console.error(formatErrorOutput(output));
     }
 
+    // If there's an error, it means the command truly failed, so return false
     return false;
   }
 }

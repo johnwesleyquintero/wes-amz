@@ -36,6 +36,13 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  ApiError,
+  AuthenticationError,
+  ServerError,
+  ClientError,
+  AuthorizationError,
+} from "@/lib/api-errors";
 
 interface OrganizationMember {
   id: string;
@@ -50,6 +57,11 @@ interface OrganizationMember {
   }> | null;
 }
 
+/**
+ * TeamManagement component allows Enterprise organization admins to manage team members.
+ * It fetches organization members from Supabase, displays them in a table,
+ * and provides functionality to invite and remove members.
+ */
 const TeamManagement = () => {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<OrganizationMember[]>([]);
@@ -59,12 +71,32 @@ const TeamManagement = () => {
   const [inviteRole, setInviteRole] = useState<"Admin" | "Member">("Member");
   const { toast } = useToast();
 
+  /**
+   * Fetches the team members for the current user's Enterprise organization.
+   * Also checks if the current user has admin privileges.
+   */
   const fetchTeamMembers = useCallback(async () => {
     try {
       setLoading(true);
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      if (userError) {
+        const statusCode =
+          userError &&
+          typeof userError === "object" &&
+          "status" in userError &&
+          typeof userError.status === "number"
+            ? userError.status
+            : 401;
+        throw new AuthenticationError(
+          "Failed to get user session.",
+          statusCode,
+          userError,
+        );
+      }
 
       if (user) {
         const { data: profileData, error: profileError } = await supabase
@@ -73,7 +105,20 @@ const TeamManagement = () => {
           .eq("id", user.id)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          const statusCode =
+            profileError &&
+            typeof profileError === "object" &&
+            "status" in profileError &&
+            typeof profileError.status === "number"
+              ? profileError.status
+              : 500;
+          throw new ServerError(
+            "Failed to fetch user profile for team check.",
+            statusCode,
+            profileError,
+          );
+        }
 
         if (
           profileData &&
@@ -91,7 +136,20 @@ const TeamManagement = () => {
               .eq("user_id", user.id)
               .single();
 
-          if (memberRoleError) throw memberRoleError;
+          if (memberRoleError) {
+            const statusCode =
+              memberRoleError &&
+              typeof memberRoleError === "object" &&
+              "status" in memberRoleError &&
+              typeof memberRoleError.status === "number"
+                ? memberRoleError.status
+                : 500;
+            throw new ServerError(
+              "Failed to check user's organization role.",
+              statusCode,
+              memberRoleError,
+            );
+          }
 
           if (memberRoleData && memberRoleData.role === "Admin") {
             setIsUserAdmin(true);
@@ -115,26 +173,44 @@ const TeamManagement = () => {
             )
             .eq("organization_id", profileData.organization_id);
 
-          if (membersError) throw membersError;
+          if (membersError) {
+            const statusCode =
+              membersError &&
+              typeof membersError === "object" &&
+              "status" in membersError &&
+              typeof membersError.status === "number"
+                ? membersError.status
+                : 500;
+            throw new ServerError(
+              "Failed to fetch team members.",
+              statusCode,
+              membersError,
+            );
+          }
           setMembers(membersData || []);
         } else {
-          toast({
-            title: "Access Denied",
-            description: "You are not part of an Enterprise organization.",
-            variant: "destructive",
-          });
-          setMembers([]);
+          throw new AuthorizationError(
+            "You are not part of an Enterprise organization.",
+            403,
+          );
         }
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError(
+              "An unexpected error occurred.",
+              undefined,
+              undefined,
+              error,
+            );
       toast({
-        title: "Error fetching team members",
-        description: errorMessage,
+        title: `Error fetching team members: ${apiError.errorType || "Unknown"}`,
+        description: apiError.message,
         variant: "destructive",
       });
-      setMembers([]);
+      setMembers([]); // Clear members on error
     } finally {
       setLoading(false);
     }
@@ -144,6 +220,13 @@ const TeamManagement = () => {
     fetchTeamMembers();
   }, [fetchTeamMembers]);
 
+  /**
+   * Handles inviting a new member to the organization.
+   * Note: In a real application, this would involve a secure backend endpoint
+   * to send an invitation email and handle the user joining the organization.
+   * For this example, we simulate adding a user directly if they exist.
+   * @param e - The form submission event.
+   */
   const handleInviteMember = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -151,10 +234,6 @@ const TeamManagement = () => {
 
       setLoading(true);
       try {
-        // In a real application, this would involve a secure backend endpoint
-        // to send an invitation email and handle the user joining the organization.
-        // For this example, we'll simulate adding a user directly if they exist.
-
         // First, find the user by email
         const { data: users, error: userError } = await supabase
           .from("profiles")
@@ -163,8 +242,17 @@ const TeamManagement = () => {
           .single();
 
         if (userError || !users) {
-          throw new Error(
+          const statusCode =
+            userError &&
+            typeof userError === "object" &&
+            "status" in userError &&
+            typeof userError.status === "number"
+              ? userError.status
+              : 404;
+          throw new ClientError(
             "User with this email not found. Please ensure they have registered.",
+            statusCode,
+            userError,
           );
         }
 
@@ -179,11 +267,25 @@ const TeamManagement = () => {
 
         if (existingMemberError && existingMemberError.code !== "PGRST116") {
           // PGRST116 means no rows found
-          throw existingMemberError;
+          const statusCode =
+            existingMemberError &&
+            typeof existingMemberError === "object" &&
+            "status" in existingMemberError &&
+            typeof existingMemberError.status === "number"
+              ? existingMemberError.status
+              : 500;
+          throw new ServerError(
+            "Failed to check existing membership.",
+            statusCode,
+            existingMemberError,
+          );
         }
 
         if (existingMember) {
-          throw new Error("User is already a member of this organization.");
+          throw new ClientError(
+            "User is already a member of this organization.",
+            409,
+          ); // 409 Conflict
         }
 
         // Add the user to organization_members
@@ -195,7 +297,20 @@ const TeamManagement = () => {
             role: inviteRole,
           });
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          const statusCode =
+            insertError &&
+            typeof insertError === "object" &&
+            "status" in insertError &&
+            typeof insertError.status === "number"
+              ? insertError.status
+              : 500;
+          throw new ServerError(
+            "Failed to add member to organization.",
+            statusCode,
+            insertError,
+          );
+        }
 
         toast({
           title: "Member Invited/Added",
@@ -205,11 +320,18 @@ const TeamManagement = () => {
         setInviteRole("Member");
         fetchTeamMembers(); // Refresh the list
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
+        const apiError =
+          error instanceof ApiError
+            ? error
+            : new ApiError(
+                "An unexpected error occurred during invitation.",
+                undefined,
+                undefined,
+                error,
+              );
         toast({
-          title: "Error inviting member",
-          description: errorMessage,
+          title: `Error inviting member: ${apiError.errorType || "Unknown"}`,
+          description: apiError.message,
           variant: "destructive",
         });
       } finally {
@@ -226,6 +348,10 @@ const TeamManagement = () => {
     ],
   );
 
+  /**
+   * Handles removing a member from the organization.
+   * @param memberId - The ID of the organization member to remove.
+   */
   const handleRemoveMember = useCallback(
     async (memberId: string) => {
       if (!organizationId) return;
@@ -238,7 +364,16 @@ const TeamManagement = () => {
           .eq("id", memberId)
           .eq("organization_id", organizationId); // Ensure only members of the current org can be removed
 
-        if (error) throw error;
+        if (error) {
+          const statusCode =
+            error &&
+            typeof error === "object" &&
+            "status" in error &&
+            typeof error.status === "number"
+              ? error.status
+              : 500;
+          throw new ServerError("Failed to remove member.", statusCode, error);
+        }
 
         toast({
           title: "Member Removed",
@@ -247,11 +382,18 @@ const TeamManagement = () => {
         });
         fetchTeamMembers(); // Refresh the list
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
+        const apiError =
+          error instanceof ApiError
+            ? error
+            : new ApiError(
+                "An unexpected error occurred during removal.",
+                undefined,
+                undefined,
+                error,
+              );
         toast({
-          title: "Error removing member",
-          description: errorMessage,
+          title: `Error removing member: ${apiError.errorType || "Unknown"}`,
+          description: apiError.message,
           variant: "destructive",
         });
       } finally {
@@ -270,6 +412,8 @@ const TeamManagement = () => {
   }
 
   if (!organizationId) {
+    // This case is now handled by the error boundary or the catch block
+    // but keeping a basic render for clarity if state is somehow null
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
         <Card className="w-full max-w-md">

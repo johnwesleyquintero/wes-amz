@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Upload, FileText, AlertCircle, Save, Eye } from "lucide-react";
+import { ApiError, ClientError } from "@/lib/api-errors";
 
 type ProductDescription = {
   product: string;
@@ -61,8 +62,9 @@ export default function DescriptionEditor() {
             results.meta.fields ? !results.meta.fields.includes(col) : true,
           );
           if (missingColumns.length > 0) {
-            throw new Error(
+            throw new ClientError(
               `Missing required columns: ${missingColumns.join(", ")}`,
+              400,
             );
           }
 
@@ -88,20 +90,36 @@ export default function DescriptionEditor() {
             variant: "default",
           });
         } catch (error) {
-          setError(
-            error instanceof Error ? error.message : "An error occurred",
-          );
+          const apiError =
+            error instanceof ApiError
+              ? error
+              : new ClientError(
+                  "An error occurred during processing.",
+                  500,
+                  error,
+                );
+          setError(apiError.message);
           toast({
-            title: "Processing Failed",
-            description: error.message,
+            title: `Processing Failed: ${apiError.errorType || "Unknown"}`,
+            description: apiError.message,
             variant: "destructive",
           });
         }
         setIsLoading(false);
       },
       error: (error) => {
-        setError(error.message);
+        const apiError = new ClientError(
+          `CSV parsing error: ${error.message}`,
+          400,
+          error,
+        );
+        setError(apiError.message);
         setIsLoading(false);
+        toast({
+          title: `Parsing Failed: ${apiError.errorType || "Unknown"}`,
+          description: apiError.message,
+          variant: "destructive",
+        });
       },
     });
   };
@@ -129,7 +147,16 @@ export default function DescriptionEditor() {
 
   const handleAddProduct = () => {
     if (!newProduct.product || !newProduct.description) {
-      setError("Please fill in both product name and description");
+      const error = new ClientError(
+        "Please fill in both product name and description",
+        400,
+      );
+      setError(error.message);
+      toast({
+        title: `Input Error: ${error.errorType || "Unknown"}`,
+        description: error.message,
+        variant: "destructive",
+      });
       return;
     }
 
@@ -145,7 +172,7 @@ export default function DescriptionEditor() {
     setProducts([...products, productData]);
     setActiveProduct(productData);
     setNewProduct({ product: "", asin: "", description: "" });
-    setError(null);
+    setError(null); // Clear previous errors on successful add
   };
 
   const countKeywords = (text: string, targetKeywords: string[]): number => {

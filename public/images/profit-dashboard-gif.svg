@@ -1,4 +1,42 @@
 <svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="800" height="450" fill="#D0D0D0"/>
-<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#777777">Profit Dashboard GIF/Screenshot Placeholder</text>
+  <rect width="800" height="450" fill="#F0F2F5"/>
+  <rect x="50" y="50" width="700" height="350" rx="10" fill="#FFFFFF"/>
+
+  <!-- Header/Title -->
+  <text x="80" y="80" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2D3748">Profit Overview</text>
+
+  <!-- Key Metrics -->
+  <rect x="70" y="110" width="200" height="80" rx="5" fill="#F8FAFC"/>
+  <text x="85" y="135" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Net Profit</text>
+  <text x="85" y="165" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#38A169">$9,876</text>
+
+  <rect x="290" y="110" width="200" height="80" rx="5" fill="#F8FAFC"/>
+  <text x="305" y="135" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Revenue</text>
+  <text x="305" y="165" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#4299E1">$15,000</text>
+
+  <rect x="510" y="110" width="200" height="80" rx="5" fill="#F8FAFC"/>
+  <text x="525" y="135" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Cost of Goods</text>
+  <text x="525" y="165" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#E53E3E">$5,124</text>
+
+  <!-- Profit Trend Chart -->
+  <rect x="70" y="210" width="660" height="180" rx="5" fill="#F8FAFC"/>
+  <text x="85" y="235" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2D3748">Profit Trend (Last 30 Days)</text>
+  <polyline points="100,350 150,300 200,320 250,280 300,310 350,270 400,290 450,250 500,270 550,230 600,250 650,210 700,230" 
+            fill="none" stroke="#38A169" stroke-width="3"/>
+  <circle cx="100" cy="350" r="4" fill="#38A169"/>
+  <circle cx="150" cy="300" r="4" fill="#38A169"/>
+  <circle cx="200" cy="320" r="4" fill="#38A169"/>
+  <circle cx="250" cy="280" r="4" fill="#38A169"/>
+  <circle cx="300" cy="310" r="4" fill="#38A169"/>
+  <circle cx="350" cy="270" r="4" fill="#38A169"/>
+  <circle cx="400" cy="290" r="4" fill="#38A169"/>
+  <circle cx="450" cy="250" r="4" fill="#38A169"/>
+  <circle cx="500" cy="270" r="4" fill="#38A169"/>
+  <circle cx="550" cy="230" r="4" fill="#38A169"/>
+  <circle cx="600" cy="250" r="4" fill="#38A169"/>
+  <circle cx="650" cy="210" r="4" fill="#38A169"/>
+  <circle cx="700" cy="230" r="4" fill="#38A169"/>
+
+  <!-- Call to Action/Headline -->
+  <text x="400" y="425" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2D3748">Maximize Your Amazon Profitability</text>
 </svg>

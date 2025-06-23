@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSkeletonProps {
   count?: number; // Number of skeleton lines/items to render
@@ -8,8 +8,8 @@ interface LoadingSkeletonProps {
 
 const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   count = 1,
-  height = 'h-4',
-  className = 'w-full',
+  height = "h-4",
+  className = "w-full",
 }) => {
   return (
     <div className={`animate-pulse space-y-2 ${className}`}>

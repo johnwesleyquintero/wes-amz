@@ -8,25 +8,22 @@ import {
   calculateMetrics,
   getAcosColor,
   getAcosRating,
-  type CampaignData,
 } from "@/lib/acos-utils";
 import { AlertCircle, Calculator, Download, Info } from "lucide-react";
 import Papa from "papaparse";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import CsvUploader, { GenericCsvRow } from "./CsvUploader";
 import { useToast } from "@/hooks/use-toast";
 import { ACOS_EXCELLENT_THRESHOLD, ACOS_GOOD_THRESHOLD } from "@/lib/constants";
+import { ManualCampaignInput, AcosCampaignData } from "./acos-calculator/types";
 
-// Interface for manual campaign input
-interface ManualCampaignInput {
-  campaign: string;
-  adSpend: string;
-  sales: string;
-}
-
+/**
+ * ACoSCalculator component for calculating and displaying ACoS (Advertising Cost of Sales) data.
+ * Allows for manual input and CSV file uploads.
+ */
 export default function AcosCalculator() {
   const { toast } = useToast();
-  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
+  const [campaigns, setCampaigns] = useState<AcosCampaignData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [manualCampaign, setManualCampaign] = useState<ManualCampaignInput>({
@@ -40,7 +37,11 @@ export default function AcosCalculator() {
     sales: "",
   });
 
-  const handleManualCalculate = () => {
+  /**
+   * Handles the manual calculation of ACoS metrics based on user input.
+   * Validates input fields and updates the campaigns state with the new data.
+   */
+  const handleManualCalculate = useCallback(() => {
     let hasError = false;
     const newErrors = { campaign: "", adSpend: "", sales: "" };
 
@@ -79,7 +80,7 @@ export default function AcosCalculator() {
     const metrics = calculateMetrics({ adSpend, sales });
 
     // Create new campaign data
-    const newCampaign: CampaignData = {
+    const newCampaign: AcosCampaignData = {
       campaign: manualCampaign.campaign,
       adSpend,
       sales,
@@ -95,9 +96,13 @@ export default function AcosCalculator() {
       description: "Campaign data added successfully",
       variant: "default",
     });
-  };
+  }, [manualCampaign, campaigns, toast]);
 
-  const handleExport = () => {
+  /**
+   * Handles the export of current campaign data to a CSV file.
+   * Displays an error toast if no data is available for export.
+   */
+  const handleExport = useCallback(() => {
     if (campaigns.length === 0) {
       setError("No data to export");
       toast({
@@ -150,9 +155,12 @@ export default function AcosCalculator() {
         variant: "destructive",
       });
     }
-  };
+  }, [campaigns, toast]);
 
-  const clearData = () => {
+  /**
+   * Clears all campaign data from the state.
+   */
+  const clearData = useCallback(() => {
     setCampaigns([]);
     setError(null);
     toast({
@@ -160,69 +168,77 @@ export default function AcosCalculator() {
       description: "Campaign data cleared",
       variant: "default",
     });
-  };
+  }, [toast]);
 
-  const handleUploadSuccess = (data: GenericCsvRow[]) => {
-    setIsLoading(true);
-    try {
-      const processedData: CampaignData[] = data
-        .filter(
-          (item: GenericCsvRow) =>
-            typeof item.campaign === "string" &&
-            item.campaign.trim() !== "" &&
-            !isNaN(Number(item.adSpend)) &&
-            !isNaN(Number(item.sales)),
-        )
-        .map((item: GenericCsvRow) => {
-          const adSpend = Number(item.adSpend);
-          const sales = Number(item.sales);
-          const impressions = item.impressions
-            ? Number(item.impressions)
-            : undefined;
-          const clicks = item.clicks ? Number(item.clicks) : undefined;
+  /**
+   * Handles the successful upload and processing of CSV data.
+   * Filters and maps the raw CSV data to CampaignData objects,
+   * then updates the component's state.
+   * @param data - An array of GenericCsvRow objects parsed from the CSV.
+   */
+  const handleUploadSuccess = useCallback(
+    (data: GenericCsvRow[]) => {
+      setIsLoading(true);
+      try {
+        const processedData: AcosCampaignData[] = data
+          .filter(
+            (item: GenericCsvRow) =>
+              typeof item.campaign === "string" &&
+              item.campaign.trim() !== "" &&
+              !isNaN(Number(item.adSpend)) &&
+              !isNaN(Number(item.sales)),
+          )
+          .map((item: GenericCsvRow) => {
+            const adSpend = Number(item.adSpend);
+            const sales = Number(item.sales);
+            const impressions = item.impressions
+              ? Number(item.impressions)
+              : undefined;
+            const clicks = item.clicks ? Number(item.clicks) : undefined;
 
-          return {
-            campaign: String(item.campaign),
-            adSpend,
-            sales,
-            impressions,
-            clicks,
-            ...calculateMetrics({ adSpend, sales, impressions, clicks }),
-          };
-        });
+            return {
+              campaign: String(item.campaign),
+              adSpend,
+              sales,
+              impressions,
+              clicks,
+              ...calculateMetrics({ adSpend, sales, impressions, clicks }),
+            };
+          });
 
-      if (processedData.length === 0) {
+        if (processedData.length === 0) {
+          setError(
+            "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
+          );
+          toast({
+            title: "CSV Error",
+            description:
+              "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setCampaigns(processedData);
+        setError(null); // Clear any previous errors
+      } catch (err) {
         setError(
-          "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
+          `Failed to process CSV data: ${
+            err instanceof Error ? err.message : String(err)
+          }. Please ensure your CSV has the correct format`,
         );
         toast({
-          title: "CSV Error",
-          description:
-            "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
-          variant: "destructive",
+          title: "Processing Failed",
+          description: `Failed to process CSV data: ${
+            err instanceof Error ? err.message : String(err)
+          }. Please ensure your CSV has the correct format`,
         });
-        return;
+      } finally {
+        setIsLoading(false);
       }
-
-      setCampaigns(processedData);
-      setError(null); // Clear any previous errors
-    } catch (err) {
-      setError(
-        `Failed to process CSV data: ${
-          err instanceof Error ? err.message : String(err)
-        }. Please ensure your CSV has the correct format`,
-      );
-      toast({
-        title: "Processing Failed",
-        description: `Failed to process CSV data: ${
-          err instanceof Error ? err.message : String(err)
-        }. Please ensure your CSV has the correct format`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [toast, setIsLoading, setCampaigns, setError],
+  );
 
   return (
     <div className="space-y-6">

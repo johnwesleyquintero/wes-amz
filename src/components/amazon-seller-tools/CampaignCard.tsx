@@ -1,6 +1,5 @@
 "use client";
 
-import { CampaignData } from "./ppc-campaign-auditor";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -11,11 +10,14 @@ import {
   MIN_CONVERSION_RATE_THRESHOLD,
 } from "@/lib/constants";
 import { getAcosColor } from "@/lib/acos-utils";
+import { CampaignCardProps } from "./CampaignCard/types";
 
-interface CampaignCardProps {
-  campaign: CampaignData;
-}
-
+/**
+ * CampaignCard component displays detailed information and performance metrics for a single campaign.
+ * It highlights key issues and provides recommendations based on predefined thresholds.
+ *
+ * @param {CampaignCardProps} { campaign } - The campaign data to display.
+ */
 export default function CampaignCard({ campaign }: CampaignCardProps) {
   const hasData =
     campaign.spend !== undefined &&

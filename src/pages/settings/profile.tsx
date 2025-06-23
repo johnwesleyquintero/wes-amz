@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ApiError, AuthenticationError, ServerError } from "@/lib/api-errors";
 
 interface Profile {
   id: string;
@@ -21,6 +22,10 @@ interface Profile {
   tier: "Free" | "Enterprise";
 }
 
+/**
+ * ProfileManagement component allows users to view and update their profile information.
+ * It fetches user data from Supabase and provides a form for editing username, full name, and avatar URL.
+ */
 const ProfileManagement = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -29,12 +34,24 @@ const ProfileManagement = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
   const { toast } = useToast();
 
+  /**
+   * Fetches the user's profile data from Supabase.
+   */
   const getProfile = useCallback(async () => {
     try {
       setLoading(true);
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw new AuthenticationError(
+          "Failed to get user session.",
+          userError.status,
+          userError,
+        );
+      }
 
       if (user) {
         const { data, error, status } = await supabase
@@ -44,7 +61,20 @@ const ProfileManagement = () => {
           .single();
 
         if (error && status !== 406) {
-          throw error;
+          // 406 means no data found, which is okay if profile doesn't exist yet
+          // Safely access status if it exists, otherwise default to 500
+          const statusCode =
+            error &&
+            typeof error === "object" &&
+            "status" in error &&
+            typeof error.status === "number"
+              ? error.status
+              : 500;
+          throw new ServerError(
+            "Failed to fetch profile data.",
+            statusCode,
+            error,
+          );
         }
 
         if (data) {
@@ -55,11 +85,18 @@ const ProfileManagement = () => {
         }
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError(
+              "An unexpected error occurred.",
+              undefined,
+              undefined,
+              error,
+            );
       toast({
-        title: "Error fetching profile",
-        description: errorMessage,
+        title: `Error fetching profile: ${apiError.errorType || "Unknown"}`,
+        description: apiError.message,
         variant: "destructive",
       });
     } finally {
@@ -71,6 +108,11 @@ const ProfileManagement = () => {
     getProfile();
   }, [getProfile]);
 
+  /**
+   * Handles the submission of the profile update form.
+   * Updates the user's profile data in Supabase.
+   * @param event - The form submission event.
+   */
   async function updateProfile(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
@@ -78,7 +120,24 @@ const ProfileManagement = () => {
     try {
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      if (userError) {
+        // Safely access status if it exists, otherwise default to 401
+        const statusCode =
+          userError &&
+          typeof userError === "object" &&
+          "status" in userError &&
+          typeof userError.status === "number"
+            ? userError.status
+            : 401;
+        throw new AuthenticationError(
+          "Failed to get user session for update.",
+          statusCode,
+          userError,
+        );
+      }
 
       if (user) {
         const updates = {
@@ -91,7 +150,17 @@ const ProfileManagement = () => {
 
         const { error } = await supabase.from("profiles").upsert(updates);
 
-        if (error) throw error;
+        if (error) {
+          // Safely access status if it exists, otherwise default to 500
+          const statusCode =
+            error &&
+            typeof error === "object" &&
+            "status" in error &&
+            typeof error.status === "number"
+              ? error.status
+              : 500;
+          throw new ServerError("Failed to update profile.", statusCode, error);
+        }
 
         toast({
           title: "Profile Updated",
@@ -100,11 +169,18 @@ const ProfileManagement = () => {
         getProfile(); // Re-fetch profile to ensure latest data
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError(
+              "An unexpected error occurred during update.",
+              undefined,
+              undefined,
+              error,
+            );
       toast({
-        title: "Error updating profile",
-        description: errorMessage,
+        title: `Error updating profile: ${apiError.errorType || "Unknown"}`,
+        description: apiError.message,
         variant: "destructive",
       });
     } finally {

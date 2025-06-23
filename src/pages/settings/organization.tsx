@@ -11,6 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ApiError,
+  AuthenticationError,
+  ServerError,
+  AuthorizationError,
+} from "@/lib/api-errors";
 
 interface Organization {
   id: string;
@@ -18,18 +24,41 @@ interface Organization {
   owner_id: string;
 }
 
+/**
+ * OrganizationSettings component allows Enterprise tier users to view and update their organization's details.
+ * It fetches organization data from Supabase and provides a form for editing the organization name.
+ */
 const OrganizationSettings = () => {
   const [loading, setLoading] = useState(true);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [organizationName, setOrganizationName] = useState("");
   const { toast } = useToast();
 
+  /**
+   * Fetches the organization details for the current user's Enterprise organization.
+   */
   const getOrganizationDetails = useCallback(async () => {
     try {
       setLoading(true);
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      if (userError) {
+        const statusCode =
+          userError &&
+          typeof userError === "object" &&
+          "status" in userError &&
+          typeof userError.status === "number"
+            ? userError.status
+            : 401;
+        throw new AuthenticationError(
+          "Failed to get user session.",
+          statusCode,
+          userError,
+        );
+      }
 
       if (user) {
         // First, get the user's profile to find their organization_id and tier
@@ -39,7 +68,20 @@ const OrganizationSettings = () => {
           .eq("id", user.id)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          const statusCode =
+            profileError &&
+            typeof profileError === "object" &&
+            "status" in profileError &&
+            typeof profileError.status === "number"
+              ? profileError.status
+              : 500;
+          throw new ServerError(
+            "Failed to fetch user profile for organization check.",
+            statusCode,
+            profileError,
+          );
+        }
 
         if (
           profileData &&
@@ -58,35 +100,50 @@ const OrganizationSettings = () => {
             .single();
 
           if (orgError && orgStatus !== 406) {
-            throw orgError;
+            const statusCode =
+              orgError &&
+              typeof orgError === "object" &&
+              "status" in orgError &&
+              typeof orgError.status === "number"
+                ? orgError.status
+                : 500;
+            throw new ServerError(
+              "Failed to fetch organization details.",
+              statusCode,
+              orgError,
+            );
           }
 
           if (orgData) {
             setOrganization(orgData);
             setOrganizationName(orgData.name);
           } else {
-            toast({
-              title: "Error",
-              description: "Organization not found or you do not have access.",
-              variant: "destructive",
-            });
+            // This case might indicate a data inconsistency or permission issue
+            throw new AuthorizationError(
+              "Organization not found or you do not have access.",
+              403,
+            );
           }
         } else {
-          toast({
-            title: "Access Denied",
-            description: "You are not part of an Enterprise organization.",
-            variant: "destructive",
-          });
-          // Optionally redirect non-enterprise users
-          // navigate('/');
+          throw new AuthorizationError(
+            "You are not part of an Enterprise organization.",
+            403,
+          );
         }
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError(
+              "An unexpected error occurred.",
+              undefined,
+              undefined,
+              error,
+            );
       toast({
-        title: "Error fetching organization details",
-        description: errorMessage,
+        title: `Error fetching organization details: ${apiError.errorType || "Unknown"}`,
+        description: apiError.message,
         variant: "destructive",
       });
     } finally {
@@ -98,6 +155,11 @@ const OrganizationSettings = () => {
     getOrganizationDetails();
   }, [getOrganizationDetails]);
 
+  /**
+   * Handles the submission of the organization update form.
+   * Updates the organization's name in Supabase.
+   * @param event - The form submission event.
+   */
   const updateOrganization = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
@@ -105,12 +167,7 @@ const OrganizationSettings = () => {
 
       try {
         if (!organization) {
-          toast({
-            title: "Error",
-            description: "No organization to update.",
-            variant: "destructive",
-          });
-          return;
+          throw new Error("No organization to update."); // Should not happen if fetched correctly
         }
 
         const updates = {
@@ -121,7 +178,20 @@ const OrganizationSettings = () => {
 
         const { error } = await supabase.from("organizations").upsert(updates);
 
-        if (error) throw error;
+        if (error) {
+          const statusCode =
+            error &&
+            typeof error === "object" &&
+            "status" in error &&
+            typeof error.status === "number"
+              ? error.status
+              : 500;
+          throw new ServerError(
+            "Failed to update organization.",
+            statusCode,
+            error,
+          );
+        }
 
         toast({
           title: "Organization Updated",
@@ -129,11 +199,18 @@ const OrganizationSettings = () => {
         });
         getOrganizationDetails(); // Re-fetch to ensure latest data
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
+        const apiError =
+          error instanceof ApiError
+            ? error
+            : new ApiError(
+                "An unexpected error occurred during update.",
+                undefined,
+                undefined,
+                error,
+              );
         toast({
-          title: "Error updating organization",
-          description: errorMessage,
+          title: `Error updating organization: ${apiError.errorType || "Unknown"}`,
+          description: apiError.message,
           variant: "destructive",
         });
       } finally {
@@ -152,6 +229,8 @@ const OrganizationSettings = () => {
   }
 
   if (!organization) {
+    // This case is now handled by the error boundary or the catch block
+    // but keeping a basic render for clarity if state is somehow null
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
         <Card className="w-full max-w-md">

@@ -7,54 +7,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { mainNavigation, secondaryNavigation } from "@/lib/navigation";
-
-interface NavigationItem {
-  name: string;
-  href?: string;
-  children?: NavigationItem[];
-}
-
-const findPathInNavigation = (
-  path: string,
-  navigation: NavigationItem[],
-  currentBreadcrumbs: { name: string; href: string }[] = [],
-): { name: string; href: string }[] | null => {
-  for (const item of navigation) {
-    const newBreadcrumbs = [
-      ...currentBreadcrumbs,
-      { name: item.name, href: item.href || "#" },
-    ];
-
-    if (item.href && path.startsWith(item.href)) {
-      // If it's a direct match or a parent of the current path
-      if (path === item.href) {
-        return newBreadcrumbs;
-      }
-      // If it's a parent, continue searching in children
-      if (item.children) {
-        const childPath = findPathInNavigation(
-          path,
-          item.children,
-          newBreadcrumbs,
-        );
-        if (childPath) {
-          return childPath;
-        }
-      }
-    } else if (item.children) {
-      const childPath = findPathInNavigation(
-        path,
-        item.children,
-        newBreadcrumbs,
-      );
-      if (childPath) {
-        return childPath;
-      }
-    }
-  }
-  return null;
-};
+import { authenticatedAppRoutes } from "@/lib/routes.tsx";
 
 const Breadcrumb: React.FC = () => {
   const location = useLocation();
@@ -69,36 +22,24 @@ const Breadcrumb: React.FC = () => {
     const segment = pathnames[i];
     currentPath += `/${segment}`;
 
-    // Try to find the segment name from mainNavigation or secondaryNavigation
-    let foundName = segment
-      .replace(/-/g, " ")
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    // Find the route configuration for the current path segment
+    const routeConfig = authenticatedAppRoutes.find(
+      (route) =>
+        `/app/${route.path}` === currentPath ||
+        `/dashboard/${route.path}` === currentPath,
+    );
 
-    // Check main navigation
-    const mainNavPath = findPathInNavigation(currentPath, mainNavigation);
-    if (mainNavPath) {
-      foundName = mainNavPath[mainNavPath.length - 1].name;
-    } else {
-      // Check secondary navigation if main navigation doesn't provide a direct match
-      for (const key in secondaryNavigation) {
-        if (currentPath.startsWith(key)) {
-          const secondaryNavItems =
-            secondaryNavigation[key as keyof typeof secondaryNavigation]
-              .navigation;
-          const secondaryNavPath = findPathInNavigation(
-            currentPath,
-            secondaryNavItems,
-          );
-          if (secondaryNavPath) {
-            foundName = secondaryNavPath[secondaryNavPath.length - 1].name;
-            break;
-          }
-        }
-      }
-    }
-    breadcrumbs.push({ name: foundName, href: currentPath });
+    // Use the breadcrumbName from the route config if available, otherwise
+    // format the segment (e.g., "acos-calculator" becomes "Acos Calculator")
+    const breadcrumbName =
+      routeConfig?.breadcrumbName ||
+      segment
+        .replace(/-/g, " ")
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+    breadcrumbs.push({ name: breadcrumbName, href: currentPath });
   }
 
   return (
@@ -123,4 +64,4 @@ const Breadcrumb: React.FC = () => {
   );
 };
 
-export default Breadcrumb;
+export { Breadcrumb };

@@ -117,14 +117,14 @@ export const highConvertingLandingData: HighConvertingLandingData = {
     ],
   },
   customerCaseStudy: {
-    headline: "How [Seller's Brand Name] Increased Their Revenue by 40% in 3 Months.",
+    headline: "How ScaleSmart Increased Their Revenue by 40% in 3 Months.",
     visual: "/images/customer-logo.svg", // Placeholder for customer logo/photo
     quote:
-      "\"Alerion transformed our Amazon business. We saw incredible growth and efficiency gains almost immediately.\"",
+      '"Alerion transformed our Amazon business. We saw incredible growth and efficiency gains almost immediately."',
     results: [
-      "✅ +40% increase in total sales",
-      "✅ From 35% to 18% ACoS",
-      "✅ Saved 10+ hours per week on reporting",
+      "<Icon: Check> +40% increase in total sales",
+      "<Icon: Check> From 35% to 18% ACoS",
+      "<Icon: Check> Saved 10+ hours per week on reporting",
     ],
   },
   finalCta: {

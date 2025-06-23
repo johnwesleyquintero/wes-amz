@@ -17,7 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-import { useSidebar } from "@/hooks/use-sidebar";
+import { useSidebar } from "@/context/sidebar-context";
 
 interface NavigationItem {
   name: string;

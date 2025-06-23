@@ -4,7 +4,7 @@ import { Bell, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ModeToggle } from "@/components/theme/mode-toggle";
-import Breadcrumb from "./Breadcrumb";
+import { Breadcrumb } from "./Breadcrumb";
 
 const TopBar = () => {
   const isMobile = useIsMobile();

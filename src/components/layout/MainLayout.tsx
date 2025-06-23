@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/hooks/use-sidebar";
+import { useSidebar } from "@/context/sidebar-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileSidebar from "./MobileSidebar";
 

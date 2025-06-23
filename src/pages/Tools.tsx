@@ -29,7 +29,11 @@ export default function AmazonSellerTools() {
       <div className="flex h-full">
         <div className="flex-1 overflow-y-auto p-6">
           <ErrorBoundary>
-            <Suspense fallback={<LoadingSkeleton count={5} height="h-8" className="w-3/4" />}>
+            <Suspense
+              fallback={
+                <LoadingSkeleton count={5} height="h-8" className="w-3/4" />
+              }
+            >
               <Outlet />
             </Suspense>
           </ErrorBoundary>

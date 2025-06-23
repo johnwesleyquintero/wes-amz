@@ -11,7 +11,11 @@ export const siteConfig = {
     email: "johnwesleyquintero@gmail.com",
   },
   env: {
-    VITE_REDIS_URL: import.meta.env.VITE_REDIS_URL || "redis://default:jsMU2rG7qIKR8KJTOyi3SDClPnRzvmE@redis-14221.c270.us-east-1-3.ec2.redns.redis-cloud.com:14221",
-    VITE_DATABASE_URL: import.meta.env.VITE_DATABASE_URL || "postgresql://WesData_owner:npg_nZOIul1i3kmc@ep-rough-sky-a4kbpgs5-pooler.us-east-1.aws.neon.tech/WesData?sslmode=require",
+    VITE_REDIS_URL:
+      import.meta.env.VITE_REDIS_URL ||
+      "redis://default:jsMU2rG7qIKR8KJTOyi3SDClPnRzvmE@redis-14221.c270.us-east-1-3.ec2.redns.redis-cloud.com:14221",
+    VITE_DATABASE_URL:
+      import.meta.env.VITE_DATABASE_URL ||
+      "postgresql://WesData_owner:npg_nZOIul1i3kmc@ep-rough-sky-a4kbpgs5-pooler.us-east-1.aws.neon.tech/WesData?sslmode=require",
   },
 };

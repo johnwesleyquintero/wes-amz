@@ -1,4 +1,40 @@
 <svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="800" height="450" fill="#E0E0E0"/>
-<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#888888">App Dashboard Screenshot Placeholder</text>
+  <rect width="800" height="450" fill="#F0F2F5"/>
+  <rect x="50" y="50" width="700" height="350" rx="10" fill="#FFFFFF"/>
+
+  <!-- Sidebar/Navigation -->
+  <rect x="70" y="70" width="150" height="20" rx="5" fill="#E2E8F0"/>
+  <rect x="70" y="100" width="100" height="10" rx="3" fill="#E2E8F0"/>
+  <rect x="70" y="120" width="120" height="10" rx="3" fill="#E2E8F0"/>
+  <circle cx="100" cy="250" r="30" fill="#CBD5E0"/>
+  <rect x="140" y="240" width="60" height="10" rx="3" fill="#CBD5E0"/>
+  <rect x="140" y="260" width="80" height="10" rx="3" fill="#CBD5E0"/>
+
+  <!-- Main Dashboard Area -->
+  <rect x="250" y="70" width="480" height="200" rx="5" fill="#F8FAFC"/>
+  <!-- Graph/Chart Placeholder -->
+  <polyline points="270,190 320,140 370,170 420,120 470,150 520,100 570,130 620,90 670,110 710,80" 
+            fill="none" stroke="#4299E1" stroke-width="3"/>
+  <circle cx="270" cy="190" r="5" fill="#4299E1"/>
+  <circle cx="320" cy="140" r="5" fill="#4299E1"/>
+  <circle cx="370" cy="170" r="5" fill="#4299E1"/>
+  <circle cx="420" cy="120" r="5" fill="#4299E1"/>
+  <circle cx="470" cy="150" r="5" fill="#4299E1"/>
+  <circle cx="520" cy="100" r="5" fill="#4299E1"/>
+  <circle cx="570" cy="130" r="5" fill="#4299E1"/>
+  <circle cx="620" cy="90" r="5" fill="#4299E1"/>
+  <circle cx="670" cy="110" r="5" fill="#4299E1"/>
+  <circle cx="710" cy="80" r="5" fill="#4299E1"/>
+
+  <!-- Key Metrics/Cards -->
+  <rect x="250" y="280" width="230" height="120" rx="5" fill="#F8FAFC"/>
+  <text x="365" y="310" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Total Sales</text>
+  <text x="365" y="350" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#4299E1">$12,345</text>
+
+  <rect x="500" y="280" width="230" height="120" rx="5" fill="#F8FAFC"/>
+  <text x="615" y="310" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Ad Spend</text>
+  <text x="615" y="350" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#F6AD55">$876</text>
+
+  <!-- Call to Action/Headline -->
+  <text x="400" y="425" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2D3748">Unlock Your Amazon Advertising Potential</text>
 </svg>

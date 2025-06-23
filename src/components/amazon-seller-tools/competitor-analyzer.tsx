@@ -37,6 +37,12 @@ import {
   parseAndValidateCsv,
   ProcessedRow,
 } from "@/lib/csv-utils";
+import {
+  ApiError,
+  ClientError,
+  ServerError,
+  NetworkError,
+} from "@/lib/api-errors";
 
 // Constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -145,7 +151,8 @@ export default function CompetitorAnalyzer() {
         const { data, error } = await parseAndValidateCsv(file);
 
         if (error) {
-          throw new Error(error);
+          // Assuming validation errors from parseAndValidateCsv are client errors
+          throw new ClientError(`CSV validation failed: ${error}`, 400, error);
         }
 
         // Data is already processed by parseAndValidateCsv
@@ -161,11 +168,17 @@ export default function CompetitorAnalyzer() {
           variant: "default",
         });
       } catch (error) {
+        const apiError =
+          error instanceof ApiError
+            ? error
+            : new ClientError(
+                `Failed to process ${type} CSV (${file.name})`,
+                400,
+                error,
+              );
         toast({
-          title: "Error",
-          description: `Failed to process ${type} CSV (${file.name}): ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
+          title: `File Upload Error: ${apiError.errorType || "Unknown"}`,
+          description: apiError.message,
           variant: "destructive",
         });
       } finally {
@@ -232,7 +245,22 @@ export default function CompetitorAnalyzer() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch competitor data");
+        const errorBody = await response.json().catch(() => null); // Attempt to parse error body
+        const errorMessage =
+          errorBody?.message || `Request failed with status ${response.status}`;
+
+        if (response.status >= 400 && response.status < 500) {
+          throw new ClientError(errorMessage, response.status, errorBody);
+        } else if (response.status >= 500) {
+          throw new ServerError(errorMessage, response.status, errorBody);
+        } else {
+          throw new ApiError(
+            errorMessage,
+            response.status,
+            "UNKNOWN_API_ERROR",
+            errorBody,
+          );
+        }
       }
 
       const data = (await response.json()) as {
@@ -242,7 +270,11 @@ export default function CompetitorAnalyzer() {
 
       // Ensure data has the expected structure
       if (!data || !data.competitors || !data.metrics) {
-        throw new Error("Invalid response format from server");
+        throw new ServerError(
+          "Invalid response format from server",
+          response.status,
+          data,
+        );
       }
 
       const formattedData = data.competitors.map((competitor, index) => {
@@ -267,14 +299,21 @@ export default function CompetitorAnalyzer() {
       if (formattedData.length > 0) {
         setChartData(formattedData);
       } else {
-        throw new Error("No data available to render");
+        throw new ClientError(
+          "No data available to render based on the provided input.",
+          400,
+        );
       }
 
       setIsAnalyzing(false);
     } catch (error) {
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new NetworkError("A network error occurred.", error);
       toast({
-        title: "Error",
-        description: error.message,
+        title: `Analysis Error: ${apiError.errorType || "Unknown"}`,
+        description: apiError.message,
         variant: "destructive",
       });
       setChartData(null);
