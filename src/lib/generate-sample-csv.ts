@@ -6,7 +6,8 @@ type SampleDataType =
   | "ppc"
   | "keyword-dedup"
   | "acos"
-  | "description";
+  | "description"
+  | "sales-estimator";
 
 interface SampleData {
   productName: string;
@@ -714,6 +715,28 @@ export function generateSampleCsv(dataType: SampleDataType): string {
           asin: "B015ABCDEF5",
           description:
             "Achieve flawless makeup application with our Makeup Brush Set. This set includes a variety of brushes for all your makeup needs.",
+        },
+      ];
+      break;
+    case "sales-estimator":
+      data = [
+        {
+          productName: "Wireless Earbuds",
+          category: "Electronics",
+          price: 39.99,
+          competition: "High",
+        },
+        {
+          productName: "Phone Case",
+          category: "Phone Accessories",
+          price: 19.99,
+          competition: "Medium",
+        },
+        {
+          productName: "Running Shoes",
+          category: "Apparel",
+          price: 79.99,
+          competition: "Low",
         },
       ];
       break;

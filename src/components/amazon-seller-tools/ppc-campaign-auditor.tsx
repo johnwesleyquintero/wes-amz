@@ -4,7 +4,6 @@ import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Download, Info } from "lucide-react";
 import Papa from "papaparse";
 import CampaignCard from "./CampaignCard";

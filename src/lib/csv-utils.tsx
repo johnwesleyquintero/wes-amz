@@ -1,6 +1,5 @@
 // lib/csv-utils.tsx
 import Papa from "papaparse";
-import { toast } from "@/hooks/use-toast";
 
 export interface CsvRow {
   asin: string;
@@ -52,11 +51,11 @@ export const processCsvData = (csvData: CsvRow[]): ProcessedRow[] => {
   }));
 };
 
-export const parseAndValidateCsv = async <T extends CsvRow>(
+export const parseAndValidateCsv = async (
   file: File,
-): Promise<{ data: T[]; error: string | null }> => {
+): Promise<{ data: ProcessedRow[]; error: string | null }> => {
   return new Promise((resolve) => {
-    Papa.parse<T>(file, {
+    Papa.parse<CsvRow>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
@@ -82,7 +81,7 @@ export const parseAndValidateCsv = async <T extends CsvRow>(
         }
 
         const processedData = processCsvData(results.data);
-        resolve({ data: processedData as T[], error: null });
+        resolve({ data: processedData, error: null });
       },
       error: (error) => {
         resolve({ data: [], error: `Error parsing CSV: ${error.message}` });

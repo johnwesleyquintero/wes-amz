@@ -1,13 +1,5 @@
-import React, { createContext, useState, ReactNode } from "react";
-
-interface SidebarContextType {
-  isCollapsed: boolean;
-  toggleSidebar: () => void;
-}
-
-export const SidebarContext = createContext<SidebarContextType | undefined>(
-  undefined,
-); // Export SidebarContext
+import React, { useState, ReactNode } from "react";
+import { SidebarContext } from "./sidebar-context";
 
 export const SidebarProvider = ({ children }: { children: ReactNode }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -22,4 +14,3 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
     </SidebarContext.Provider>
   );
 };
-// Removed useSidebar hook as it's moved to src/hooks/use-sidebar.tsx

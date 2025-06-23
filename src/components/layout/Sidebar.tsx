@@ -16,7 +16,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { LucideIcon } from "lucide-react";
 
 import { useSidebar } from "@/hooks/use-sidebar";
 
@@ -102,25 +101,32 @@ const Sidebar: React.FC = React.memo(() => {
     [location.pathname, isCollapsed],
   );
 
+  const getSidebarWidthClasses = useCallback(
+    () => cn(isCollapsed ? "w-20" : "w-64"),
+    [isCollapsed],
+  );
+
+  const getAlignmentClasses = useCallback(
+    () => cn(isCollapsed ? "justify-center" : "justify-between"),
+    [isCollapsed],
+  );
+
   return (
     <aside
       className={cn(
         "border-r border-border bg-background dark:bg-sidebar hidden lg:flex flex-col h-screen transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-20" : "w-64",
+        getSidebarWidthClasses(),
       )}
     >
       <div
         className={cn(
           "p-4 border-b border-border flex items-center",
-          isCollapsed ? "justify-center" : "justify-between",
+          getAlignmentClasses(),
         )}
       >
         <Link
           to="/"
-          className={cn(
-            "flex items-center gap-2",
-            isCollapsed ? "justify-center" : "justify-between",
-          )}
+          className={cn("flex items-center gap-2", getAlignmentClasses())}
         >
           <img src="/logo.svg" className="h-8 w-8" alt="Alerion Logo" />
           {!isCollapsed && <span className="text-xl font-bold">Alerion</span>}
@@ -143,7 +149,7 @@ const Sidebar: React.FC = React.memo(() => {
       <div
         className={cn(
           "p-4 border-t border-border flex items-center",
-          isCollapsed ? "justify-center" : "justify-between",
+          getAlignmentClasses(),
         )}
       >
         <TooltipProvider>

@@ -11,7 +11,7 @@ import React, {
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
-import { SidebarProvider } from "./context/sidebar-context";
+import { SidebarProvider } from "./context/sidebar-context.tsx";
 import MainLayout from "./components/layout/MainLayout";
 
 // Define types for route configuration

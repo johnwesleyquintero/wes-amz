@@ -4,7 +4,6 @@ import { Bell, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ModeToggle } from "@/components/theme/mode-toggle";
-import MobileSidebar from "./MobileSidebar";
 import Breadcrumb from "./Breadcrumb";
 
 const TopBar = () => {
@@ -15,7 +14,6 @@ const TopBar = () => {
   return (
     <header className="border-b border-border bg-background dark:bg-sidebar h-16 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
-        {isMobile && <MobileSidebar />}
         {/* Placeholder for Breadcrumb and Project Selector */}
         <div className="flex items-center gap-2">
           <Breadcrumb />

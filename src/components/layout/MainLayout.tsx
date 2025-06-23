@@ -16,6 +16,7 @@ const MainLayout: React.FC = () => {
       {!isMobile && <Sidebar />}
       <div className={cn("flex flex-col flex-1 overflow-hidden")}>
         <TopBar />
+        {isMobile && <MobileSidebar />}
         <main
           className={cn(
             "flex-1 overflow-y-auto p-6 transition-all duration-300 ease-in-out",
@@ -25,7 +26,6 @@ const MainLayout: React.FC = () => {
           <Outlet />
         </main>
       </div>
-      {isMobile && <MobileSidebar />}
     </div>
   );
 };

@@ -138,7 +138,7 @@ const TeamManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [organizationId, setLoading, toast, supabase]);
+  }, [setLoading, toast]);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -223,7 +223,6 @@ const TeamManagement = () => {
       setLoading,
       toast,
       fetchTeamMembers,
-      supabase,
     ],
   );
 
@@ -259,7 +258,7 @@ const TeamManagement = () => {
         setLoading(false);
       }
     },
-    [organizationId, setLoading, toast, fetchTeamMembers, supabase],
+    [setLoading, toast, fetchTeamMembers, organizationId],
   );
 
   if (loading) {

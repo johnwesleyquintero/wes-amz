@@ -212,13 +212,17 @@ export default function CsvUploader<T extends GenericCsvRow>({
           <p>Drag 'n' drop some files here, or click to select files</p>
         )}
         {(isLoading || isParsing) && (
-          <div className="w-full mt-4">
+          <div aria-live="polite" aria-atomic="true" className="w-full mt-4">
             <Progress value={progress} className="h-2" />
             <p className="text-sm text-gray-500 mt-1">Parsing: {progress}%</p>
           </div>
         )}
         {parsingError && (
-          <div className="flex items-center gap-2 rounded-lg bg-red-100 p-3 text-red-800 dark:bg-red-900/30 dark:text-red-400 mt-4">
+          <div
+            aria-live="assertive"
+            aria-atomic="true"
+            className="flex items-center gap-2 rounded-lg bg-red-100 p-3 text-red-800 dark:bg-red-900/30 dark:text-red-400 mt-4"
+          >
             <AlertCircle className="h-5 w-5" />
             <span>{parsingError}</span>
           </div>

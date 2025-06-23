@@ -87,10 +87,11 @@ async function runCommand(command, name) {
   try {
     const { stderr } = await execPromise(command);
 
-    // Only log stderr if it contains warnings, stdout is not an error on success
+    // If stderr contains output, treat it as a warning/error and return false
     if (stderr.trim()) {
       console.error(chalk.yellow(`⚠ ${name} warnings:`));
       console.error(formatErrorOutput(stderr));
+      return false; // Treat warnings as failures
     }
 
     console.log(chalk.green(`✓ ${name} passed`));

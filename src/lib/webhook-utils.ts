@@ -9,7 +9,7 @@ export const registerWebhook = (url: string, eventType: string) => {
   return { success: true, id: "webhook-123" };
 };
 
-export const sendWebhookPayload = (webhookId: string, payload: unknown) => {
+export const sendWebhookPayload = (webhookId: string, _payload: unknown) => {
   console.log(`Sending payload for webhook ID: ${webhookId}`);
   // Placeholder for sending a webhook payload
   return true;

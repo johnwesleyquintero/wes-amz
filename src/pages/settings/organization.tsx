@@ -140,7 +140,7 @@ const OrganizationSettings = () => {
         setLoading(false);
       }
     },
-    [organization, organizationName, setLoading, toast],
+    [organization, organizationName, setLoading, toast, getOrganizationDetails],
   );
 
   if (loading) {

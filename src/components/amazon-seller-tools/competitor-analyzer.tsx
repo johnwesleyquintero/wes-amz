@@ -32,19 +32,14 @@ import { Info, FileText } from "lucide-react";
 import { useIsMobile } from "../../hooks/use-mobile";
 import { ChartDataPoint } from "@/lib/amazon-types";
 import { Progress } from "../ui/progress";
-import { cn } from "@/lib/utils";
 import {
-  CsvRow,
-  processCsvData,
+  // CsvRow,
   parseAndValidateCsv,
   ProcessedRow,
 } from "@/lib/csv-utils";
 
 // Constants
-const COMPETITOR_ANALYSIS_ENDPOINT = "/api/amazon/competitor-analysis";
-const COMPETITOR_ANALYSES_KEY = "competitorAnalyses";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_SAVED_ANALYSES = 10;
 
 type MetricType =
   | "price"
@@ -76,11 +71,6 @@ const getChartColor = (metric: MetricType): string => {
   }
 };
 
-interface ApiResponse {
-  competitors: string[];
-  metrics: Record<MetricType, number[]>;
-}
-
 export default function CompetitorAnalyzer() {
   const { toast } = useToast();
   const [asin, setAsin] = useState("");
@@ -93,8 +83,8 @@ export default function CompetitorAnalyzer() {
   const [sellerData, setSellerData] = useState<ProcessedRow | null>(null);
   const [competitorData, setCompetitorData] = useState<ProcessedRow[]>([]);
   const [selectedMetrics, setSelectedMetrics] = useState<MetricType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (chartData) {
@@ -151,17 +141,19 @@ export default function CompetitorAnalyzer() {
 
       setIsLoading(true);
       try {
-        const { data, error } = await parseAndValidateCsv<CsvRow>(file);
+        // parseAndValidateCsv already returns ProcessedRow[] and handles validation
+        const { data, error } = await parseAndValidateCsv(file);
 
         if (error) {
           throw new Error(error);
         }
 
-        const processedData = processCsvData(data);
+        // Data is already processed by parseAndValidateCsv
         if (type === "seller") {
-          setData(processedData[0]);
+          // Assuming seller data CSV contains only one row for the seller.
+          setData(data.length > 0 ? data[0] : null);
         } else {
-          setData(processedData);
+          setData(data);
         }
         toast({
           title: "Success",
@@ -243,12 +235,10 @@ export default function CompetitorAnalyzer() {
         throw new Error("Failed to fetch competitor data");
       }
 
-      interface ApiResponse {
+      const data = (await response.json()) as {
         competitors: string[];
         metrics: Record<MetricType, number[]>;
-      }
-
-      const data = (await response.json()) as ApiResponse;
+      };
 
       // Ensure data has the expected structure
       if (!data || !data.competitors || !data.metrics) {
@@ -331,6 +321,7 @@ export default function CompetitorAnalyzer() {
                 accept=".csv"
                 onChange={(e) => handleFileUpload(e, setSellerData, "seller")}
                 className="cursor-pointer"
+                disabled={isLoading}
               />
               <FileText className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
@@ -362,6 +353,7 @@ export default function CompetitorAnalyzer() {
                   handleFileUpload(e, setCompetitorData, "competitor")
                 }
                 className="cursor-pointer"
+                disabled={isLoading}
               />
               <FileText className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>

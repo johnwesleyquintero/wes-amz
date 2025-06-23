@@ -5,7 +5,13 @@ import { Download } from "lucide-react";
 import { downloadSampleCsv } from "@/lib/generate-sample-csv";
 import { useToast } from "@/hooks/use-toast";
 
-type SampleDataType = "fba" | "keyword" | "ppc" | "keyword-dedup" | "acos";
+type SampleDataType =
+  | "fba"
+  | "keyword"
+  | "ppc"
+  | "keyword-dedup"
+  | "acos"
+  | "sales-estimator";
 
 interface SampleCsvButtonProps {
   dataType: SampleDataType;

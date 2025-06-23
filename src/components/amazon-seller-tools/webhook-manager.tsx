@@ -69,7 +69,8 @@ const WebhookManager: React.FC = () => {
       } else {
         alert("Failed to send payload (placeholder)");
       }
-    } catch (_e) {
+    } catch {
+      // Removed unused 'error' variable
       alert("Invalid JSON payload");
     }
   };

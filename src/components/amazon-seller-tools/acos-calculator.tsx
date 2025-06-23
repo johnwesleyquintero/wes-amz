@@ -3,34 +3,17 @@
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
-import { ChartContainer } from "../ui/chart";
 import { Input } from "../ui/input";
-import { Progress } from "../ui/progress";
 import {
-  acosRatingGuide,
   calculateMetrics,
-  chartConfig,
   getAcosColor,
   getAcosRating,
   type CampaignData,
 } from "@/lib/acos-utils";
 import { AlertCircle, Calculator, Download, Info } from "lucide-react";
 import Papa from "papaparse";
-import type React from "react";
 import { useState } from "react";
 import CsvUploader, { GenericCsvRow } from "./CsvUploader";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-} from "recharts";
 import { useToast } from "@/hooks/use-toast";
 import { ACOS_EXCELLENT_THRESHOLD, ACOS_GOOD_THRESHOLD } from "@/lib/constants";
 
@@ -44,11 +27,8 @@ interface ManualCampaignInput {
 export default function AcosCalculator() {
   const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMetric, setSelectedMetric] = useState<
-    "acos" | "roas" | "ctr" | "cpc"
-  >("acos");
+  const [isLoading, setIsLoading] = useState(false);
   const [manualCampaign, setManualCampaign] = useState<ManualCampaignInput>({
     campaign: "",
     adSpend: "",
@@ -183,6 +163,7 @@ export default function AcosCalculator() {
   };
 
   const handleUploadSuccess = (data: GenericCsvRow[]) => {
+    setIsLoading(true);
     try {
       const processedData: CampaignData[] = data
         .filter(
@@ -238,6 +219,8 @@ export default function AcosCalculator() {
         }. Please ensure your CSV has the correct format`,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -4,43 +4,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface ContentItem {
-  date: string;
-  text: string;
-}
-
-interface LandingContent {
-  welcomeTitle: string;
-  welcomeText: string;
-  announcementsTitle: string;
-  announcements: ContentItem[];
-  featureUpdatesTitle: string;
-  featureUpdates: ContentItem[];
-  navigationTitle: string;
-  navigationText: string;
-}
-
-const today = new Date().toLocaleDateString();
-
-const landingContent: LandingContent = {
-  welcomeTitle: "Welcome to the Dashboard!",
-  welcomeText:
-    "Here you can find all the tools you need to manage your Amazon business.",
-  announcementsTitle: "Announcements",
-  announcements: [
-    { date: today, text: "New feature: PPC Campaign Auditor!" },
-    { date: today, text: "Improved Sales Trend Analyzer." },
-  ],
-  featureUpdatesTitle: "Feature Updates",
-  featureUpdates: [
-    { date: today, text: "Added support for multiple Amazon marketplaces." },
-    { date: today, text: "Enhanced Keyword Analyzer with more data sources." },
-  ],
-  navigationTitle: "Navigation",
-  navigationText:
-    "Use the sidebar to navigate to different tools and features.",
-};
+import { landingContent, ContentItem } from "../data/landingContent";
 
 const Landing = () => {
   return (
@@ -56,14 +20,11 @@ const Landing = () => {
         </CardHeader>
         <CardContent>
           <ul className="list-disc pl-5 mb-4">
-            {landingContent.announcements.map(
-              (item: ContentItem, index: number) => (
-                // Note: Using index as key is acceptable for static lists that don't change order or get filtered/added/removed
-                <li key={index}>
-                  [{item.date}] - {item.text}
-                </li>
-              ),
-            )}
+            {landingContent.announcements.map((item: ContentItem) => (
+              <li key={item.id}>
+                [{item.date}] - {item.text}
+              </li>
+            ))}
           </ul>
         </CardContent>
       </Card>
@@ -74,14 +35,11 @@ const Landing = () => {
         </CardHeader>
         <CardContent>
           <ul className="list-disc pl-5 mb-4">
-            {landingContent.featureUpdates.map(
-              (item: ContentItem, index: number) => (
-                // Note: Using index as key is acceptable for static lists that don't change order or get filtered/added/removed
-                <li key={index}>
-                  [{item.date}] - {item.text}
-                </li>
-              ),
-            )}
+            {landingContent.featureUpdates.map((item: ContentItem) => (
+              <li key={item.id}>
+                [{item.date}] - {item.text}
+              </li>
+            ))}
           </ul>
         </CardContent>
       </Card>

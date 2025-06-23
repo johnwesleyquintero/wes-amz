@@ -1,12 +1,20 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"; // Import table components
 import {
   Upload,
   FileText,
@@ -18,6 +26,7 @@ import {
 import Papa from "papaparse";
 import SampleCsvButton from "./sample-csv-button";
 import { useToast } from "@/hooks/use-toast";
+import { FixedSizeList as List } from "react-window"; // Import FixedSizeList
 
 type ProductData = {
   product: string;
@@ -47,135 +56,141 @@ export default function SalesEstimator() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const estimateSales = (
-    category: string,
-    price: number,
-    competition: CompetitionLevel,
-  ): {
-    estimatedSales: number;
-    estimatedRevenue: number;
-    confidence: "Low" | "Medium" | "High";
-  } => {
-    let baseSales = 0;
+  const estimateSales = useCallback(
+    (
+      category: string,
+      price: number,
+      competition: CompetitionLevel,
+    ): {
+      estimatedSales: number;
+      estimatedRevenue: number;
+      confidence: "Low" | "Medium" | "High";
+    } => {
+      let baseSales = 0;
 
-    if (category === "Electronics") baseSales = 150;
-    else if (category === "Phone Accessories") baseSales = 200;
-    else baseSales = 100;
+      if (category === "Electronics") baseSales = 150;
+      else if (category === "Phone Accessories") baseSales = 200;
+      else baseSales = 100;
 
-    const priceFactor = price < 20 ? 1.5 : price < 50 ? 1.0 : 0.7;
-    const competitionFactor =
-      competition === "Low" ? 1.3 : competition === "Medium" ? 1.0 : 0.7;
+      const priceFactor = price < 20 ? 1.5 : price < 50 ? 1.0 : 0.7;
+      const competitionFactor =
+        competition === "Low" ? 1.3 : competition === "Medium" ? 1.0 : 0.7;
 
-    const estimatedSales = Math.round(
-      baseSales * priceFactor * competitionFactor,
-    );
-    const estimatedRevenue = estimatedSales * price;
+      const estimatedSales = Math.round(
+        baseSales * priceFactor * competitionFactor,
+      );
+      const estimatedRevenue = estimatedSales * price;
 
-    let confidence: "Low" | "Medium" | "High" = "Medium";
-    if (competition === "Low" && price < 30) confidence = "High";
-    else if (competition === "High" && price > 50) confidence = "Low";
+      let confidence: "Low" | "Medium" | "High" = "Medium";
+      if (competition === "Low" && price < 30) confidence = "High";
+      else if (competition === "High" && price > 50) confidence = "Low";
 
-    return { estimatedSales, estimatedRevenue, confidence };
-  };
+      return { estimatedSales, estimatedRevenue, confidence };
+    },
+    [],
+  );
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    setIsLoading(true);
-    setError(null);
+      setIsLoading(true);
+      setError(null);
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        try {
-          interface ProductDataCSV {
-            product: string;
-            category: string;
-            price: string;
-            competition: string;
-          }
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          try {
+            interface ProductDataCSV {
+              product: string;
+              category: string;
+              price: string;
+              competition: string;
+            }
 
-          const requiredColumns = [
-            "product",
-            "category",
-            "price",
-            "competition",
-          ];
-          const missingColumns = requiredColumns.filter((col) =>
-            results.meta.fields ? !results.meta.fields.includes(col) : true,
-          );
-          if (missingColumns.length > 0) {
-            throw new Error(
-              `Missing required columns: ${missingColumns.join(", ")}`,
+            const requiredColumns = [
+              "product",
+              "category",
+              "price",
+              "competition",
+            ];
+            const missingColumns = requiredColumns.filter((col) =>
+              results.meta.fields ? !results.meta.fields.includes(col) : true,
             );
-          }
-
-          const processedData: ProductData[] = results.data
-            .filter((row: unknown) => {
-              const productRow = row as ProductDataCSV;
-              return (
-                productRow.product &&
-                productRow.category &&
-                !isNaN(Number(productRow.price)) &&
-                COMPETITION_LEVELS.includes(
-                  productRow.competition as CompetitionLevel,
-                )
+            if (missingColumns.length > 0) {
+              throw new Error(
+                `Missing required columns: ${missingColumns.join(", ")}`,
               );
-            })
-            .map((row: unknown) => {
-              const productRow = row as ProductDataCSV;
-              const price = Number(productRow.price);
-              const competition = productRow.competition as CompetitionLevel;
-              const { estimatedSales, estimatedRevenue, confidence } =
-                estimateSales(productRow.category, price, competition);
+            }
 
-              return {
-                product: productRow.product,
-                category: productRow.category,
-                price,
-                competition,
-                estimatedSales,
-                estimatedRevenue,
-                confidence,
-              };
+            const processedData: ProductData[] = results.data
+              .filter((row: unknown) => {
+                const productRow = row as ProductDataCSV;
+                return (
+                  productRow.product &&
+                  productRow.category &&
+                  !isNaN(Number(productRow.price)) &&
+                  COMPETITION_LEVELS.includes(
+                    productRow.competition as CompetitionLevel,
+                  )
+                );
+              })
+              .map((row: unknown) => {
+                const productRow = row as ProductDataCSV;
+                const price = Number(productRow.price);
+                const competition = productRow.competition as CompetitionLevel;
+                const { estimatedSales, estimatedRevenue, confidence } =
+                  estimateSales(productRow.category, price, competition);
+
+                return {
+                  product: productRow.product,
+                  category: productRow.category,
+                  price,
+                  competition,
+                  estimatedSales,
+                  estimatedRevenue,
+                  confidence,
+                };
+              });
+
+            if (processedData.length === 0) {
+              throw new Error("No valid data found in CSV");
+            }
+
+            setProducts(processedData);
+            toast({
+              title: "CSV Processed",
+              description: `Loaded ${processedData.length} product data`,
+              variant: "default",
             });
-
-          if (processedData.length === 0) {
-            throw new Error("No valid data found in CSV");
+          } catch (error) {
+            setError(
+              error instanceof Error ? error.message : "An error occurred",
+            );
+            toast({
+              title: "Processing Failed",
+              description: error.message,
+              variant: "destructive",
+            });
           }
+          setIsLoading(false);
+        },
+        error: (error) => {
+          setError(error.message);
+          setIsLoading(false);
+        },
+      });
 
-          setProducts(processedData);
-          toast({
-            title: "CSV Processed",
-            description: `Loaded ${processedData.length} product data`,
-            variant: "default",
-          });
-        } catch (error) {
-          setError(
-            error instanceof Error ? error.message : "An error occurred",
-          );
-          toast({
-            title: "Processing Failed",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-        setIsLoading(false);
-      },
-      error: (error) => {
-        setError(error.message);
-        setIsLoading(false);
-      },
-    });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    },
+    [estimateSales, toast, setIsLoading, setError, setProducts],
+  );
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleManualEstimate = () => {
+  const handleManualEstimate = useCallback(() => {
     if (
       !manualProduct.product ||
       !manualProduct.category ||
@@ -218,7 +233,7 @@ export default function SalesEstimator() {
       confidence,
     };
 
-    setProducts([...products, newProduct]);
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
     setManualProduct({
       product: "",
       category: "",
@@ -231,9 +246,9 @@ export default function SalesEstimator() {
       description: "Product added successfully",
       variant: "default",
     });
-  };
+  }, [manualProduct, estimateSales, toast, setProducts, setError]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     if (products.length === 0) {
       setError("No data to export");
       toast({
@@ -268,9 +283,9 @@ export default function SalesEstimator() {
       description: "Sales estimates exported successfully",
       variant: "default",
     });
-  };
+  }, [products, toast, setError]);
 
-  const clearData = () => {
+  const clearData = useCallback(() => {
     setProducts([]);
     setError(null);
     if (fileInputRef.current) {
@@ -281,6 +296,58 @@ export default function SalesEstimator() {
       description: "Sales estimates data cleared",
       variant: "default",
     });
+  }, [setProducts, setError, fileInputRef, toast]);
+
+  // Row renderer for react-window
+  const Row = ({
+    index,
+    style,
+  }: {
+    index: number;
+    style: React.CSSProperties;
+  }) => {
+    const product = products[index];
+    return (
+      <TableRow key={index} style={style}>
+        <TableCell>{product.product}</TableCell>
+        <TableCell>{product.category}</TableCell>
+        <TableCell className="text-right">
+          ${product.price.toFixed(2)}
+        </TableCell>
+        <TableCell className="text-center">
+          <Badge
+            variant={
+              product.competition === "Low"
+                ? "default"
+                : product.competition === "Medium"
+                  ? "secondary"
+                  : "destructive"
+            }
+          >
+            {product.competition}
+          </Badge>
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          {product.estimatedSales.toLocaleString()} units
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          ${product.estimatedRevenue.toFixed(2)}
+        </TableCell>
+        <TableCell className="text-center">
+          <Badge
+            variant={
+              product.confidence === "High"
+                ? "default"
+                : product.confidence === "Medium"
+                  ? "secondary"
+                  : "outline"
+            }
+          >
+            {product.confidence}
+          </Badge>
+        </TableCell>
+      </TableRow>
+    );
   };
 
   return (
@@ -333,6 +400,10 @@ export default function SalesEstimator() {
                     ref={fileInputRef}
                   />
                 </label>
+                <SampleCsvButton
+                  dataType="sales-estimator"
+                  fileName="sales_estimator_data.csv"
+                />
                 {products.length > 0 && (
                   <Button
                     variant="outline"
@@ -441,7 +512,7 @@ export default function SalesEstimator() {
         </div>
       )}
 
-      {products.length > 0 && (
+      {products.length > 0 ? (
         <>
           <div className="flex justify-end">
             <Button variant="outline" size="sm" onClick={handleExport}>
@@ -452,76 +523,33 @@ export default function SalesEstimator() {
 
           <div className="rounded-lg border">
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-left text-sm font-medium">
-                      Product
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">
-                      Category
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
-                      Price
-                    </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">
-                      Competition
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="text-center">Competition</TableHead>
+                    <TableHead className="text-right">
                       Est. Monthly Sales
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
+                    </TableHead>
+                    <TableHead className="text-right">
                       Est. Monthly Revenue
-                    </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">
-                      Confidence
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map((product, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="px-4 py-3 text-sm">{product.product}</td>
-                      <td className="px-4 py-3 text-sm">{product.category}</td>
-                      <td className="px-4 py-3 text-right text-sm">
-                        ${product.price.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge
-                          variant={
-                            product.competition === "Low"
-                              ? "default"
-                              : product.competition === "Medium"
-                                ? "secondary"
-                                : "destructive"
-                          }
-                        >
-                          {product.competition}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium">
-                        {product.estimatedSales.toLocaleString()} units
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium">
-                        ${product.estimatedRevenue.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge
-                          variant={
-                            product.confidence === "High"
-                              ? "default"
-                              : product.confidence === "Medium"
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {product.confidence}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    </TableHead>
+                    <TableHead className="text-center">Confidence</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <List
+                    height={300} // Set a fixed height for the virtualized list
+                    itemCount={products.length}
+                    itemSize={40} // Approximate height of each row
+                    width="100%"
+                  >
+                    {Row}
+                  </List>
+                </TableBody>
+              </Table>
             </div>
           </div>
 
@@ -536,6 +564,17 @@ export default function SalesEstimator() {
             </p>
           </div>
         </>
+      ) : (
+        !isLoading &&
+        !error && (
+          <div className="text-center py-10 text-muted-foreground">
+            <p className="mb-2">No sales estimates to display.</p>
+            <p>
+              Upload a CSV file or enter product details manually to get
+              started.
+            </p>
+          </div>
+        )
       )}
     </div>
   );

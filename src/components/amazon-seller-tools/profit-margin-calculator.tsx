@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -141,208 +141,217 @@ export default function ProfitMarginCalculator() {
     }
   }, [results]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    setIsLoading(true);
-    const file = event.target.files?.[0];
-    if (!file) {
-      setIsLoading(false);
-      return;
-    }
-
-    Papa.parse<ProductData>(file, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        try {
-          // Validate required columns
-          const requiredColumns = ["product", "cost", "price", "fees"];
-          const missingColumns = requiredColumns.filter(
-            (col) => !result.meta.fields.includes(col),
-          );
-
-          if (missingColumns.length > 0) {
-            throw new Error(
-              `Missing required columns: ${missingColumns.join(", ")}`,
-            );
-          }
-
-          const processedData = result.data
-            .filter(
-              (item: ProductData) =>
-                item.product &&
-                !isNaN(Number(item.cost)) &&
-                !isNaN(Number(item.price)) &&
-                !isNaN(Number(item.fees)),
-            )
-            .map((item: ProductData) => ({
-              product: String(item.product),
-              cost: Number(item.cost),
-              price: Number(item.price),
-              fees: Number(item.fees),
-            }));
-
-          if (processedData.length === 0) {
-            throw new Error("No valid data found in CSV");
-          }
-
-          calculateResults(processedData);
-        } catch (err) {
-          setError(`Error processing CSV file: ${err.message}`);
-          toast({
-            title: "CSV Error",
-            description: `Error processing CSV file: ${err.message}`,
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      error: (error) => {
-        setError(`Error parsing CSV: ${error.message}`);
+  const calculateResults = useCallback(
+    (data: ProductData[]) => {
+      if (!data || data.length === 0) {
+        setError("No valid data to calculate");
         toast({
-          title: "CSV Error",
-          description: `Error parsing CSV: ${error.message}`,
+          title: "Calculation Error",
+          description: "No valid data to calculate",
           variant: "destructive",
         });
+        return;
+      }
+
+      const calculated = data.map((item) => {
+        const productScore = AmazonAlgorithms.calculateProductScore({
+          conversionRate: item.conversionRate || 15,
+          sessions: item.sessions || 300,
+          reviewRating: item.reviewRating || 4.5,
+          reviewCount: item.reviewCount || 42,
+          priceCompetitiveness: item.priceCompetitiveness || 0.92,
+          inventoryHealth: item.inventoryHealth || 0.8,
+          weight: item.weight || 1.2,
+          volume: item.volume || 0.05,
+          category: ProductCategory.STANDARD,
+        });
+
+        const adjustedPrice = AmazonAlgorithms.calculateOptimalPrice(
+          item.price,
+          item.competitorPrices || [item.price * 0.9, item.price * 1.1],
+          productScore / 100,
+        );
+
+        const profit = adjustedPrice - item.cost - item.fees;
+        const margin = (profit / item.price) * 100;
+        const roi = (profit / item.cost) * 100;
+        return {
+          ...item,
+          profit,
+          margin: parseFloat(margin.toFixed(2)),
+          roi: parseFloat(roi.toFixed(2)),
+        };
+      });
+
+      if (calculated.length === 0) {
+        setError("Failed to calculate results");
+        toast({
+          title: "Calculation Error",
+          description: "Failed to calculate results",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setResults(calculated);
+    },
+    [toast, setError, setResults],
+  );
+
+  const handleFileUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setError(null);
+      setIsLoading(true);
+      const file = event.target.files?.[0];
+      if (!file) {
         setIsLoading(false);
-      },
-    });
-  };
+        return;
+      }
 
-  const calculateResults = (data: ProductData[]) => {
-    if (!data || data.length === 0) {
-      setError("No valid data to calculate");
-      toast({
-        title: "Calculation Error",
-        description: "No valid data to calculate",
-        variant: "destructive",
+      Papa.parse<ProductData>(file, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          try {
+            // Validate required columns
+            const requiredColumns = ["product", "cost", "price", "fees"];
+            const missingColumns = requiredColumns.filter(
+              (col) => !result.meta.fields.includes(col),
+            );
+
+            if (missingColumns.length > 0) {
+              throw new Error(
+                `Missing required columns: ${missingColumns.join(", ")}`,
+              );
+            }
+
+            const processedData = result.data
+              .filter(
+                (item: ProductData) =>
+                  item.product &&
+                  !isNaN(Number(item.cost)) &&
+                  !isNaN(Number(item.price)) &&
+                  !isNaN(Number(item.fees)),
+              )
+              .map((item: ProductData) => ({
+                product: String(item.product),
+                cost: Number(item.cost),
+                price: Number(item.price),
+                fees: Number(item.fees),
+              }));
+
+            if (processedData.length === 0) {
+              throw new Error("No valid data found in CSV");
+            }
+
+            calculateResults(processedData);
+          } catch (err) {
+            setError(`Error processing CSV file: ${err.message}`);
+            toast({
+              title: "CSV Error",
+              description: `Error processing CSV file: ${err.message}`,
+              variant: "destructive",
+            });
+          } finally {
+            setIsLoading(false);
+          }
+        },
+        error: (error) => {
+          setError(`Error parsing CSV: ${error.message}`);
+          toast({
+            title: "CSV Error",
+            description: `Error parsing CSV: ${error.message}`,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+        },
       });
-      return;
-    }
+    },
+    [calculateResults, toast, setIsLoading, setError],
+  );
 
-    const calculated = data.map((item) => {
-      const productScore = AmazonAlgorithms.calculateProductScore({
-        conversionRate: item.conversionRate || 15,
-        sessions: item.sessions || 300,
-        reviewRating: item.reviewRating || 4.5,
-        reviewCount: item.reviewCount || 42,
-        priceCompetitiveness: item.priceCompetitiveness || 0.92,
-        inventoryHealth: item.inventoryHealth || 0.8,
-        weight: item.weight || 1.2,
-        volume: item.volume || 0.05,
-        category: ProductCategory.STANDARD,
-      });
+  const handleManualSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
 
-      const adjustedPrice = AmazonAlgorithms.calculateOptimalPrice(
-        item.price,
-        item.competitorPrices || [item.price * 0.9, item.price * 1.1],
-        productScore / 100,
-      );
+      if (!manualProduct.product.trim()) {
+        setError("Please enter a product name");
+        toast({
+          title: "Input Error",
+          description: "Please enter a product name",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      const profit = adjustedPrice - item.cost - item.fees;
-      const margin = (profit / item.price) * 100;
-      const roi = (profit / item.cost) * 100;
-      return {
-        ...item,
-        profit,
-        margin: parseFloat(margin.toFixed(2)),
-        roi: parseFloat(roi.toFixed(2)),
-      };
-    });
+      const cost = Number(manualProduct.cost);
+      const price = Number(manualProduct.price);
+      const fees = Number(manualProduct.fees);
 
-    if (calculated.length === 0) {
-      setError("Failed to calculate results");
-      toast({
-        title: "Calculation Error",
-        description: "Failed to calculate results",
-        variant: "destructive",
-      });
-      return;
-    }
+      if (isNaN(cost) || cost <= 0) {
+        setError("Product cost must be a valid positive number");
+        toast({
+          title: "Input Error",
+          description: "Product cost must be a valid positive number",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    setResults(calculated);
-  };
+      if (isNaN(price) || price <= 0) {
+        setError("Selling price must be a valid positive number");
+        toast({
+          title: "Input Error",
+          description: "Selling price must be a valid positive number",
+          variant: "destructive",
+        });
+        return;
+      }
 
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+      if (isNaN(fees) || fees < 0) {
+        setError("Fees must be a valid non-negative number");
+        toast({
+          title: "Input Error",
+          description: "Fees must be a valid non-negative number",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (!manualProduct.product.trim()) {
-      setError("Please enter a product name");
-      toast({
-        title: "Input Error",
-        description: "Please enter a product name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const cost = Number(manualProduct.cost);
-    const price = Number(manualProduct.price);
-    const fees = Number(manualProduct.fees);
-
-    if (isNaN(cost) || cost <= 0) {
-      setError("Product cost must be a valid positive number");
-      toast({
-        title: "Input Error",
-        description: "Product cost must be a valid positive number",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isNaN(price) || price <= 0) {
-      setError("Selling price must be a valid positive number");
-      toast({
-        title: "Input Error",
-        description: "Selling price must be a valid positive number",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isNaN(fees) || fees < 0) {
-      setError("Fees must be a valid non-negative number");
-      toast({
-        title: "Input Error",
-        description: "Fees must be a valid non-negative number",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (price <= cost + fees) {
-      setError(
-        "Selling price must be greater than the sum of cost and fees for a profitable margin",
-      );
-      toast({
-        title: "Input Error",
-        description:
+      if (price <= cost + fees) {
+        setError(
           "Selling price must be greater than the sum of cost and fees for a profitable margin",
-        variant: "destructive",
+        );
+        toast({
+          title: "Input Error",
+          description:
+            "Selling price must be greater than the sum of cost and fees for a profitable margin",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const newProduct = {
+        product: manualProduct.product.trim(),
+        cost,
+        price,
+        fees,
+      };
+
+      calculateResults([newProduct]);
+      setManualProduct({
+        product: "",
+        cost: 0,
+        price: 0,
+        fees: 0,
       });
-      return;
-    }
+    },
+    [manualProduct, calculateResults, toast, setError, setManualProduct],
+  );
 
-    const newProduct = {
-      product: manualProduct.product.trim(),
-      cost,
-      price,
-      fees,
-    };
-
-    calculateResults([newProduct]);
-    setManualProduct({
-      product: "",
-      cost: 0,
-      price: 0,
-      fees: 0,
-    });
-  };
-
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     if (results.length === 0) {
       setError("No data to export");
       toast({
@@ -377,7 +386,7 @@ export default function ProfitMarginCalculator() {
       description: "Profit margin data exported successfully",
       variant: "default",
     });
-  };
+  }, [results, toast, setError]);
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -512,7 +521,7 @@ export default function ProfitMarginCalculator() {
         )}
 
         {/* Results Section */}
-        {results.length > 0 && (
+        {results.length > 0 ? (
           <div className="space-y-6">
             <h3 className="font-medium">Results</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -612,6 +621,17 @@ export default function ProfitMarginCalculator() {
               </Button>
             </div>
           </div>
+        ) : (
+          !isLoading &&
+          !error && (
+            <div className="text-center py-10 text-muted-foreground">
+              <p className="mb-2">No profit margin data to display.</p>
+              <p>
+                Upload a CSV file or enter product details manually to get
+                started.
+              </p>
+            </div>
+          )
         )}
       </CardContent>
     </Card>
