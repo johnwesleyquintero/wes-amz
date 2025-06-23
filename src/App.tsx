@@ -11,7 +11,7 @@ import React, {
   LazyExoticComponent,
 } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import Landing from "./pages/Landing";
+
 import NotFound from "./pages/NotFound";
 import { SidebarProvider } from "./context/sidebar-context.tsx";
 import MainLayout from "./components/layout/MainLayout";
@@ -189,7 +189,7 @@ function App() {
                 <StackTheme>
                   <Routes>
                     <Route path="/handler/*" element={<HandlerRoutes />} />
-                    <Route path="/" element={<Landing />} />
+                    <Route path="/" element={<Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}><Dashboard /></Suspense>} />
                     {/* Authentication Routes - No MainLayout */}
                     <Route
                       path="/auth/register"

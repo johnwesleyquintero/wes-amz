@@ -3,8 +3,10 @@
 "use client";
 
 import React, { Suspense } from "react";
+import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { Outlet } from "react-router-dom";
 import TextBlock from "@/components/shared/TextBlock";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
 
 export default function AmazonSellerTools() {
   const introText = [
@@ -26,9 +28,11 @@ export default function AmazonSellerTools() {
       />
       <div className="flex h-full">
         <div className="flex-1 overflow-y-auto p-6">
-          <Suspense fallback={<div>Loading tool...</div>}>
-            <Outlet />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSkeleton count={5} height="h-8" className="w-3/4" />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
           <TextBlock title="About These Tools:" paragraphs={aboutText} />
         </div>
       </div>
