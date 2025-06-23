@@ -4,5 +4,6 @@
 
 [build.environment]
   NODE_VERSION = "20.14.0"
-  NETLIFY_DATABASE_URL = "postgresql://neondb_owner:npg_Oh2BHmCe3Dil@ep-wild-pond-a5cciso6-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
-  NETLIFY_DATABASE_URL_UNPOOLED = "postgresql://neondb_owner:npg_Oh2BHmCe3Dil@ep-wild-pond-a5cciso6.us-east-2.aws.neon.tech/neondb?sslmode=require"
+  VITE_REDIS_URL = "redis://default:jsMU2rG7qIKR8KJTOyi3SDClPnRzvmE@redis-14221.c270.us-east-1-3.ec2.redns.redis-cloud.com:14221"
+  VITE_DATABASE_URL = "postgresql://WesData_owner:npg_nZOIul1i3kmc@ep-rough-sky-a4kbpgs5-pooler.us-east-1.aws.neon.tech/WesData?sslmode=require"
+  NETLIFY_DATABASE_URL_UNPOOLED = "postgresql://WesData_owner:npg_nZOIul1i3kmc@ep-rough-sky-a4kbpgs5.us-east-1.aws.neon.tech/WesData?sslmode=require"
