@@ -23,7 +23,6 @@
     --radius: 0.5rem;
 
     /* Existing variables that need to be re-evaluated or removed if not used */
-    --catskill-white: 220 80% 98%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary-foreground: 210 40% 98%;
@@ -41,6 +40,16 @@
     --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217 91% 60%;
+
+    /* Custom color palette - Light Mode */
+    --burnt-sienna: 359 82% 64%; /* #ED595B */
+    --shakespeare: 195 66% 57%; /* #4FBBDA */
+    --gold: 48 100% 50%; /* #FFD600 */
+    --apricot: 8 74% 67%; /* #EA7A6C */
+    --jaffa: 22 80% 57%; /* #EB7D3E */
+    --iceberg: 195 50% 94%; /* #CBEAF1 */
+    --hampton: 47 50% 91%; /* #E4DBAE */
+    --butterfly-bush: 262 34% 48%; /* #7554A2 */
   }
 
   .dark {
@@ -57,6 +66,16 @@
     --date-text: 216 17% 63%; /* #a0aec0 */
     --testimonial-bg: 220 17% 30%; /* #3a445d */
     --testimonial-quote: 210 17% 90%; /* #e0e6ed */
+
+    /* Custom color palette - Dark Mode */
+    --burnt-sienna: 359 60% 75%;
+    --shakespeare: 195 50% 70%;
+    --gold: 48 80% 65%;
+    --apricot: 8 60% 75%;
+    --jaffa: 22 60% 70%;
+    --iceberg: 195 30% 30%;
+    --hampton: 47 30% 35%;
+    --butterfly-bush: 262 25% 65%;
 
     /* Existing variables that need to be re-evaluated or removed if not used */
     --popover: 222 47% 11%;
