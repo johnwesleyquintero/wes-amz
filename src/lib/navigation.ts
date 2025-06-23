@@ -25,23 +25,24 @@ import {
   Activity,
   Webhook,
   Wrench, // Added Wrench icon for Amazon Seller Tools
+  LucideIcon, // Import LucideIcon type
 } from "lucide-react";
 
 export interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon; // Changed to LucideIcon
 }
 
 export interface NavigationCategory {
   name: string;
-  icon: React.ElementType;
+  icon: LucideIcon; // Changed to LucideIcon
   children: NavigationItem[];
 }
 
 export interface MainNavigationItem {
   name: string;
-  icon: React.ElementType;
+  icon: LucideIcon; // Changed to LucideIcon
   href?: string;
   children?: NavigationCategory[];
 }

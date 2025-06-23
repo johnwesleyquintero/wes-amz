@@ -121,89 +121,74 @@ function App() {
 
                     {/* Protected Routes (within MainLayout) */}
                     <Route element={<ProtectedRoute />}>
-                      <Route path="/dashboard" element={<MainLayout />}>
-                        <Route
-                          index
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <DashboardContent />
-                            </Suspense>
-                          }
-                        />
-                        {authenticatedAppRoutes.map((route) => (
-                          <Route
-                            key={route.path}
-                            path={route.path}
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <route.component {...route.props} />
-                              </Suspense>
-                            }
-                          />
-                        ))}
-                      </Route>
-
-                      <Route path="/app" element={<MainLayout />}>
-                        <Route
-                          index
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <DashboardContent />
-                            </Suspense>
-                          }
-                        />
-                        {authenticatedAppRoutes.map((route) => (
-                          <Route
-                            key={route.path}
-                            path={route.path}
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <route.component {...route.props} />
-                              </Suspense>
-                            }
-                          />
-                        ))}
-                        {/* Settings Routes */}
-                        <Route
-                          path="settings"
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsLayout />
-                            </Suspense>
-                          }
-                        >
+                      {/* Protected Routes (within MainLayout) */}
+                      <Route element={<ProtectedRoute />}>
+                        <Route path="/dashboard" element={<MainLayout />}>
                           <Route
                             index
                             element={
                               <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <ProfileManagement />
+                                <DashboardContent />
                               </Suspense>
                             }
                           />
+                        </Route>
+
+                        {/* Direct routes for tools and settings */}
+                        <Route path="/" element={<MainLayout />}>
+                          {authenticatedAppRoutes.map((route) => (
+                            <Route
+                              key={route.path}
+                              path={route.path}
+                              element={
+                                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                                  <route.component {...route.props} />
+                                </Suspense>
+                              }
+                            />
+                          ))}
+                          {/* Settings Routes */}
                           <Route
-                            path="profile"
+                            path="settings"
                             element={
                               <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <ProfileManagement />
+                                <SettingsLayout />
                               </Suspense>
                             }
-                          />
-                          <Route
-                            path="organization"
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <OrganizationSettings />
-                              </Suspense>
-                            }
-                          />
-                          <Route
-                            path="team"
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <TeamManagement />
-                              </Suspense>
-                            }
-                          />
+                          >
+                            <Route
+                              index
+                              element={
+                                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                                  <ProfileManagement />
+                                </Suspense>
+                              }
+                            />
+                            <Route
+                              path="profile"
+                              element={
+                                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                                  <ProfileManagement />
+                                </Suspense>
+                              }
+                            />
+                            <Route
+                              path="organization"
+                              element={
+                                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                                  <OrganizationSettings />
+                                </Suspense>
+                              }
+                            />
+                            <Route
+                              path="team"
+                              element={
+                                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                                  <TeamManagement />
+                                </Suspense>
+                              }
+                            />
+                          </Route>
                         </Route>
                       </Route>
                     </Route>

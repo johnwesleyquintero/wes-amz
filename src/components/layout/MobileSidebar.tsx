@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { mainNavigation } from "@/lib/navigation";
+import {
+  mainNavigation,
+  NavigationItem,
+  NavigationCategory,
+  MainNavigationItem,
+} from "@/lib/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -17,22 +22,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
-
-interface NavigationItem {
-  name: string;
-  href?: string;
-  icon?: LucideIcon;
-  children?: NavigationItem[];
-}
 
 const MobileSidebar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
 
-  const renderNavigationItems = (items: NavigationItem[]) => {
+  const renderNavigationItems = (
+    items: (NavigationItem | NavigationCategory | MainNavigationItem)[],
+  ) => {
     return items.map((item) => {
-      if (item.children) {
+      if ("children" in item && item.children) {
         return (
           <Accordion type="single" collapsible key={item.name}>
             <AccordionItem value={item.name}>
@@ -41,12 +40,19 @@ const MobileSidebar: React.FC = () => {
                 <span>{item.name}</span>
               </AccordionTrigger>
               <AccordionContent className="pl-4 space-y-1">
-                {renderNavigationItems(item.children)}
+                {/* Recursively render children, ensuring correct type assertion */}
+                {renderNavigationItems(
+                  item.children as (
+                    | NavigationItem
+                    | NavigationCategory
+                    | MainNavigationItem
+                  )[],
+                )}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
         );
-      } else {
+      } else if ("href" in item && item.href) {
         return (
           <Link
             key={item.name}
@@ -64,6 +70,7 @@ const MobileSidebar: React.FC = () => {
           </Link>
         );
       }
+      return null; // Handle cases where item is neither a category nor a link
     });
   };
 
