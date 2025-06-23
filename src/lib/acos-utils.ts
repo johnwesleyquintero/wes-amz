@@ -29,41 +29,46 @@ export const calculateMetrics = (
 ): Omit<CampaignData, "campaign" | "adSpend" | "sales"> => {
   const { adSpend, sales, impressions, clicks } = data;
 
-  // Calculate base metrics
+  // Calculate fundamental metrics: ACoS (Advertising Cost of Sales) and ROAS (Return on Ad Spend)
   const metrics: Omit<CampaignData, "campaign" | "adSpend" | "sales"> = {
-    acos: (adSpend / sales) * 100,
-    roas: sales / adSpend,
+    acos: (adSpend / sales) * 100, // ACoS = (Ad Spend / Sales) * 100
+    roas: sales / adSpend, // ROAS = Sales / Ad Spend
   };
 
-  // Enhanced CTR calculation with industry benchmark comparison
+  // Calculate Click-Through Rate (CTR) if impressions and clicks data are available.
+  // Includes an optional adjustment based on industry average CTR for more nuanced performance evaluation.
   if (impressions && clicks) {
     const rawCTR = (clicks / impressions) * 100;
     metrics.ctr = rawCTR;
 
     if (trendData?.industryAverageCTR) {
-      // Adjust CTR score based on industry performance
+      // Adjust CTR score: A higher ratio to industry average means better performance,
+      // which is weighted to influence the final CTR metric.
       const ctrPerformanceRatio = rawCTR / trendData.industryAverageCTR;
-      metrics.ctr = rawCTR * (0.7 + ctrPerformanceRatio * 0.3);
+      metrics.ctr = rawCTR * (0.7 + ctrPerformanceRatio * 0.3); // Weighted adjustment
     }
   }
 
-  // Enhanced conversion and cost metrics
+  // Calculate Conversion Rate and Cost Per Click (CPC) if clicks data is available.
+  // Conversion rate also includes an optional adjustment based on industry average.
   if (clicks) {
     const rawConversionRate = (sales / clicks) * 100;
     metrics.conversionRate = rawConversionRate;
 
     if (trendData?.industryAverageConversion) {
-      // Adjust conversion score based on industry performance
+      // Adjust conversion score: Similar to CTR, a better ratio to industry average
+      // positively influences the conversion rate metric.
       const conversionPerformanceRatio =
         rawConversionRate / trendData.industryAverageConversion;
       metrics.conversionRate =
-        rawConversionRate * (0.7 + conversionPerformanceRatio * 0.3);
+        rawConversionRate * (0.7 + conversionPerformanceRatio * 0.3); // Weighted adjustment
     }
 
-    metrics.cpc = adSpend / clicks;
+    metrics.cpc = adSpend / clicks; // CPC = Ad Spend / Clicks
   }
 
-  // Calculate trend-based metrics with advanced analysis
+  // Incorporate trend-based analysis to provide a more dynamic ACoS metric.
+  // This section considers historical performance, seasonality, market trends, and competition.
   if (trendData) {
     const salesGrowth =
       ((sales - trendData.previousPeriodSales) /
@@ -74,40 +79,42 @@ export const calculateMetrics = (
         trendData.previousPeriodAdSpend) *
       100;
 
-    // Calculate weighted performance score
-    const performanceWeight = 0.6; // Base performance weight
-    const seasonalityWeight = 0.2; // Seasonality impact weight
-    const marketTrendWeight = 0.2; // Market trend impact weight
+    // Define weights for different factors influencing the overall performance score.
+    const performanceWeight = 0.6; // Primary weight for current performance
+    const seasonalityWeight = 0.2; // Weight for seasonal impact
+    const marketTrendWeight = 0.2; // Weight for general market direction
 
-    // Calculate base trend factor
+    // Calculate a base trend factor based on sales and ad spend growth.
     let trendFactor = 1 + (salesGrowth - adSpendGrowth) / 100;
 
-    // Apply seasonality adjustment if available
+    // Adjust trend factor based on seasonality.
     if (trendData.seasonalityFactor) {
       trendFactor *= 1 + (trendData.seasonalityFactor - 1) * seasonalityWeight;
     }
 
-    // Apply market trend adjustment
+    // Adjust trend factor based on overall market trend.
     if (trendData.marketTrend) {
       const marketTrendImpact = {
-        rising: 1.1,
-        stable: 1.0,
-        declining: 0.9,
+        rising: 1.1, // Positive impact for rising markets
+        stable: 1.0, // Neutral impact for stable markets
+        declining: 0.9, // Negative impact for declining markets
       }[trendData.marketTrend];
       trendFactor *= 1 + (marketTrendImpact - 1) * marketTrendWeight;
     }
 
-    // Apply competition level adjustment
+    // Adjust trend factor based on competition level.
     if (trendData.competitionLevel) {
       const competitionImpact = {
-        low: 0.95,
-        medium: 1.0,
-        high: 1.05,
+        low: 0.95, // Slightly positive for low competition
+        medium: 1.0, // Neutral for medium competition
+        high: 1.05, // Slightly negative for high competition
       }[trendData.competitionLevel];
       trendFactor *= competitionImpact;
     }
 
-    // Calculate final ACOS with weighted performance score
+    // Calculate the final ACoS by blending the base ACoS with an adjusted ACoS
+    // that incorporates the calculated trend factor. The Math.max/min ensures
+    // the trend factor remains within a reasonable range to prevent extreme values.
     const baseAcos = metrics.acos;
     const adjustedAcos =
       baseAcos * (1 / Math.max(0.8, Math.min(1.2, trendFactor)));
