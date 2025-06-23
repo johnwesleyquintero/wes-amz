@@ -10,4 +10,8 @@ export const siteConfig = {
     twitter: "https://twitter.com/wesleyquintero",
     email: "johnwesleyquintero@gmail.com",
   },
+  env: {
+    VITE_REDIS_URL: import.meta.env.VITE_REDIS_URL,
+    VITE_DATABASE_URL: import.meta.env.VITE_DATABASE_URL,
+  },
 };

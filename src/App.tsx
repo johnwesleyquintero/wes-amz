@@ -1,4 +1,6 @@
+import { StackHandler, StackProvider, StackTheme } from "@stackframe/react";
 import { Toaster } from "@/components/ui/toaster";
+import EnvDisplay from "./components/shared/EnvDisplay";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,11 +10,12 @@ import React, {
   ComponentType,
   LazyExoticComponent,
 } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import { SidebarProvider } from "./context/sidebar-context.tsx";
 import MainLayout from "./components/layout/MainLayout";
+import { stackClientApp } from "./stack";
 
 // Define types for route configuration
 type LazyComponent = LazyExoticComponent<ComponentType<unknown>>;
@@ -163,98 +166,118 @@ const appRoutes: AppRouteConfig[] = [
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <SidebarProvider>
-        <BrowserRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            {/* Authentication Routes - No MainLayout */}
-            <Route
-              path="/auth/register"
-              element={
-                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                  <Register />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/auth/login"
-              element={
-                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                  <Login />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/auth/forgot-password"
-              element={
-                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                  <ForgotPassword />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/auth/update-password"
-              element={
-                <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                  <UpdatePassword />
-                </Suspense>
-              }
-            />
+function HandlerRoutes() {
+  const location = useLocation();
 
-            {/* Routes that use the MainLayout */}
-            <Route element={<MainLayout />}>
-              {/* Dynamically generate routes using the configuration array */}
-              {appRoutes.map(({ path, component: Component, props }) => (
-                <Route
-                  key={path} // Use path as a key for unique routes
-                  path={path}
-                  element={
-                    <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                      <Component {...props} />
-                    </Suspense>
-                  }
-                />
-              ))}
-              {/* New Settings Routes */}
-              <Route
-                path="/settings/profile"
-                element={
-                  <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                    <ProfileManagement />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/settings/organization"
-                element={
-                  <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                    <OrganizationSettings />
-                  </Suspense>
-                }
-              />
-              <Route
-                path="/settings/team"
-                element={
-                  <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                    <TeamManagement />
-                  </Suspense>
-                }
-              />
-            </Route>
-            {/* The catch-all route should be the last one */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </SidebarProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  return (
+    <StackHandler app={stackClientApp} location={location.pathname} fullPage />
+  );
+}
+
+function App() {
+  return (
+    <Suspense fallback={null}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <SidebarProvider>
+            <BrowserRouter
+              future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+            >
+              <StackProvider app={stackClientApp}>
+                <StackTheme>
+                  <Routes>
+                    <Route path="/handler/*" element={<HandlerRoutes />} />
+                    <Route path="/" element={<Landing />} />
+                    {/* Authentication Routes - No MainLayout */}
+                    <Route
+                      path="/auth/register"
+                      element={
+                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                          <Register />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/auth/login"
+                      element={
+                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                          <Login />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/auth/forgot-password"
+                      element={
+                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                          <ForgotPassword />
+                        </Suspense>
+                      }
+                    />
+                    <Route
+                      path="/auth/update-password"
+                      element={
+                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                          <UpdatePassword />
+                        </Suspense>
+                      }
+                    />
+
+                    {/* Routes that use the MainLayout */}
+                    <Route element={<MainLayout />}>
+                      {/* Dynamically generate routes using the configuration array */}
+                      {appRoutes.map(
+                        ({ path, component: Component, props }) => (
+                          <Route
+                            key={path} // Use path as a key for unique routes
+                            path={path}
+                            element={
+                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                                <Component {...props} />
+                              </Suspense>
+                            }
+                          />
+                        ),
+                      )}
+                      {/* New Settings Routes */}
+                      <Route
+                        path="/settings/profile"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <ProfileManagement />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/settings/organization"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <OrganizationSettings />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="/settings/team"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <TeamManagement />
+                          </Suspense>
+                        }
+                      />
+                    </Route>
+                    {/* The catch-all route should be the last one */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </StackTheme>
+              </StackProvider>
+              <EnvDisplay />
+            </BrowserRouter>
+          </SidebarProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </Suspense>
+  );
+}
 
 export default App;
