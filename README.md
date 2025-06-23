@@ -5,6 +5,7 @@
 
 ### Enterprise-Grade Amazon Advertising Analytics Platform
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/5e8f7348-e74c-4014-b1be-1aba4dd5043c/deploy-status)](https://app.netlify.com/projects/alerion/deploys)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2+-61DAFB.svg)](https://reactjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
