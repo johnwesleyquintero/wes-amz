@@ -3,6 +3,6 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "20.14.0"
   NETLIFY_DATABASE_URL = "postgresql://neondb_owner:npg_Oh2BHmCe3Dil@ep-wild-pond-a5cciso6-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
   NETLIFY_DATABASE_URL_UNPOOLED = "postgresql://neondb_owner:npg_Oh2BHmCe3Dil@ep-wild-pond-a5cciso6.us-east-2.aws.neon.tech/neondb?sslmode=require"
