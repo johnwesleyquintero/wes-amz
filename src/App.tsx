@@ -30,7 +30,8 @@ interface AppRouteConfig {
 const DEFAULT_SUSPENSE_FALLBACK = <div>Loading...</div>; // A generic loading message is often sufficient
 
 // Lazy-load components
-const Dashboard = lazy(() => import("./pages/index.tsx"));
+const LandingPage = lazy(() => import("./pages/index.tsx"));
+const DashboardContent = lazy(() => import("./pages/DashboardContent.tsx"));
 const Tools = lazy(() => import("./pages/Tools"));
 const AcosCalculator = lazy(
   () => import("./components/amazon-seller-tools/acos-calculator"),
@@ -108,10 +109,9 @@ const OrganizationSettings = lazy(
 const TeamManagement = lazy(() => import("./pages/settings/team"));
 
 // Define routes that use the MainLayout
-const appRoutes: AppRouteConfig[] = [
-  { path: "/dashboard", component: Dashboard },
+const authenticatedAppRoutes: AppRouteConfig[] = [
   {
-    path: "/tools",
+    path: "tools", // Relative path for the main dashboard
     component: Tools,
     props: {
       showCategories: true,
@@ -120,48 +120,35 @@ const appRoutes: AppRouteConfig[] = [
       showCTA: true,
     },
   },
-  { path: "/tools/acos-calculator", component: AcosCalculator },
-  {
-    path: "/tools/automated-email-followup",
-    component: AutomatedEmailFollowup,
-  },
-  { path: "/tools/competitor-analyzer", component: CompetitorAnalyzer },
-  { path: "/tools/description-editor", component: DescriptionEditor },
-  { path: "/tools/fba-calculator", component: FbaCalculator },
-  {
-    path: "/tools/google-workspace-integration",
-    component: GoogleWorkspaceIntegration,
-  },
-  { path: "/tools/inventory-management", component: InventoryManagement },
-  { path: "/tools/keyword-analyzer", component: KeywordAnalyzer },
-  { path: "/tools/keyword-deduplicator", component: KeywordDeduplicator },
-  { path: "/tools/keyword-index-checker", component: KeywordIndexChecker },
-  { path: "/tools/keyword-trend-analyzer", component: KeywordTrendAnalyzer },
-  { path: "/tools/listing-hijack-alerts", component: ListingHijackAlerts },
-  { path: "/tools/listing-quality-checker", component: ListingQualityChecker },
-  { path: "/tools/market-share-analysis", component: MarketShareAnalysis },
-  { path: "/tools/opportunity-finder", component: OpportunityFinder },
-  { path: "/tools/ppc-campaign-auditor", component: PpcCampaignAuditor },
-  {
-    path: "/tools/profit-margin-calculator",
-    component: ProfitMarginCalculator,
-  },
-  {
-    path: "/tools/reverse-asin-keyword-miner",
-    component: ReverseASINKeywordMiner,
-  },
-  { path: "/tools/sales-estimator", component: SalesEstimator },
-  { path: "/tools/sales-trend-analyzer", component: SalesTrendAnalyzer },
-  { path: "/tools/webhook-manager", component: WebhookManager },
-  { path: "/privacy-policy", component: PrivacyPolicy },
-  { path: "/terms-of-service", component: TermsOfService },
-  // Routes that point to the Dashboard component
-  { path: "/search-analytics", component: Dashboard },
-  { path: "/campaign-manager", component: Dashboard },
-  { path: "/products", component: Dashboard },
-  { path: "/sheets-integration", component: Dashboard },
-  { path: "/team", component: Dashboard },
-  { path: "/settings", component: Dashboard },
+  // Other tool routes, adjusted to be relative to /app
+  { path: "tools/acos-calculator", component: AcosCalculator },
+  { path: "tools/automated-email-followup", component: AutomatedEmailFollowup },
+  { path: "tools/competitor-analyzer", component: CompetitorAnalyzer },
+  { path: "tools/description-editor", component: DescriptionEditor },
+  { path: "tools/fba-calculator", component: FbaCalculator },
+  { path: "tools/google-workspace-integration", component: GoogleWorkspaceIntegration },
+  { path: "tools/inventory-management", component: InventoryManagement },
+  { path: "tools/keyword-analyzer", component: KeywordAnalyzer },
+  { path: "tools/keyword-deduplicator", component: KeywordDeduplicator },
+  { path: "tools/keyword-index-checker", component: KeywordIndexChecker },
+  { path: "tools/keyword-trend-analyzer", component: KeywordTrendAnalyzer },
+  { path: "tools/listing-hijack-alerts", component: ListingHijackAlerts },
+  { path: "tools/listing-quality-checker", component: ListingQualityChecker },
+  { path: "tools/market-share-analysis", component: MarketShareAnalysis },
+  { path: "tools/opportunity-finder", component: OpportunityFinder },
+  { path: "tools/ppc-campaign-auditor", component: PpcCampaignAuditor },
+  { path: "tools/profit-margin-calculator", component: ProfitMarginCalculator },
+  { path: "tools/reverse-asin-keyword-miner", component: ReverseASINKeywordMiner },
+  { path: "tools/sales-estimator", component: SalesEstimator },
+  { path: "tools/sales-trend-analyzer", component: SalesTrendAnalyzer },
+  { path: "tools/webhook-manager", component: WebhookManager },
+  // These routes were previously pointing to the landing page, now point to the actual dashboard (Tools)
+  { path: "search-analytics", component: Tools },
+  { path: "campaign-manager", component: Tools },
+  { path: "products", component: Tools },
+  { path: "sheets-integration", component: Tools },
+  { path: "team", component: Tools },
+  { path: "settings", component: Tools },
 ];
 
 const queryClient = new QueryClient();
@@ -189,60 +176,93 @@ function App() {
                 <StackTheme>
                   <Routes>
                     <Route path="/handler/*" element={<HandlerRoutes />} />
-                    <Route path="/" element={<Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}><Dashboard /></Suspense>} />
-                    {/* Authentication Routes - No MainLayout */}
+
+                    {/* Public Routes */}
                     <Route
-                      path="/auth/register"
+                      path="/"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <Register />
+                          <LandingPage />
                         </Suspense>
                       }
                     />
                     <Route
-                      path="/auth/login"
+                      path="/privacy-policy"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <Login />
+                          <PrivacyPolicy />
                         </Suspense>
                       }
                     />
                     <Route
-                      path="/auth/forgot-password"
+                      path="/terms-of-service"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <ForgotPassword />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="/auth/update-password"
-                      element={
-                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <UpdatePassword />
+                          <TermsOfService />
                         </Suspense>
                       }
                     />
 
-                    {/* Routes that use the MainLayout */}
-                    <Route element={<MainLayout />}>
-                      {/* Dynamically generate routes using the configuration array */}
-                      {appRoutes.map(
-                        ({ path, component: Component, props }) => (
-                          <Route
-                            key={path} // Use path as a key for unique routes
-                            path={path}
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <Component {...props} />
-                              </Suspense>
-                            }
-                          />
-                        ),
-                      )}
-                      {/* New Settings Routes */}
+                    {/* Authentication Routes - No MainLayout */}
+                    <Route path="/auth">
                       <Route
-                        path="/settings/profile"
+                        path="register"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <Register />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="login"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <Login />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="forgot-password"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <ForgotPassword />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path="update-password"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <UpdatePassword />
+                          </Suspense>
+                        }
+                      />
+                    </Route>
+
+                    {/* Main Application Routes - With MainLayout */}
+                    <Route path="/app" element={<MainLayout />}>
+                      <Route
+                        index
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <DashboardContent />
+                          </Suspense>
+                        }
+                      />
+                      {authenticatedAppRoutes.map((route) => (
+                        <Route
+                          key={route.path}
+                          path={route.path}
+                          element={
+                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                              <route.component {...route.props} />
+                            </Suspense>
+                          }
+                        />
+                      ))}
+                      {/* Settings Routes */}
+                      <Route
+                        path="settings/profile"
                         element={
                           <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
                             <ProfileManagement />
@@ -250,7 +270,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/settings/organization"
+                        path="settings/organization"
                         element={
                           <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
                             <OrganizationSettings />
@@ -258,7 +278,7 @@ function App() {
                         }
                       />
                       <Route
-                        path="/settings/team"
+                        path="settings/team"
                         element={
                           <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
                             <TeamManagement />
@@ -266,7 +286,6 @@ function App() {
                         }
                       />
                     </Route>
-                    {/* The catch-all route should be the last one */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </StackTheme>

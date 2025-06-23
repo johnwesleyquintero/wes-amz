@@ -71,7 +71,7 @@ export const highConvertingLandingData: HighConvertingLandingData = {
     subheadline:
       "The powerful analytics and optimization suite for Amazon sellers who want to increase sales, lower their ACoS, and save dozens of hours every week.",
     primaryCta: { text: "Start My 14-Day Free Trial", href: "/auth/register" },
-    visual: "/images/app-dashboard-screenshot.png", // Placeholder for app screenshot
+    visual: "/images/app-dashboard-screenshot.svg", // Placeholder for app screenshot
   },
   socialProof: {
     type: "metrics", // Can be 'logos', 'testimonials', or 'metrics'
@@ -103,7 +103,7 @@ export const highConvertingLandingData: HighConvertingLandingData = {
   },
   featureDeepDive: {
     headline: "Go from Data Overload to Clear Actions.",
-    visual: "/images/profit-dashboard-gif.gif", // Placeholder for GIF/screenshot
+    visual: "/images/profit-dashboard-gif.svg", // Placeholder for GIF/screenshot
     description:
       "Our Profit Dashboard instantly connects to your Seller Central account to give you a real-time view of your business health, so you know exactly where to focus.",
     secondaryCta: { text: "Explore All Features", href: "#features" },
@@ -118,7 +118,7 @@ export const highConvertingLandingData: HighConvertingLandingData = {
   },
   customerCaseStudy: {
     headline: "How [Seller's Brand Name] Increased Their Revenue by 40% in 3 Months.",
-    visual: "/images/customer-logo.png", // Placeholder for customer logo/photo
+    visual: "/images/customer-logo.svg", // Placeholder for customer logo/photo
     quote:
       "\"Alerion transformed our Amazon business. We saw incredible growth and efficiency gains almost immediately.\"",
     results: [
