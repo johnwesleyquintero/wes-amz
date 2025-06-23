@@ -203,6 +203,29 @@ function App() {
                       }
                     />
 
+                    {/* Authenticated Routes (within MainLayout) */}
+                    <Route path="/dashboard" element={<MainLayout />}>
+                      <Route
+                        index
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <DashboardContent />
+                          </Suspense>
+                        }
+                      />
+                      {authenticatedAppRoutes.map((route) => (
+                        <Route
+                          key={route.path}
+                          path={route.path}
+                          element={
+                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                              <route.component {...route.props} />
+                            </Suspense>
+                          }
+                        />
+                      ))}
+                    </Route>
+
                     {/* Authentication Routes - No MainLayout */}
                     <Route path="/auth">
                       <Route

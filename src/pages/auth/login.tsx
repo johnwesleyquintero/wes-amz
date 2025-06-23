@@ -66,7 +66,7 @@ const Login = () => {
         title: "Login Successful",
         description: "You have been successfully logged in.",
       });
-      navigate("/"); // Redirect to dashboard/home page after successful login
+      navigate("/dashboard"); // Redirect to dashboard/home page after successful login
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred";
