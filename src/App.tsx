@@ -30,7 +30,7 @@ interface AppRouteConfig {
 const DEFAULT_SUSPENSE_FALLBACK = <div>Loading...</div>; // A generic loading message is often sufficient
 
 // Lazy-load components
-const Dashboard = lazy(() => import("./pages/index"));
+const Dashboard = lazy(() => import("./pages/index.tsx"));
 const Tools = lazy(() => import("./pages/Tools"));
 const AcosCalculator = lazy(
   () => import("./components/amazon-seller-tools/acos-calculator"),
