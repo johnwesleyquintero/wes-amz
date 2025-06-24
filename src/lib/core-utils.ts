@@ -28,3 +28,7 @@ export function parseCsvNumber(value: string) {
   const num = parseFloat(value.replace(/[^0-9.-]/g, ""));
   return isNaN(num) ? 0 : num;
 }
+
+export function generateUniqueId(): string {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}

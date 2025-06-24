@@ -23,6 +23,7 @@ import {
   SalesEstimator,
   SalesTrendAnalyzer,
   WebhookManager,
+  ProductResearch,
   SettingsLayout,
   ProfileManagement,
   OrganizationSettings,
@@ -154,6 +155,11 @@ export const authenticatedAppRoutes: AppRouteConfig[] = [
     path: "tools/webhook-manager",
     component: WebhookManager,
     breadcrumbName: "Webhook Manager",
+  },
+  {
+    path: "tools/product-research",
+    component: ProductResearch,
+    breadcrumbName: "Product Research",
   },
   { path: "settings", component: SettingsLayout, breadcrumbName: "Settings" }, // Parent route for settings
   {

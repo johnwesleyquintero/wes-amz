@@ -9,7 +9,7 @@ import { Breadcrumb } from "./Breadcrumb";
 const TopBar = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
-  const [notificationCount] = useState(3); // Simulate unread notifications
+  const [notificationCount] = useState(3); // TODO: Replace with dynamic notification count from state management or API
 
   return (
     <header className="border-b border-border bg-background dark:bg-sidebar h-16 px-6 flex items-center justify-between">
@@ -53,7 +53,7 @@ const TopBar = () => {
               variant="outline"
               size="icon"
               className="relative"
-              onClick={() => alert("Navigate to notifications!")}
+              onClick={() => { /* TODO: Implement navigation to notifications page or open a notification modal */ }}
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
@@ -65,14 +65,13 @@ const TopBar = () => {
 
             <ModeToggle />
 
-            <Link to="/">
-              <Button
-                variant="outline"
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                Landing Page
-              </Button>
-            </Link>
+            <Button
+              variant="outline"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => { /* TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate) */ }}
+            >
+              Logout
+            </Button>
           </>
         )}
       </div>

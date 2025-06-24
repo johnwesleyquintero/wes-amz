@@ -68,4 +68,5 @@ export const amazonSellerToolsNavigation = [
     href: "/tools/sales-trend-analyzer",
   },
   { name: "Webhook Manager", href: "/tools/webhook-manager" },
+  { name: "Product Research", href: "/tools/product-research" },
 ];

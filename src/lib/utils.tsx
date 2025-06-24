@@ -4,3 +4,7 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export function renderIf(condition: boolean, component: React.ReactNode) {
+  return condition ? component : null;
+}
