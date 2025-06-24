@@ -106,5 +106,6 @@ export const NotFound = lazy(() => import("../pages/NotFound"));
 export const SettingsLayout = lazy(
   () => import("../pages/settings/SettingsLayout"),
 );
+export const GeminiAIChat = lazy(() => import("../pages/GeminiAIChat"));
 
 // Define routes that use the MainLayout

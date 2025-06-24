@@ -28,6 +28,7 @@ import {
   ProfileManagement,
   OrganizationSettings,
   TeamManagement,
+  GeminiAIChat,
 } from "./app-routes";
 
 export const ROUTES = {
@@ -173,6 +174,11 @@ export const authenticatedAppRoutes: AppRouteConfig[] = [
     breadcrumbName: "Organization",
   },
   { path: "settings/team", component: TeamManagement, breadcrumbName: "Team" },
+  {
+    path: "tools/gemini-ai-chat",
+    component: GeminiAIChat,
+    breadcrumbName: "Gemini AI Chat",
+  },
 ];
 
 export const appRoutes = authenticatedAppRoutes;

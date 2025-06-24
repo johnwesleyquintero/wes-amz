@@ -16,6 +16,7 @@ import CsvUploader, { GenericCsvRow } from "./CsvUploader";
 import { useToast } from "@/hooks/use-toast";
 import { ACOS_EXCELLENT_THRESHOLD, ACOS_GOOD_THRESHOLD } from "@/lib/constants";
 import { ManualCampaignInput, AcosCampaignData } from "./acos-calculator/types";
+import { ApiError } from "@/lib/api-errors"; // Import ApiError
 
 /**
  * ACoSCalculator component for calculating and displaying ACoS (Advertising Cost of Sales) data.
@@ -24,7 +25,6 @@ import { ManualCampaignInput, AcosCampaignData } from "./acos-calculator/types";
 export default function AcosCalculator() {
   const { toast } = useToast();
   const [campaigns, setCampaigns] = useState<AcosCampaignData[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [manualCampaign, setManualCampaign] = useState<ManualCampaignInput>({
     campaign: "",
@@ -36,6 +36,22 @@ export default function AcosCalculator() {
     adSpend: "",
     sales: "",
   });
+
+  /**
+   * Displays a toast message for errors.
+   * @param title - The title of the toast.
+   * @param description - The description of the toast.
+   */
+  const showErrorToast = useCallback(
+    (title: string, description: string) => {
+      toast({
+        title: title,
+        description: description,
+        variant: "destructive",
+      });
+    },
+    [toast],
+  );
 
   /**
    * Handles the manual calculation of ACoS metrics based on user input.
@@ -68,11 +84,10 @@ export default function AcosCalculator() {
     setManualErrors(newErrors);
 
     if (hasError) {
-      toast({
-        title: "Input Error",
-        description: "Please correct the errors in the manual input form.",
-        variant: "destructive",
-      });
+      showErrorToast(
+        "Input Error",
+        "Please correct the errors in the manual input form.",
+      );
       return;
     }
 
@@ -90,13 +105,12 @@ export default function AcosCalculator() {
     // Update state
     setCampaigns([...campaigns, newCampaign]);
     setManualCampaign({ campaign: "", adSpend: "", sales: "" });
-    setError(null);
     toast({
       title: "Campaign Added",
       description: "Campaign data added successfully",
       variant: "default",
     });
-  }, [manualCampaign, campaigns, toast]);
+  }, [manualCampaign, campaigns, toast, showErrorToast]);
 
   /**
    * Handles the export of current campaign data to a CSV file.
@@ -104,12 +118,7 @@ export default function AcosCalculator() {
    */
   const handleExport = useCallback(() => {
     if (campaigns.length === 0) {
-      setError("No data to export");
-      toast({
-        title: "Export Error",
-        description: "No data to export",
-        variant: "destructive",
-      });
+      showErrorToast("Export Error", "No data to export");
       return;
     }
 
@@ -142,27 +151,27 @@ export default function AcosCalculator() {
         variant: "default",
       });
     } catch (error) {
-      setError(
-        `Error exporting data: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError(
+              "An unexpected error occurred during export.",
+              undefined,
+              undefined,
+              error,
+            );
+      showErrorToast(
+        `Export Error: ${apiError.errorType || "Unknown"}`,
+        apiError.message,
       );
-      toast({
-        title: "Export Error",
-        description: `Error exporting data: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-        variant: "destructive",
-      });
     }
-  }, [campaigns, toast]);
+  }, [campaigns, toast, showErrorToast]);
 
   /**
    * Clears all campaign data from the state.
    */
   const clearData = useCallback(() => {
     setCampaigns([]);
-    setError(null);
     toast({
       title: "Data Cleared",
       description: "Campaign data cleared",
@@ -207,37 +216,33 @@ export default function AcosCalculator() {
           });
 
         if (processedData.length === 0) {
-          setError(
+          throw new ApiError(
             "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
+            400,
+            "CSV_PARSE_ERROR",
           );
-          toast({
-            title: "CSV Error",
-            description:
-              "No valid data found in CSV. Please ensure your CSV has columns: campaign, adSpend, sales",
-            variant: "destructive",
-          });
-          return;
         }
 
         setCampaigns(processedData);
-        setError(null); // Clear any previous errors
       } catch (err) {
-        setError(
-          `Failed to process CSV data: ${
-            err instanceof Error ? err.message : String(err)
-          }. Please ensure your CSV has the correct format`,
+        const apiError =
+          err instanceof ApiError
+            ? err
+            : new ApiError(
+                "An unexpected error occurred during CSV processing.",
+                undefined,
+                undefined,
+                err,
+              );
+        showErrorToast(
+          `Processing Failed: ${apiError.errorType || "Unknown"}`,
+          apiError.message,
         );
-        toast({
-          title: "Processing Failed",
-          description: `Failed to process CSV data: ${
-            err instanceof Error ? err.message : String(err)
-          }. Please ensure your CSV has the correct format`,
-        });
       } finally {
         setIsLoading(false);
       }
     },
-    [toast, setIsLoading, setCampaigns, setError],
+    [toast, setIsLoading, setCampaigns, showErrorToast],
   );
 
   return (
@@ -362,13 +367,7 @@ export default function AcosCalculator() {
         </Card>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-100 p-3 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-          <AlertCircle className="h-5 w-5" />
-          <span>{error}</span>
-        </div>
-      )}
-
+      {/* Removed the local error display as toast is now used */}
       {campaigns.length > 0 && (
         <>
           <div className="flex justify-end">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { ApiError, AuthenticationError, ServerError } from "@/lib/api-errors";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Form,
   FormField,
@@ -44,9 +45,8 @@ const formSchema = z.object({
  * It fetches user data from Supabase and provides a form for editing username, full name, and avatar URL.
  */
 const ProfileManagement = () => {
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,11 +60,86 @@ const ProfileManagement = () => {
   const { isSubmitting } = form.formState;
 
   /**
-   * Fetches the user's profile data from Supabase.
+   * Fetches the user's profile data from Supabase using React Query.
    */
-  const getProfile = useCallback(async () => {
-    try {
-      setLoading(true);
+  const fetchProfile = useCallback(async (): Promise<Profile> => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError) {
+      throw new AuthenticationError(
+        "Failed to get user session.",
+        userError.status,
+        userError,
+      );
+    }
+
+    if (!user) {
+      throw new AuthenticationError("User not logged in.", 401);
+    }
+
+    const { data, error, status } = await supabase
+      .from("profiles")
+      .select(`id, username, full_name, avatar_url, tier`)
+      .eq("id", user.id)
+      .single();
+
+    if (error && status !== 406) {
+      const statusCode =
+        error &&
+        typeof error === "object" &&
+        "status" in error &&
+        typeof error.status === "number"
+          ? error.status
+          : 500;
+      throw new ServerError("Failed to fetch profile data.", statusCode, error);
+    }
+
+    return data as Profile;
+  }, []);
+
+  const {
+    data: profile,
+    isLoading,
+    error: fetchError,
+  } = useQuery<Profile, ApiError>({
+    queryKey: ["profile"],
+    queryFn: fetchProfile,
+    staleTime: 1000 * 60 * 5, // Data considered fresh for 5 minutes
+    gcTime: 1000 * 60 * 10, // Data kept in cache for 10 minutes
+  });
+
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        username: profile.username || "",
+        fullName: profile.full_name || "",
+        avatarUrl: profile.avatar_url || "",
+      });
+    }
+  }, [profile, form]);
+
+  useEffect(() => {
+    if (fetchError) {
+      toast({
+        title: `Error fetching profile: ${fetchError.errorType || "Unknown"}`,
+        description: fetchError.message,
+        variant: "destructive",
+      });
+    }
+  }, [fetchError, toast]);
+
+  /**
+   * Handles the submission of the profile update form using React Query's useMutation.
+   */
+  const updateProfileMutation = useMutation<
+    void,
+    ApiError,
+    z.infer<typeof formSchema>
+  >({
+    mutationFn: async (values) => {
       const {
         data: { user },
         error: userError,
@@ -72,149 +147,113 @@ const ProfileManagement = () => {
 
       if (userError) {
         throw new AuthenticationError(
-          "Failed to get user session.",
+          "Failed to get user session for update.",
           userError.status,
           userError,
         );
       }
 
-      if (user) {
-        const { data, error, status } = await supabase
-          .from("profiles")
-          .select(`id, username, full_name, avatar_url, tier`)
-          .eq("id", user.id)
-          .single();
-
-        if (error && status !== 406) {
-          const statusCode =
-            error &&
-            typeof error === "object" &&
-            "status" in error &&
-            typeof error.status === "number"
-              ? error.status
-              : 500;
-          throw new ServerError(
-            "Failed to fetch profile data.",
-            statusCode,
-            error,
-          );
-        }
-
-        if (data) {
-          setProfile(data);
-          form.reset({
-            username: data.username || "",
-            fullName: data.full_name || "",
-            avatarUrl: data.avatar_url || "",
-          });
-        }
+      if (!user) {
+        throw new AuthenticationError("User not logged in.", 401);
       }
-    } catch (error) {
-      const apiError =
-        error instanceof ApiError
-          ? error
-          : new ApiError(
-              "An unexpected error occurred.",
-              undefined,
-              undefined,
-              error,
-            );
+
+      const updates = {
+        id: user.id,
+        username: values.username,
+        full_name: values.fullName,
+        avatar_url: values.avatarUrl,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase.from("profiles").upsert(updates);
+
+      if (error) {
+        const statusCode =
+          error &&
+          typeof error === "object" &&
+          "status" in error &&
+          typeof error.status === "number"
+            ? error.status
+            : 500;
+        throw new ServerError("Failed to update profile.", statusCode, error);
+      }
+    },
+    onSuccess: () => {
       toast({
-        title: `Error fetching profile: ${apiError.errorType || "Unknown"}`,
-        description: apiError.message,
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["profile"] }); // Invalidate cache to refetch latest data
+    },
+    onError: (error) => {
+      toast({
+        title: `Error updating profile: ${error.errorType || "Unknown"}`,
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, setLoading, setProfile, form]);
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    updateProfileMutation.mutate(values);
+  };
+
+  const [geminiApiKey, setGeminiApiKey] = useState('');
 
   useEffect(() => {
-    getProfile();
-  }, [getProfile]);
-
-  /**
-   * Handles the submission of the profile update form.
-   * Updates the user's profile data in Supabase.
-   */
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setLoading(true);
-
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError) {
-        const statusCode =
-          userError &&
-          typeof userError === "object" &&
-          "status" in userError &&
-          typeof userError.status === "number"
-            ? userError.status
-            : 401;
-        throw new AuthenticationError(
-          "Failed to get user session for update.",
-          statusCode,
-          userError,
-        );
-      }
-
+    const fetchApiKey = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const updates = {
-          id: user.id,
-          username: values.username,
-          full_name: values.fullName,
-          avatar_url: values.avatarUrl,
-          updated_at: new Date().toISOString(),
-        };
-
-        const { error } = await supabase.from("profiles").upsert(updates);
-
-        if (error) {
-          const statusCode =
-            error &&
-            typeof error === "object" &&
-            "status" in error &&
-            typeof error.status === "number"
-              ? error.status
-              : 500;
-          throw new ServerError("Failed to update profile.", statusCode, error);
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('gemini_api_key')
+          .eq('id', user.id)
+          .single();
+        if (profile && profile.gemini_api_key) {
+          setGeminiApiKey(profile.gemini_api_key);
         }
-
-        toast({
-          title: "Profile Updated",
-          description: "Your profile has been successfully updated.",
-        });
-        getProfile(); // Re-fetch profile to ensure latest data
       }
-    } catch (error) {
-      const apiError =
-        error instanceof ApiError
-          ? error
-          : new ApiError(
-              "An unexpected error occurred during update.",
-              undefined,
-              undefined,
-              error,
-            );
-      toast({
-        title: `Error updating profile: ${apiError.errorType || "Unknown"}`,
-        description: apiError.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    };
+    fetchApiKey();
+  }, []);
+
+  const handleSaveGeminiApiKey = async () => {
+    const { data: { user } = {} } = await supabase.auth.getUser();
+    if (user) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ gemini_api_key: geminiApiKey })
+        .eq('id', user.id);
+
+      if (error) {
+        toast({
+          title: "Error saving API key",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Gemini API key saved successfully.",
+        });
+      }
     }
   };
 
   const currentAvatarUrl = form.watch("avatarUrl");
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
         <p>Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <p className="text-destructive">Error: {fetchError.message}</p>
       </div>
     );
   }
@@ -238,8 +277,8 @@ const ProfileManagement = () => {
                     alt="@shadcn"
                   />
                   <AvatarFallback>
-                    {form.getValues("username")
-                      ? form.getValues("username")[0].toUpperCase()
+                    {profile?.username
+                      ? profile.username[0].toUpperCase()
                       : "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -253,6 +292,7 @@ const ProfileManagement = () => {
                         <Input
                           type="text"
                           placeholder="https://example.com/avatar.jpg"
+                          aria-label="Avatar URL"
                           {...field}
                         />
                       </FormControl>
@@ -268,7 +308,12 @@ const ProfileManagement = () => {
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input type="text" placeholder="Your username" {...field} />
+                      <Input
+                        type="text"
+                        placeholder="Your username"
+                        aria-label="Username"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -281,7 +326,12 @@ const ProfileManagement = () => {
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input type="text" placeholder="Your full name" {...field} />
+                      <Input
+                        type="text"
+                        placeholder="Your full name"
+                        aria-label="Full Name"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -299,11 +349,32 @@ const ProfileManagement = () => {
               {profile?.tier === "Free" && (
                 <Button className="w-full">Upgrade to Enterprise</Button>
               )}
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save Profile"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting || updateProfileMutation.isPending}
+              >
+                {isSubmitting || updateProfileMutation.isPending
+                  ? "Saving..."
+                  : "Save Profile"}
               </Button>
             </form>
           </Form>
+
+          <h2 className="text-xl font-semibold mt-6 mb-4">AI Integration Settings</h2>
+          <div className="grid gap-2">
+            <Label htmlFor="gemini-api-key">Gemini API Key</Label>
+            <Input
+              id="gemini-api-key"
+              type="password"
+              value={geminiApiKey}
+              onChange={(e) => setGeminiApiKey(e.target.value)}
+              placeholder="Enter your Gemini API Key"
+            />
+            <Button onClick={handleSaveGeminiApiKey} className="mt-2 w-fit">
+              Save API Key
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

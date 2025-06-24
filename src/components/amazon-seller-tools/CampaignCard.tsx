@@ -11,6 +11,7 @@ import {
 } from "@/lib/constants";
 import { getAcosColor } from "@/lib/acos-utils";
 import { CampaignCardProps } from "./CampaignCard/types";
+import MetricDisplay from "@/components/shared/MetricDisplay"; // Import MetricDisplay
 
 /**
  * CampaignCard component displays detailed information and performance metrics for a single campaign.
@@ -81,123 +82,79 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         )}
 
         <div className="grid gap-4 md:grid-cols-3">
-          {/* Spend */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Spend</div>
-            <div className="text-xl font-semibold">
-              ${campaign.spend.toFixed(2)}
-            </div>
-          </div>
-
-          {/* Sales */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Sales</div>
-            <div className="text-xl font-semibold">
-              ${campaign.sales.toFixed(2)}
-            </div>
-          </div>
-
-          {/* ROAS */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">ROAS</div>
-            <div className="text-xl font-semibold">{roas.toFixed(2)}x</div>
-          </div>
+          <MetricDisplay
+            label="Spend"
+            value={campaign.spend?.toFixed(2)}
+            unit="$"
+          />
+          <MetricDisplay
+            label="Sales"
+            value={campaign.sales?.toFixed(2)}
+            unit="$"
+          />
+          <MetricDisplay label="ROAS" value={roas.toFixed(2)} unit="x" />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {/* ACoS */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              ACoS
-              {isAcosHigh && (
+          <MetricDisplay
+            label="ACoS"
+            value={campaign.acos?.toFixed(2)}
+            unit="%"
+            statusIcon={
+              isAcosHigh ? (
                 <TrendingDown className="h-4 w-4 text-destructive" />
-              )}
-              {!isAcosHigh && campaign.acos !== undefined && (
+              ) : campaign.acos !== undefined ? (
                 <CheckCircle className="h-4 w-4 text-primary" />
-              )}
-            </div>
-            <div
-              className={cn(
-                "text-xl font-semibold",
-                {
-                  green: "text-green-600 dark:text-green-400",
-                  emerald: "text-emerald-600 dark:text-emerald-400",
-                  yellow: "text-yellow-600 dark:text-yellow-400",
-                  orange: "text-orange-600 dark:text-orange-400",
-                  red: "text-red-600 dark:text-red-400",
-                }[getAcosColor(campaign.acos || 0)],
-              )}
-            >
-              {campaign.acos !== undefined ? campaign.acos.toFixed(2) : "N/A"}%
-            </div>
-          </div>
-
-          {/* CTR */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              CTR
-              {isCtrLow && (
+              ) : undefined
+            }
+            valueClassName={
+              getAcosColor(campaign.acos || 0) === "green"
+                ? "text-green-600 dark:text-green-400"
+                : getAcosColor(campaign.acos || 0) === "emerald"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : getAcosColor(campaign.acos || 0) === "yellow"
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : getAcosColor(campaign.acos || 0) === "orange"
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-red-600 dark:text-red-400"
+            }
+          />
+          <MetricDisplay
+            label="CTR"
+            value={campaign.ctr?.toFixed(2)}
+            unit="%"
+            statusIcon={
+              isCtrLow ? (
                 <TrendingDown className="h-4 w-4 text-destructive" />
-              )}
-              {!isCtrLow && campaign.ctr !== undefined && (
+              ) : campaign.ctr !== undefined ? (
                 <CheckCircle className="h-4 w-4 text-primary" />
-              )}
-            </div>
-            <div
-              className={cn(
-                "text-xl font-semibold",
-                isCtrLow && "text-destructive",
-              )}
-            >
-              {campaign.ctr !== undefined ? campaign.ctr.toFixed(2) : "N/A"}%
-            </div>
-          </div>
-
-          {/* Conversion Rate */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              Conversion Rate
-              {isConversionRateLow && (
+              ) : undefined
+            }
+            valueClassName={isCtrLow ? "text-destructive" : ""}
+          />
+          <MetricDisplay
+            label="Conversion Rate"
+            value={campaign.conversionRate?.toFixed(2)}
+            unit="%"
+            statusIcon={
+              isConversionRateLow ? (
                 <TrendingDown className="h-4 w-4 text-destructive" />
-              )}
-              {!isConversionRateLow &&
-                campaign.conversionRate !== undefined && (
-                  <CheckCircle className="h-4 w-4 text-primary" />
-                )}
-            </div>
-            <div
-              className={cn(
-                "text-xl font-semibold",
-                isConversionRateLow && "text-destructive",
-              )}
-            >
-              {campaign.conversionRate !== undefined
-                ? campaign.conversionRate.toFixed(2)
-                : "N/A"}
-              %
-            </div>
-          </div>
+              ) : campaign.conversionRate !== undefined ? (
+                <CheckCircle className="h-4 w-4 text-primary" />
+              ) : undefined
+            }
+            valueClassName={isConversionRateLow ? "text-destructive" : ""}
+          />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Impressions */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Impressions</div>
-            <div className="text-xl font-semibold">
-              {campaign.impressions !== undefined
-                ? campaign.impressions.toLocaleString()
-                : "N/A"}
-            </div>
-          </div>
-
-          {/* Clicks */}
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Clicks</div>
-            <div className="text-xl font-semibold">
-              {campaign.clicks !== undefined
-                ? campaign.clicks.toLocaleString()
-                : "N/A"}
-            </div>
-          </div>
+          <MetricDisplay
+            label="Impressions"
+            value={campaign.impressions?.toLocaleString()}
+          />
+          <MetricDisplay
+            label="Clicks"
+            value={campaign.clicks?.toLocaleString()}
+          />
         </div>
       </CardContent>
     </Card>
