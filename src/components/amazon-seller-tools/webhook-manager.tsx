@@ -143,7 +143,7 @@ const WebhookManager: React.FC = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Invalid JSON payload.",

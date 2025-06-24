@@ -9,7 +9,7 @@ import {
   getAcosColor,
   getAcosRating,
 } from "@/lib/acos-utils";
-import { AlertCircle, Calculator, Download, Info } from "lucide-react";
+import { Calculator, Download, Info } from "lucide-react";
 import Papa from "papaparse";
 import { useState, useCallback } from "react";
 import CsvUploader, { GenericCsvRow } from "./CsvUploader";
@@ -242,7 +242,7 @@ export default function AcosCalculator() {
         setIsLoading(false);
       }
     },
-    [toast, setIsLoading, setCampaigns, showErrorToast],
+    [setIsLoading, setCampaigns, showErrorToast],
   );
 
   return (

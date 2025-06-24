@@ -2,7 +2,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { AlertCircle, CheckCircle, TrendingDown } from "lucide-react";
 import {
   MAX_ACOS_THRESHOLD,

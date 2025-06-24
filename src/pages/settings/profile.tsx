@@ -131,6 +131,32 @@ const ProfileManagement = () => {
     }
   }, [fetchError, toast]);
 
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+
+  useEffect(() => {
+    const fetchApiKey = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error: fetchProfileError } = await supabase
+          .from('profiles')
+          .select('gemini_api_key')
+          .eq('id', user.id)
+          .single();
+        if (fetchProfileError) {
+          console.error("Error fetching Gemini API key:", fetchProfileError);
+          toast({
+            title: "Error fetching API key",
+            description: fetchProfileError.message,
+            variant: "destructive",
+          });
+        } else if (profile && profile.gemini_api_key) {
+          setGeminiApiKey(profile.gemini_api_key);
+        }
+      }
+    };
+    fetchApiKey();
+  }, [toast]);
+
   /**
    * Handles the submission of the profile update form using React Query's useMutation.
    */
@@ -198,37 +224,18 @@ const ProfileManagement = () => {
     updateProfileMutation.mutate(values);
   };
 
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-
-  useEffect(() => {
-    const fetchApiKey = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('gemini_api_key')
-          .eq('id', user.id)
-          .single();
-        if (profile && profile.gemini_api_key) {
-          setGeminiApiKey(profile.gemini_api_key);
-        }
-      }
-    };
-    fetchApiKey();
-  }, []);
-
   const handleSaveGeminiApiKey = async () => {
     const { data: { user } = {} } = await supabase.auth.getUser();
     if (user) {
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({ gemini_api_key: geminiApiKey })
         .eq('id', user.id);
 
-      if (error) {
+      if (updateError) {
         toast({
           title: "Error saving API key",
-          description: error.message,
+          description: updateError.message,
           variant: "destructive",
         });
       } else {
