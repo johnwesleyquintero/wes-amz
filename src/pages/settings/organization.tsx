@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Card,
@@ -17,12 +16,27 @@ import {
   ServerError,
   AuthorizationError,
 } from "@/lib/api-errors";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface Organization {
   id: string;
   name: string;
   owner_id: string;
 }
+
+const formSchema = z.object({
+  organizationName: z.string().min(1, { message: "Organization name is required." }),
+});
 
 /**
  * OrganizationSettings component allows Enterprise tier users to view and update their organization's details.
@@ -31,8 +45,16 @@ interface Organization {
 const OrganizationSettings = () => {
   const [loading, setLoading] = useState(true);
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [organizationName, setOrganizationName] = useState("");
   const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      organizationName: "",
+    },
+  });
+
+  const { isSubmitting } = form.formState;
 
   /**
    * Fetches the organization details for the current user's Enterprise organization.
@@ -116,7 +138,7 @@ const OrganizationSettings = () => {
 
           if (orgData) {
             setOrganization(orgData);
-            setOrganizationName(orgData.name);
+            form.reset({ organizationName: orgData.name });
           } else {
             // This case might indicate a data inconsistency or permission issue
             throw new AuthorizationError(
@@ -149,7 +171,7 @@ const OrganizationSettings = () => {
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setOrganization, setOrganizationName, toast]);
+  }, [setLoading, setOrganization, toast, form]);
 
   useEffect(() => {
     getOrganizationDetails();
@@ -158,11 +180,9 @@ const OrganizationSettings = () => {
   /**
    * Handles the submission of the organization update form.
    * Updates the organization's name in Supabase.
-   * @param event - The form submission event.
    */
-  const updateOrganization = useCallback(
-    async (event: React.FormEvent) => {
-      event.preventDefault();
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>) => {
       setLoading(true);
 
       try {
@@ -172,7 +192,7 @@ const OrganizationSettings = () => {
 
         const updates = {
           id: organization.id,
-          name: organizationName,
+          name: values.organizationName,
           updated_at: new Date().toISOString(),
         };
 
@@ -217,7 +237,7 @@ const OrganizationSettings = () => {
         setLoading(false);
       }
     },
-    [organization, organizationName, setLoading, toast, getOrganizationDetails],
+    [organization, setLoading, toast, getOrganizationDetails],
   );
 
   if (loading) {
@@ -257,33 +277,41 @@ const OrganizationSettings = () => {
           <CardDescription>Manage your organization's details.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={updateOrganization} className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="organization-name">Organization Name</Label>
-              <Input
-                id="organization-name"
-                type="text"
-                placeholder="Your Organization Name"
-                value={organizationName}
-                onChange={(e) => setOrganizationName(e.target.value)}
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="organizationName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Your Organization Name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="billing-info">
-                Billing Information (Placeholder)
-              </Label>
-              <Input
-                id="billing-info"
-                type="text"
-                placeholder="Integration with payment gateway (e.g., Stripe)"
-                disabled
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Saving..." : "Save Organization Settings"}
-            </Button>
-          </form>
+              <div className="grid gap-2">
+                <FormLabel htmlFor="billing-info">
+                  Billing Information (Placeholder)
+                </FormLabel>
+                <Input
+                  id="billing-info"
+                  type="text"
+                  placeholder="Integration with payment gateway (e.g., Stripe)"
+                  disabled
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Organization Settings"}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

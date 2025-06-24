@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Card,
@@ -12,52 +11,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(1, { message: "Password is required." }),
+});
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const validateForm = () => {
-    let isValid = true;
-    setEmailError(null);
-    setPasswordError(null);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    if (!email) {
-      setEmailError("Email is required.");
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Email is invalid.");
-      isValid = false;
-    }
+  const { isSubmitting } = form.formState;
 
-    if (!password) {
-      setPasswordError("Password is required.");
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setEmailError(null);
-    setPasswordError(null);
-
-    if (!validateForm()) {
-      setLoading(false);
-      return;
-    }
-
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: values.email,
+        password: values.password,
       });
 
       if (error) throw error;
@@ -75,8 +64,6 @@ const Login = () => {
         description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -90,55 +77,54 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setEmailError(null); // Clear error on change
-                }}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {emailError && (
-                <p className="text-sm text-red-500">{emailError}</p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordError(null); // Clear error on change
-                }}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {passwordError && (
-                <p className="text-sm text-red-500">{passwordError}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
-            </Button>
-            <div className="mt-4 text-center text-sm">
-              Don't have an account?{" "}
-              <Link to="/auth/register" className="underline">
-                Register
-              </Link>
-            </div>
-            <div className="text-center text-sm">
-              <Link to="/auth/forgot-password" className="underline">
-                Forgot Password?
-              </Link>
-            </div>
-          </form>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Logging in..." : "Login"}
+              </Button>
+              <div className="mt-4 text-center text-sm">
+                Don't have an account?{" "}
+                <Link to="/auth/register" className="underline">
+                  Register
+                </Link>
+              </div>
+              <div className="text-center text-sm">
+                <Link to="/auth/forgot-password" className="underline">
+                  Forgot Password?
+                </Link>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

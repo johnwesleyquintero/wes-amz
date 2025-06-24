@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
@@ -13,83 +13,69 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z
+  .object({
+    email: z.string().email({ message: "Invalid email address." }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters long." }),
+    confirmPassword: z.string().min(1, { message: "Confirm password is required." }),
+    tier: z.enum(["Free", "Enterprise"]),
+    organizationName: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  })
+  .refine(
+    (data) =>
+      !(data.tier === "Enterprise" && !data.organizationName?.trim()),
+    {
+      message: "Organization name is required for Enterprise tier.",
+      path: ["organizationName"],
+    },
+  );
 
 const Register = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [tier, setTier] = useState("Free");
-  const [organizationName, setOrganizationName] = useState("");
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [confirmPasswordError, setConfirmPasswordError] = useState<
-    string | null
-  >(null);
-  const [organizationNameError, setOrganizationNameError] = useState<
-    string | null
-  >(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const validateForm = () => {
-    let isValid = true;
-    setEmailError(null);
-    setPasswordError(null);
-    setConfirmPasswordError(null);
-    setOrganizationNameError(null);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      tier: "Free",
+      organizationName: "",
+    },
+  });
 
-    if (!email) {
-      setEmailError("Email is required.");
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError("Email is invalid.");
-      isValid = false;
-    }
+  const { isSubmitting } = form.formState;
+  const tier = form.watch("tier"); // Watch the tier field to conditionally render organization name input
 
-    if (!password) {
-      setPasswordError("Password is required.");
-      isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters long.");
-      isValid = false;
-    }
-
-    if (!confirmPassword) {
-      setConfirmPasswordError("Confirm password is required.");
-      isValid = false;
-    } else if (password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match.");
-      isValid = false;
-    }
-
-    if (tier === "Enterprise" && !organizationName.trim()) {
-      setOrganizationNameError(
-        "Organization name is required for Enterprise tier.",
-      );
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    if (!validateForm()) {
-      setLoading(false);
-      return;
-    }
-
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: values.email,
+        password: values.password,
         options: {
           data: {
-            tier: tier,
-            organization_name: tier === "Enterprise" ? organizationName : null,
+            tier: values.tier,
+            organization_name:
+              values.tier === "Enterprise" ? values.organizationName : null,
           },
         },
       });
@@ -104,13 +90,13 @@ const Register = () => {
         navigate("/auth/login"); // Redirect to login after successful registration
       }
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -122,108 +108,107 @@ const Register = () => {
           <CardDescription>Create your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setEmailError(null); // Clear error on change
-                }}
-              />
-              {emailError && (
-                <p className="text-sm text-red-500">{emailError}</p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordError(null); // Clear error on change
-                }}
-              />
-              {passwordError && (
-                <p className="text-sm text-red-500">{passwordError}</p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setConfirmPasswordError(null); // Clear error on change
-                }}
-              />
-              {confirmPasswordError && (
-                <p className="text-sm text-red-500">{confirmPasswordError}</p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label>Select Tier</Label>
-              <RadioGroup
-                defaultValue="Free"
-                value={tier}
-                onValueChange={(value) => {
-                  setTier(value);
-                  setOrganizationNameError(null); // Clear error on tier change
-                }}
-                className="flex space-x-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Free" id="r1" />
-                  <Label htmlFor="r1">Free</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Enterprise" id="r2" />
-                  <Label htmlFor="r2">Enterprise</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            {tier === "Enterprise" && (
-              <div className="grid gap-2">
-                <Label htmlFor="organization-name">Organization Name</Label>
-                <Input
-                  id="organization-name"
-                  type="text"
-                  placeholder="Your Organization"
-                  required={tier === "Enterprise"}
-                  value={organizationName}
-                  onChange={(e) => {
-                    setOrganizationName(e.target.value);
-                    setOrganizationNameError(null); // Clear error on change
-                  }}
-                />
-                {organizationNameError && (
-                  <p className="text-sm text-red-500">
-                    {organizationNameError}
-                  </p>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tier"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Select Tier</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Free" id="r1" />
+                          <Label htmlFor="r1">Free</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Enterprise" id="r2" />
+                          <Label htmlFor="r2">Enterprise</Label>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {tier === "Enterprise" && (
+                <FormField
+                  control={form.control}
+                  name="organizationName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organization Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="Your Organization"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Registering..." : "Register"}
+              </Button>
+              <div className="mt-4 text-center text-sm">
+                Already have an account?{" "}
+                <Link to="/auth/login" className="underline">
+                  Login
+                </Link>
               </div>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Registering..." : "Register"}
-            </Button>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link to="/auth/login" className="underline">
-                Login
-              </Link>
-            </div>
-          </form>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

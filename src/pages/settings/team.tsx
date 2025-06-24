@@ -43,6 +43,17 @@ import {
   ClientError,
   AuthorizationError,
 } from "@/lib/api-errors";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface OrganizationMember {
   id: string;
@@ -57,6 +68,11 @@ interface OrganizationMember {
   }> | null;
 }
 
+const inviteFormSchema = z.object({
+  inviteEmail: z.string().email({ message: "Invalid email address." }),
+  inviteRole: z.enum(["Admin", "Member"]),
+});
+
 /**
  * TeamManagement component allows Enterprise organization admins to manage team members.
  * It fetches organization members from Supabase, displays them in a table,
@@ -67,9 +83,17 @@ const TeamManagement = () => {
   const [members, setMembers] = useState<OrganizationMember[]>([]);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"Admin" | "Member">("Member");
   const { toast } = useToast();
+
+  const inviteForm = useForm<z.infer<typeof inviteFormSchema>>({
+    resolver: zodResolver(inviteFormSchema),
+    defaultValues: {
+      inviteEmail: "",
+      inviteRole: "Member",
+    },
+  });
+
+  const { isSubmitting: isInviting } = inviteForm.formState;
 
   /**
    * Fetches the team members for the current user's Enterprise organization.
@@ -225,11 +249,9 @@ const TeamManagement = () => {
    * Note: In a real application, this would involve a secure backend endpoint
    * to send an invitation email and handle the user joining the organization.
    * For this example, we simulate adding a user directly if they exist.
-   * @param e - The form submission event.
    */
   const handleInviteMember = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (values: z.infer<typeof inviteFormSchema>) => {
       if (!organizationId) return;
 
       setLoading(true);
@@ -238,7 +260,7 @@ const TeamManagement = () => {
         const { data: users, error: userError } = await supabase
           .from("profiles")
           .select("id")
-          .eq("email", inviteEmail)
+          .eq("email", values.inviteEmail)
           .single();
 
         if (userError || !users) {
@@ -294,7 +316,7 @@ const TeamManagement = () => {
           .insert({
             organization_id: organizationId,
             user_id: users.id,
-            role: inviteRole,
+            role: values.inviteRole,
           });
 
         if (insertError) {
@@ -314,10 +336,9 @@ const TeamManagement = () => {
 
         toast({
           title: "Member Invited/Added",
-          description: `${inviteEmail} has been added as a ${inviteRole}.`,
+          description: `${values.inviteEmail} has been added as a ${values.inviteRole}.`,
         });
-        setInviteEmail("");
-        setInviteRole("Member");
+        inviteForm.reset(); // Clear form
         fetchTeamMembers(); // Refresh the list
       } catch (error) {
         const apiError =
@@ -338,14 +359,7 @@ const TeamManagement = () => {
         setLoading(false);
       }
     },
-    [
-      inviteEmail,
-      inviteRole,
-      organizationId,
-      setLoading,
-      toast,
-      fetchTeamMembers,
-    ],
+    [organizationId, setLoading, toast, fetchTeamMembers, inviteForm],
   );
 
   /**
@@ -443,46 +457,61 @@ const TeamManagement = () => {
           {isUserAdmin && (
             <div className="mb-6 space-y-4 rounded-md border p-4">
               <h3 className="text-lg font-semibold">Invite New Member</h3>
-              <form
-                onSubmit={handleInviteMember}
-                className="flex flex-col gap-4 md:flex-row"
-              >
-                <div className="flex-1">
-                  <Label htmlFor="invite-email">Email</Label>
-                  <Input
-                    id="invite-email"
-                    type="email"
-                    placeholder="member@example.com"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="w-full md:w-1/3">
-                  <Label htmlFor="invite-role">Role</Label>
-                  <Select
-                    value={inviteRole}
-                    onValueChange={(value) =>
-                      setInviteRole(value as "Admin" | "Member")
-                    }
-                  >
-                    <SelectTrigger id="invite-role">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Member">Member</SelectItem>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  type="submit"
-                  className="md:self-end"
-                  disabled={loading}
+              <Form {...inviteForm}>
+                <form
+                  onSubmit={inviteForm.handleSubmit(handleInviteMember)}
+                  className="flex flex-col gap-4 md:flex-row"
                 >
-                  {loading ? "Inviting..." : "Invite Member"}
-                </Button>
-              </form>
+                  <FormField
+                    control={inviteForm.control}
+                    name="inviteEmail"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="member@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={inviteForm.control}
+                    name="inviteRole"
+                    render={({ field }) => (
+                      <FormItem className="w-full md:w-1/3">
+                        <FormLabel>Role</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a role" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Member">Member</SelectItem>
+                            <SelectItem value="Admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="md:self-end"
+                    disabled={isInviting}
+                  >
+                    {isInviting ? "Inviting..." : "Invite Member"}
+                  </Button>
+                </form>
+              </Form>
             </div>
           )}
 

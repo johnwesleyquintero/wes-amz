@@ -13,6 +13,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ApiError, AuthenticationError, ServerError } from "@/lib/api-errors";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface Profile {
   id: string;
@@ -22,6 +33,12 @@ interface Profile {
   tier: "Free" | "Enterprise";
 }
 
+const formSchema = z.object({
+  username: z.string().optional(),
+  fullName: z.string().optional(),
+  avatarUrl: z.string().url({ message: "Invalid URL" }).optional().or(z.literal("")),
+});
+
 /**
  * ProfileManagement component allows users to view and update their profile information.
  * It fetches user data from Supabase and provides a form for editing username, full name, and avatar URL.
@@ -29,10 +46,18 @@ interface Profile {
 const ProfileManagement = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      fullName: "",
+      avatarUrl: "",
+    },
+  });
+
+  const { isSubmitting } = form.formState;
 
   /**
    * Fetches the user's profile data from Supabase.
@@ -61,8 +86,6 @@ const ProfileManagement = () => {
           .single();
 
         if (error && status !== 406) {
-          // 406 means no data found, which is okay if profile doesn't exist yet
-          // Safely access status if it exists, otherwise default to 500
           const statusCode =
             error &&
             typeof error === "object" &&
@@ -79,9 +102,11 @@ const ProfileManagement = () => {
 
         if (data) {
           setProfile(data);
-          setUsername(data.username || "");
-          setFullName(data.full_name || "");
-          setAvatarUrl(data.avatar_url || "");
+          form.reset({
+            username: data.username || "",
+            fullName: data.full_name || "",
+            avatarUrl: data.avatar_url || "",
+          });
         }
       }
     } catch (error) {
@@ -102,7 +127,7 @@ const ProfileManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast, setLoading, setProfile, setUsername, setFullName, setAvatarUrl]);
+  }, [toast, setLoading, setProfile, form]);
 
   useEffect(() => {
     getProfile();
@@ -111,10 +136,8 @@ const ProfileManagement = () => {
   /**
    * Handles the submission of the profile update form.
    * Updates the user's profile data in Supabase.
-   * @param event - The form submission event.
    */
-  async function updateProfile(event: React.FormEvent) {
-    event.preventDefault();
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
 
     try {
@@ -124,7 +147,6 @@ const ProfileManagement = () => {
       } = await supabase.auth.getUser();
 
       if (userError) {
-        // Safely access status if it exists, otherwise default to 401
         const statusCode =
           userError &&
           typeof userError === "object" &&
@@ -142,16 +164,15 @@ const ProfileManagement = () => {
       if (user) {
         const updates = {
           id: user.id,
-          username,
-          full_name: fullName,
-          avatar_url: avatarUrl,
+          username: values.username,
+          full_name: values.fullName,
+          avatar_url: values.avatarUrl,
           updated_at: new Date().toISOString(),
         };
 
         const { error } = await supabase.from("profiles").upsert(updates);
 
         if (error) {
-          // Safely access status if it exists, otherwise default to 500
           const statusCode =
             error &&
             typeof error === "object" &&
@@ -186,7 +207,9 @@ const ProfileManagement = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const currentAvatarUrl = form.watch("avatarUrl");
 
   if (loading) {
     return (
@@ -206,64 +229,81 @@ const ProfileManagement = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={updateProfile} className="space-y-4">
-            <div className="flex flex-col items-center gap-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage
-                  src={avatarUrl || "https://github.com/shadcn.png"}
-                  alt="@shadcn"
-                />
-                <AvatarFallback>
-                  {username ? username[0].toUpperCase() : "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid w-full gap-2">
-                <Label htmlFor="avatar-url">Avatar URL</Label>
-                <Input
-                  id="avatar-url"
-                  type="text"
-                  placeholder="https://example.com/avatar.jpg"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="flex flex-col items-center gap-4">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage
+                    src={currentAvatarUrl || "https://github.com/shadcn.png"}
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>
+                    {form.getValues("username")
+                      ? form.getValues("username")[0].toUpperCase()
+                      : "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <FormField
+                  control={form.control}
+                  name="avatarUrl"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Avatar URL</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="https://example.com/avatar.jpg"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input type="text" placeholder="Your username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="full-name">Full Name</Label>
-              <Input
-                id="full-name"
-                type="text"
-                placeholder="Your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input type="text" placeholder="Your full name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="grid gap-2">
-              <Label>Current Tier</Label>
-              <Input
-                type="text"
-                value={profile?.tier || "N/A"}
-                readOnly
-                disabled
-              />
-            </div>
-            {profile?.tier === "Free" && (
-              <Button className="w-full">Upgrade to Enterprise</Button>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Saving..." : "Save Profile"}
-            </Button>
-          </form>
+              <div className="grid gap-2">
+                <Label>Current Tier</Label>
+                <Input
+                  type="text"
+                  value={profile?.tier || "N/A"}
+                  readOnly
+                  disabled
+                />
+              </div>
+              {profile?.tier === "Free" && (
+                <Button className="w-full">Upgrade to Enterprise</Button>
+              )}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Profile"}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>
