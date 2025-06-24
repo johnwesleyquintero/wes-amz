@@ -13,7 +13,6 @@ export interface AppRouteConfig {
 // Define default suspense fallback
 
 // Lazy-load components
-export const LandingPage = lazy(() => import("@/pages/index.tsx"));
 export const DashboardContent = lazy(
   () => import("../pages/DashboardContent.tsx"),
 );
