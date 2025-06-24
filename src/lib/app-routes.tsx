@@ -14,7 +14,7 @@ export interface AppRouteConfig {
 
 // Lazy-load components
 export const DashboardContent = lazy(
-  () => import("../pages/DashboardContent.tsx"),
+  () => import("../pages/DashboardContent"),
 );
 export const Tools = lazy(() => import("../pages/Tools"));
 export const AcosCalculator = lazy(
@@ -84,7 +84,7 @@ export const WebhookManager = lazy(
 export const ProductResearch = lazy(
   () => import("../components/amazon-seller-tools/product-research"),
 );
-export const LandingPage = lazy(() => import("../pages/index.tsx"));
+export const LandingPage = lazy(() => import("../pages/index"));
 export const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
 export const TermsOfService = lazy(() => import("../pages/TermsOfService"));
 export const Register = lazy(() => import("../pages/auth/register"));

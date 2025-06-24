@@ -1,5 +1,5 @@
 import React from "react";
-import { AppRouteConfig } from "./app-routes.tsx";
+import { AppRouteConfig } from "./app-routes";
 import {
   Tools,
   AcosCalculator,
@@ -28,7 +28,7 @@ import {
   ProfileManagement,
   OrganizationSettings,
   TeamManagement,
-} from "./app-routes.tsx";
+} from "./app-routes";
 
 export const ROUTES = {
   DASHBOARD: "/dashboard",
