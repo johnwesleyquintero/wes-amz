@@ -6,7 +6,30 @@
   <text x="80" y="80" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2D3748">Profit Overview</text>
 
   <!-- Key Metrics -->
-  <rect x="70" y="110" width="200" height="80" rx="5" fill="#F8FAFC"/>
+  <rect id="netProfitCard" x="70" y="110" width="200" height="80" rx="5" fill="#F8FAFC">
+    <animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="scale"
+      from="1 1"
+      to="1.05 1.05"
+      begin="netProfitCard.click"
+      dur="0.1s"
+      fill="freeze"
+      additive="sum"
+    />
+    <animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="scale"
+      from="1.05 1.05"
+      to="1 1"
+      begin="netProfitCard.click + 0.1s"
+      dur="0.1s"
+      fill="freeze"
+      additive="sum"
+    />
+  </rect>
   <text x="85" y="135" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Net Profit</text>
   <text x="85" y="165" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#38A169">$9,876</text>
 

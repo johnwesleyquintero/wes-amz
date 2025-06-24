@@ -4,7 +4,6 @@ import { CsvRow } from "../lib/csv-utils";
 self.onmessage = (event) => {
   const { file } = event.data;
 
-  const parsedData: CsvRow[] = [];
   const totalBytes = file.size;
   let bytesRead = 0;
 
@@ -12,7 +11,9 @@ self.onmessage = (event) => {
     header: true,
     skipEmptyLines: true,
     chunk: (results, parser) => {
-      parsedData.push(...results.data);
+      // Post each chunk of data to the main thread
+      self.postMessage({ type: "chunk", data: results.data });
+
       bytesRead += results.meta.cursor; // This is an approximation, as cursor is byte index of the last row.
       const progress = Math.min(
         100,
@@ -31,7 +32,8 @@ self.onmessage = (event) => {
       }
     },
     complete: () => {
-      self.postMessage({ type: "complete", data: parsedData });
+      // Signal completion without sending accumulated data
+      self.postMessage({ type: "complete" });
     },
     error: (error: Error) => {
       self.postMessage({

@@ -11,7 +11,10 @@
   <rect x="140" y="260" width="80" height="10" rx="3" fill="#CBD5E0"/>
 
   <!-- Main Dashboard Area -->
-  <rect x="250" y="70" width="480" height="200" rx="5" fill="#F8FAFC"/>
+  <rect x="250" y="70" width="480" height="200" rx="5" fill="#F8FAFC">
+    <animate attributeName="fill" from="#F8FAFC" to="#E2E8F0" begin="mouseover" dur="0.2s" fill="freeze"/>
+    <animate attributeName="fill" from="#E2E8F0" to="#F8FAFC" begin="mouseout" dur="0.2s" fill="freeze"/>
+  </rect>
   <!-- Graph/Chart Placeholder -->
   <polyline points="270,190 320,140 370,170 420,120 470,150 520,100 570,130 620,90 670,110 710,80" 
             fill="none" stroke="#4299E1" stroke-width="3"/>
@@ -27,11 +30,39 @@
   <circle cx="710" cy="80" r="5" fill="#4299E1"/>
 
   <!-- Key Metrics/Cards -->
-  <rect x="250" y="280" width="230" height="120" rx="5" fill="#F8FAFC"/>
+  <rect id="totalSalesCard" x="250" y="280" width="230" height="120" rx="5" fill="#F8FAFC">
+    <animate attributeName="fill" from="#F8FAFC" to="#E2E8F0" begin="mouseover" dur="0.2s" fill="freeze"/>
+    <animate attributeName="fill" from="#E2E8F0" to="#F8FAFC" begin="mouseout" dur="0.2s" fill="freeze"/>
+    <animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="scale"
+      from="1 1"
+      to="1.05 1.05"
+      begin="totalSalesCard.click"
+      dur="0.1s"
+      fill="freeze"
+      additive="sum"
+    />
+    <animateTransform
+      attributeName="transform"
+      attributeType="XML"
+      type="scale"
+      from="1.05 1.05"
+      to="1 1"
+      begin="totalSalesCard.click + 0.1s"
+      dur="0.1s"
+      fill="freeze"
+      additive="sum"
+    />
+  </rect>
   <text x="365" y="310" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Total Sales</text>
   <text x="365" y="350" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#4299E1">$12,345</text>
 
-  <rect x="500" y="280" width="230" height="120" rx="5" fill="#F8FAFC"/>
+  <rect x="500" y="280" width="230" height="120" rx="5" fill="#F8FAFC">
+    <animate attributeName="fill" from="#F8FAFC" to="#E2E8F0" begin="mouseover" dur="0.2s" fill="freeze"/>
+    <animate attributeName="fill" from="#E2E8F0" to="#F8FAFC" begin="mouseout" dur="0.2s" fill="freeze"/>
+  </rect>
   <text x="615" y="310" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#4A5568">Ad Spend</text>
   <text x="615" y="350" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" fill="#F6AD55">$876</text>
 

@@ -38,6 +38,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
   const [isParsing, setIsParsing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [fileNameDisplay, setFileNameDisplay] = useState<string | null>(null);
+  const [accumulatedData, setAccumulatedData] = useState<T[]>([]);
   const workerRef = useRef<Worker>();
 
   useEffect(() => {
@@ -52,11 +53,15 @@ export default function CsvUploader<T extends GenericCsvRow>({
         case "progress":
           setProgress(progress);
           break;
+        case "chunk":
+          setAccumulatedData((prevData) => [...prevData, ...data]);
+          break;
         case "complete": {
           setIsParsing(false);
           setProgress(100);
+          // Perform column validation on the accumulated data
           const missingColumns = requiredColumns.filter(
-            (col) => !Object.keys(data[0] || {}).includes(col),
+            (col) => !Object.keys(accumulatedData[0] || {}).includes(col),
           );
           if (missingColumns.length > 0) {
             setParsingError(
@@ -69,19 +74,22 @@ export default function CsvUploader<T extends GenericCsvRow>({
               )}`,
               variant: "destructive",
             });
+            setAccumulatedData([]); // Clear data on error
             return;
           }
-          onUploadSuccess(data);
+          onUploadSuccess(accumulatedData);
           toast({
             title: "Success",
             description: `File processed successfully`,
             variant: "default",
           });
+          setAccumulatedData([]); // Clear data after successful upload
           break;
         }
         case "error":
           setIsParsing(false);
           setParsingError(message);
+          setAccumulatedData([]); // Clear data on error
           toast({
             title: "Error",
             description: message,
@@ -94,6 +102,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
     workerRef.current.onerror = (error: ErrorEvent) => {
       setIsParsing(false);
       setParsingError(`Worker error: ${error.message}`);
+      setAccumulatedData([]); // Clear data on error
       toast({
         title: "Error",
         description: `Worker error: ${error.message}`,
@@ -106,13 +115,14 @@ export default function CsvUploader<T extends GenericCsvRow>({
         workerRef.current.terminate();
       }
     };
-  }, [onUploadSuccess, requiredColumns, toast]);
+  }, [onUploadSuccess, requiredColumns, toast, accumulatedData]);
 
   const parseCsv = useCallback((file: File) => {
     setIsParsing(true);
     setParsingError(null);
     setProgress(0);
     setFileNameDisplay(file.name); // Set file name for display
+    setAccumulatedData([]); // Clear accumulated data before new parse
     workerRef.current?.postMessage({ file });
   }, []);
 
@@ -120,6 +130,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
     (acceptedFiles: File[]) => {
       setParsingError(null); // Clear previous errors
       setFileNameDisplay(null); // Clear previous file name display
+      setAccumulatedData([]); // Clear accumulated data on new file drop
       if (acceptedFiles.length === 0) {
         const errorMessage = "No file selected";
         setParsingError(errorMessage);

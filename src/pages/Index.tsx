@@ -23,34 +23,36 @@ const Landing = () => {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Header & Navigation */}
-      <header className="flex justify-between items-center p-6 bg-white shadow-md">
-        <div className="flex items-center">
-          <LazyImage
-            src="/logo.svg"
-            alt="Alerion Logo"
-            className="h-8 w-8 mr-2"
-          />
-          <span className="text-2xl font-bold text-orange-500">
-            {header.logoText}
-          </span>
-        </div>
-        <nav className="flex space-x-4">
-          {header.navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-gray-700 hover:text-orange-500"
+      <header className="bg-white shadow-md py-4">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <div className="flex items-center">
+            <LazyImage
+              src="/logo.svg"
+              alt="Alerion Logo"
+              className="h-8 w-8 mr-2"
+            />
+            <span className="text-2xl font-bold text-orange-500">
+              {header.logoText}
+            </span>
+          </div>
+          <nav className="flex space-x-4">
+            {header.navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-gray-700 hover:text-orange-500"
+              >
+                {link.text}
+              </a>
+            ))}
+            <Button
+              asChild
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
-              {link.text}
-            </a>
-          ))}
-          <Button
-            asChild
-            className="bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            <a href={header.primaryCta.href}>{header.primaryCta.text}</a>
-          </Button>
-        </nav>
+              <a href={header.primaryCta.href}>{header.primaryCta.text}</a>
+            </Button>
+          </nav>
+        </div>
       </header>
 
       {/* Hero Section */}
