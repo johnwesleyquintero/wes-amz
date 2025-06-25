@@ -6,7 +6,9 @@
   "installCommand": "npm install",
   "build": {
     "env": {
-      "VITE_APP_BASE_URL": "https://wes-amz.vercel.app"
+      "VITE_APP_BASE_URL": "https://alerion-amz.vercel.app",
+      "VITE_SUPABASE_URL": "https://uygpgwfruiqqofyltvuy.supabase.co",
+      "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5Z3Bnd2ZydWlxcW9meWx0dnV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NTkxMTMsImV4cCI6MjA2NTMzNTExM30.US-P1KFLeuJestoaFtqio-kjjP8AaQ5EXiOdcAcfSxU"
     }
   },
   "builds": [
