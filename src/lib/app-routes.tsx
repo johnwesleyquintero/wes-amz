@@ -20,7 +20,7 @@ export interface AppRouteConfig {
 export const Pages = {
   DashboardContent: lazy(() => import("../pages/DashboardContent.tsx")) as LazyComponent,
   Tools: lazy(() => import("../pages/Tools.tsx")) as LazyComponent,
-  LandingPage: lazy(() => import("../pages/index.tsx")) as LazyComponent,
+  LandingPage: lazy(() => import("../pages/Index.tsx")) as LazyComponent,
   PrivacyPolicy: lazy(() => import("../pages/PrivacyPolicy.tsx")) as LazyComponent,
   TermsOfService: lazy(() => import("../pages/TermsOfService.tsx")) as LazyComponent,
   NotFound: lazy(() => import("../pages/NotFound.tsx")) as LazyComponent,
