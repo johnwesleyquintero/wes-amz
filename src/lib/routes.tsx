@@ -1,34 +1,9 @@
 import React from "react";
 import { AppRouteConfig } from "./app-routes";
 import {
-  Tools,
-  AcosCalculator,
-  AutomatedEmailFollowup,
-  CompetitorAnalyzer,
-  DescriptionEditor,
-  FbaCalculator,
-  GoogleWorkspaceIntegration,
-  InventoryManagement,
-  KeywordAnalyzer,
-  KeywordDeduplicator,
-  KeywordIndexChecker,
-  KeywordTrendAnalyzer,
-  ListingHijackAlerts,
-  ListingQualityChecker,
-  MarketShareAnalysis,
-  OpportunityFinder,
-  PpcCampaignAuditor,
-  ProfitMarginCalculator,
-  ReverseASINKeywordMiner,
-  SalesEstimator,
-  SalesTrendAnalyzer,
-  WebhookManager,
-  ProductResearch,
-  SettingsLayout,
-  ProfileManagement,
-  OrganizationSettings,
-  TeamManagement,
-  GeminiAIChat,
+  Pages,
+  AmazonSellerTools,
+  SettingsComponents,
 } from "./app-routes";
 
 export const ROUTES = {
@@ -42,7 +17,7 @@ export const DEFAULT_SUSPENSE_FALLBACK = <div>Loading...</div>;
 export const authenticatedAppRoutes: AppRouteConfig[] = [
   {
     path: "tools", // Relative path for the main dashboard
-    component: Tools,
+    component: Pages.Tools,
     props: {
       showCategories: true,
       showTable: true,
@@ -54,129 +29,129 @@ export const authenticatedAppRoutes: AppRouteConfig[] = [
   // Other tool routes, adjusted to be relative to /app
   {
     path: "tools/acos-calculator",
-    component: AcosCalculator,
+    component: AmazonSellerTools.AcosCalculator,
     breadcrumbName: "ACoS Calculator",
   },
   {
     path: "tools/automated-email-followup",
-    component: AutomatedEmailFollowup,
+    component: AmazonSellerTools.AutomatedEmailFollowup,
     breadcrumbName: "Automated Email Followup",
   },
   {
     path: "tools/competitor-analyzer",
-    component: CompetitorAnalyzer,
+    component: AmazonSellerTools.CompetitorAnalyzer,
     breadcrumbName: "Competitor Analyzer",
   },
   {
     path: "tools/description-editor",
-    component: DescriptionEditor,
+    component: AmazonSellerTools.DescriptionEditor,
     breadcrumbName: "Description Editor",
   },
   {
     path: "tools/fba-calculator",
-    component: FbaCalculator,
+    component: AmazonSellerTools.FbaCalculator,
     breadcrumbName: "FBA Calculator",
   },
   {
     path: "tools/google-workspace-integration",
-    component: GoogleWorkspaceIntegration,
+    component: AmazonSellerTools.GoogleWorkspaceIntegration,
     breadcrumbName: "Google Workspace Integration",
   },
   {
     path: "tools/inventory-management",
-    component: InventoryManagement,
+    component: AmazonSellerTools.InventoryManagement,
     breadcrumbName: "Inventory Management",
   },
   {
     path: "tools/keyword-analyzer",
-    component: KeywordAnalyzer,
+    component: AmazonSellerTools.KeywordAnalyzer,
     breadcrumbName: "Keyword Analyzer",
   },
   {
     path: "tools/keyword-deduplicator",
-    component: KeywordDeduplicator,
+    component: AmazonSellerTools.KeywordDeduplicator,
     breadcrumbName: "Keyword Deduplicator",
   },
   {
     path: "tools/keyword-index-checker",
-    component: KeywordIndexChecker,
+    component: AmazonSellerTools.KeywordIndexChecker,
     breadcrumbName: "Keyword Index Checker",
   },
   {
     path: "tools/keyword-trend-analyzer",
-    component: KeywordTrendAnalyzer,
+    component: AmazonSellerTools.KeywordTrendAnalyzer,
     breadcrumbName: "Keyword Trend Analyzer",
   },
   {
     path: "tools/listing-hijack-alerts",
-    component: ListingHijackAlerts,
+    component: AmazonSellerTools.ListingHijackAlerts,
     breadcrumbName: "Listing Hijack Alerts",
   },
   {
     path: "tools/listing-quality-checker",
-    component: ListingQualityChecker,
+    component: AmazonSellerTools.ListingQualityChecker,
     breadcrumbName: "Listing Quality Checker",
   },
   {
     path: "tools/market-share-analysis",
-    component: MarketShareAnalysis,
+    component: AmazonSellerTools.MarketShareAnalysis,
     breadcrumbName: "Market Share Analysis",
   },
   {
     path: "tools/opportunity-finder",
-    component: OpportunityFinder,
+    component: AmazonSellerTools.OpportunityFinder,
     breadcrumbName: "Opportunity Finder",
   },
   {
     path: "tools/ppc-campaign-auditor",
-    component: PpcCampaignAuditor,
+    component: AmazonSellerTools.PpcCampaignAuditor,
     breadcrumbName: "PPC Campaign Auditor",
   },
   {
     path: "tools/profit-margin-calculator",
-    component: ProfitMarginCalculator,
+    component: AmazonSellerTools.ProfitMarginCalculator,
     breadcrumbName: "Profit Margin Calculator",
   },
   {
     path: "tools/reverse-asin-keyword-miner",
-    component: ReverseASINKeywordMiner,
+    component: AmazonSellerTools.ReverseASINKeywordMiner,
     breadcrumbName: "Reverse ASIN Keyword Miner",
   },
   {
     path: "tools/sales-estimator",
-    component: SalesEstimator,
+    component: AmazonSellerTools.SalesEstimator,
     breadcrumbName: "Sales Estimator",
   },
   {
     path: "tools/sales-trend-analyzer",
-    component: SalesTrendAnalyzer,
+    component: AmazonSellerTools.SalesTrendAnalyzer,
     breadcrumbName: "Sales Trend Analyzer",
   },
   {
     path: "tools/webhook-manager",
-    component: WebhookManager,
+    component: AmazonSellerTools.WebhookManager,
     breadcrumbName: "Webhook Manager",
   },
   {
     path: "tools/product-research",
-    component: ProductResearch,
+    component: AmazonSellerTools.ProductResearch,
     breadcrumbName: "Product Research",
   },
-  { path: "settings", component: SettingsLayout, breadcrumbName: "Settings" }, // Parent route for settings
+  { path: "settings", component: SettingsComponents.SettingsLayout, breadcrumbName: "Settings" }, // Parent route for settings
   {
     path: "settings/profile",
-    component: ProfileManagement,
+    component: SettingsComponents.ProfileManagement,
     breadcrumbName: "Profile",
   },
   {
     path: "settings/organization",
-    component: OrganizationSettings,
+    component: SettingsComponents.OrganizationSettings,
     breadcrumbName: "Organization",
   },
-  { path: "settings/team", component: TeamManagement, breadcrumbName: "Team" },
+  { path: "settings/team", component: SettingsComponents.TeamManagement, breadcrumbName: "Team" },
   {
     path: "tools/gemini-ai-chat",
-    component: GeminiAIChat,
+    component: Pages.GeminiAIChat,
     breadcrumbName: "Gemini AI Chat",
   },
 ];

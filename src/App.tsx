@@ -10,19 +10,9 @@ import MainLayout from "./components/layout/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/shared/ErrorBoundary"; // Import ErrorBoundary
 import {
-  LandingPage,
-  DashboardContent,
-  PrivacyPolicy,
-  TermsOfService,
-  Register,
-  Login,
-  ForgotPassword,
-  UpdatePassword,
-  ProfileManagement,
-  OrganizationSettings,
-  TeamManagement,
-  NotFound,
-  SettingsLayout,
+  Pages,
+  AuthComponents,
+  SettingsComponents,
 } from "./lib/app-routes.tsx";
 import {
   DEFAULT_SUSPENSE_FALLBACK,
@@ -49,7 +39,7 @@ function App() {
                     path="/"
                     element={
                       <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <LandingPage />
+                        <Pages.LandingPage />
                       </Suspense>
                     }
                   />
@@ -57,7 +47,7 @@ function App() {
                     path="/privacy-policy"
                     element={
                       <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <PrivacyPolicy />
+                        <Pages.PrivacyPolicy />
                       </Suspense>
                     }
                   />
@@ -65,7 +55,7 @@ function App() {
                     path="/terms-of-service"
                     element={
                       <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <TermsOfService />
+                        <Pages.TermsOfService />
                       </Suspense>
                     }
                   />
@@ -76,7 +66,7 @@ function App() {
                       path="register"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <Register />
+                          <AuthComponents.Register />
                         </Suspense>
                       }
                     />
@@ -84,7 +74,7 @@ function App() {
                       path="login"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <Login />
+                          <AuthComponents.Login />
                         </Suspense>
                       }
                     />
@@ -92,7 +82,7 @@ function App() {
                       path="forgot-password"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <ForgotPassword />
+                          <AuthComponents.ForgotPassword />
                         </Suspense>
                       }
                     />
@@ -100,7 +90,7 @@ function App() {
                       path="update-password"
                       element={
                         <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <UpdatePassword />
+                          <AuthComponents.UpdatePassword />
                         </Suspense>
                       }
                     />
@@ -115,7 +105,7 @@ function App() {
                           index
                           element={
                             <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <DashboardContent />
+                              <Pages.DashboardContent />
                             </Suspense>
                           }
                         />
@@ -139,7 +129,7 @@ function App() {
                           path="settings"
                           element={
                             <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsLayout />
+                              <SettingsComponents.SettingsLayout />
                             </Suspense>
                           }
                         >
@@ -147,7 +137,7 @@ function App() {
                             index
                             element={
                               <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <ProfileManagement />
+                                <SettingsComponents.ProfileManagement />
                               </Suspense>
                             }
                           />
@@ -155,7 +145,7 @@ function App() {
                             path="profile"
                             element={
                               <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <ProfileManagement />
+                                <SettingsComponents.ProfileManagement />
                               </Suspense>
                             }
                           />
@@ -163,7 +153,7 @@ function App() {
                             path="organization"
                             element={
                               <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <OrganizationSettings />
+                                <SettingsComponents.OrganizationSettings />
                               </Suspense>
                             }
                           />
@@ -171,7 +161,7 @@ function App() {
                             path="team"
                             element={
                               <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <TeamManagement />
+                                <SettingsComponents.TeamManagement />
                               </Suspense>
                             }
                           />
@@ -180,7 +170,7 @@ function App() {
                     </Route>
                   </Route>
 
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="*" element={<Pages.NotFound />} />
                 </Routes>
               </BrowserRouter>
             </ErrorBoundary>
