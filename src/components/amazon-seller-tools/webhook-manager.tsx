@@ -5,7 +5,9 @@ import {
   sendWebhookPayload,
   listWebhooks,
   deleteWebhook,
-  Webhook, // Import the interface from webhook-utils
+  toggleWebhookStatus,
+  testWebhook,
+  Webhook,
 } from "../../lib/webhook-utils";
 import { Button } from "../ui/button";
 import {
@@ -25,22 +27,91 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { useToast } from "../ui/use-toast"; // Assuming useToast is available
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Switch } from "../ui/switch";
+import { useToast } from "../ui/use-toast";
+import { useApi } from "@/hooks/use-api";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import ErrorDisplay from "@/components/shared/ErrorDisplay";
+import { 
+  Webhook as WebhookIcon, 
+  Plus, 
+  Trash2, 
+  TestTube, 
+  AlertTriangle,
+  CheckCircle,
+  Clock
+} from "lucide-react";
 
 const WebhookManager: React.FC = () => {
   const [webhookUrl, setWebhookUrl] = useState("");
   const [eventType, setEventType] = useState("");
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
-  const [payload, setPayload] = useState("");
-  const [sendWebhookId, setSendWebhookId] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
-  const [isLoadingWebhooks, setIsLoadingWebhooks] = useState(true);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [isSendingPayload, setIsSendingPayload] = useState(false);
-  const [deletingWebhookId, setDeletingWebhookId] = useState<string | null>(
-    null,
-  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  const {
+    loading: isLoadingWebhooks,
+    error: webhooksError,
+    execute: executeListWebhooks
+  } = useApi<Webhook[]>({
+    onSuccess: (data) => setWebhooks(data),
+    showErrorToast: true
+  });
+
+  const {
+    loading: isRegistering,
+    execute: executeRegisterWebhook
+  } = useApi({
+    onSuccess: () => {
+      toast({
+        title: "Webhook Registered",
+        description: "Webhook has been successfully registered.",
+      });
+      setWebhookUrl("");
+      setEventType("");
+      setIsDialogOpen(false);
+      fetchWebhooks();
+    },
+    showErrorToast: true
+  });
+
+  const {
+    loading: isDeleting,
+    execute: executeDeleteWebhook
+  } = useApi({
+    onSuccess: () => {
+      toast({
+        title: "Webhook Deleted",
+        description: "Webhook has been successfully deleted.",
+      });
+      fetchWebhooks();
+    },
+    showErrorToast: true
+  });
+
+  const {
+    loading: isTesting,
+    execute: executeTestWebhook
+  } = useApi({
+    onSuccess: () => {
+      toast({
+        title: "Test Successful",
+        description: "Test webhook sent successfully.",
+      });
+    },
+    showErrorToast: true
+  });
 
   useEffect(() => {
     const getUserId = async () => {
@@ -55,7 +126,6 @@ const WebhookManager: React.FC = () => {
           description: "User not logged in. Cannot manage webhooks.",
           variant: "destructive",
         });
-        setIsLoadingWebhooks(false); // Stop loading if no user
       }
     };
     getUserId();
@@ -63,21 +133,8 @@ const WebhookManager: React.FC = () => {
 
   const fetchWebhooks = useCallback(async () => {
     if (!userId) return;
-    setIsLoadingWebhooks(true);
-    try {
-      const fetched = await listWebhooks(userId);
-      setWebhooks(fetched);
-    } catch (error) {
-      console.error("Failed to fetch webhooks:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load webhooks.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingWebhooks(false);
-    }
-  }, [userId, toast]);
+    await executeListWebhooks(() => listWebhooks(userId));
+  }, [userId, executeListWebhooks]);
 
   useEffect(() => {
     if (userId) {
@@ -94,192 +151,241 @@ const WebhookManager: React.FC = () => {
       });
       return;
     }
-    setIsRegistering(true);
-    try {
-      const result = await registerWebhook(webhookUrl, eventType, userId);
-      if (result.success) {
-        toast({
-          title: "Webhook Registered",
-          description: `Webhook registered with ID: ${result.id}`,
-        });
-        setWebhookUrl("");
-        setEventType("");
-        fetchWebhooks();
-      } else {
-        toast({
-          title: "Error",
-          description: `Failed to register webhook: ${result.error?.message || "Unknown error"}`,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error registering webhook:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred during registration.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRegistering(false);
-    }
-  };
 
-  const handleSendPayload = async () => {
-    setIsSendingPayload(true);
-    try {
-      const parsedPayload = JSON.parse(payload);
-      const success = await sendWebhookPayload(sendWebhookId, parsedPayload);
-      if (success) {
-        toast({
-          title: "Payload Sent",
-          description: "Payload sent successfully (check console for details).",
-        });
-        setPayload("");
-        setSendWebhookId("");
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to send payload.",
-          variant: "destructive",
-        });
-      }
-    } catch {
+    if (!webhookUrl.trim() || !eventType.trim()) {
       toast({
-        title: "Error",
-        description: "Invalid JSON payload.",
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
-    } finally {
-      setIsSendingPayload(false);
+      return;
     }
+
+    await executeRegisterWebhook(() => 
+      registerWebhook(webhookUrl.trim(), eventType.trim(), userId)
+    );
   };
 
   const handleDeleteWebhook = async (id: string) => {
-    setDeletingWebhookId(id);
+    await executeDeleteWebhook(() => deleteWebhook(id));
+  };
+
+  const handleTestWebhook = async (id: string) => {
+    await executeTestWebhook(() => testWebhook(id));
+  };
+
+  const handleToggleStatus = async (id: string, isActive: boolean) => {
     try {
-      const success = await deleteWebhook(id);
-      if (success) {
-        toast({
-          title: "Webhook Deleted",
-          description: `Webhook ${id} deleted.`,
-        });
-        fetchWebhooks();
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete webhook.",
-          variant: "destructive",
-        });
-      }
+      await toggleWebhookStatus(id, isActive);
+      toast({
+        title: "Status Updated",
+        description: `Webhook ${isActive ? "activated" : "deactivated"} successfully.`,
+      });
+      fetchWebhooks();
     } catch (error) {
-      console.error("Error deleting webhook:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred during deletion.",
+        description: "Failed to update webhook status.",
         variant: "destructive",
       });
-    } finally {
-      setDeletingWebhookId(null);
     }
   };
+
+  const getStatusBadge = (webhook: Webhook) => {
+    if (!webhook.is_active) {
+      return <Badge variant="secondary">Inactive</Badge>;
+    }
+    
+    if (webhook.failure_count && webhook.failure_count > 0) {
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          {webhook.failure_count} failures
+        </Badge>
+      );
+    }
+    
+    return (
+      <Badge variant="default" className="flex items-center gap-1">
+        <CheckCircle className="h-3 w-3" />
+        Active
+      </Badge>
+    );
+  };
+
+  if (isLoadingWebhooks) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoadingSpinner size="lg" />
+        <span className="ml-2">Loading webhooks...</span>
+      </div>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Webhook Manager</CardTitle>
-        <CardDescription>
-          Manage your custom webhook integrations.
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <WebhookIcon className="h-5 w-5" />
+              Webhook Manager
+            </CardTitle>
+            <CardDescription>
+              Manage your custom webhook integrations for real-time notifications.
+            </CardDescription>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Webhook
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Register New Webhook</DialogTitle>
+                <DialogDescription>
+                  Add a new webhook endpoint to receive real-time notifications.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="webhookUrl">Webhook URL</Label>
+                  <Input
+                    id="webhookUrl"
+                    value={webhookUrl}
+                    onChange={(e) => setWebhookUrl(e.target.value)}
+                    placeholder="https://your-domain.com/webhook"
+                    type="url"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="eventType">Event Type</Label>
+                  <Input
+                    id="eventType"
+                    value={eventType}
+                    onChange={(e) => setEventType(e.target.value)}
+                    placeholder="e.g., campaign_update, listing_change"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleRegisterWebhook} 
+                  disabled={isRegistering}
+                >
+                  {isRegistering ? (
+                    <>
+                      <LoadingSpinner size="sm" className="mr-2" />
+                      Registering...
+                    </>
+                  ) : (
+                    "Register Webhook"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Register New Webhook</h3>
-          <div>
-            <Label htmlFor="webhookUrl">Webhook URL</Label>
-            <Input
-              id="webhookUrl"
-              value={webhookUrl}
-              onChange={(e) => setWebhookUrl(e.target.value)}
-              placeholder="Enter Webhook URL"
-            />
-          </div>
-          <div>
-            <Label htmlFor="eventType">Event Type</Label>
-            <Input
-              id="eventType"
-              value={eventType}
-              onChange={(e) => setEventType(e.target.value)}
-              placeholder="e.g., campaign_update, listing_change"
-            />
-          </div>
-          <Button onClick={handleRegisterWebhook} disabled={isRegistering}>
-            {isRegistering ? "Registering..." : "Register Webhook"}
-          </Button>
-        </div>
+      <CardContent className="space-y-6">
+        {webhooksError && (
+          <ErrorDisplay 
+            error={webhooksError.message} 
+            onRetry={fetchWebhooks}
+          />
+        )}
 
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Send Webhook Payload</h3>
-          <div>
-            <Label htmlFor="sendWebhookId">Webhook ID</Label>
-            <Input
-              id="sendWebhookId"
-              value={sendWebhookId}
-              onChange={(e) => setSendWebhookId(e.target.value)}
-              placeholder="Enter Webhook ID"
-              disabled={isSendingPayload}
-            />
-          </div>
-          <div>
-            <Label htmlFor="payload">Payload (JSON)</Label>
-            <Input
-              id="payload"
-              value={payload}
-              onChange={(e) => setPayload(e.target.value)}
-              placeholder="Enter JSON payload"
-              disabled={isSendingPayload}
-            />
-          </div>
-          <Button onClick={handleSendPayload} disabled={isSendingPayload}>
-            {isSendingPayload ? "Sending..." : "Send Payload"}
-          </Button>
-        </div>
-
-        <div className="space-y-2">
+        <div className="space-y-4">
           <h3 className="text-lg font-semibold">Registered Webhooks</h3>
-          {isLoadingWebhooks ? (
-            <p>Loading webhooks...</p>
-          ) : webhooks.length === 0 ? (
-            <p>No webhooks registered yet.</p>
+          {webhooks.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <WebhookIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">No webhooks registered</p>
+              <p className="text-sm">Add your first webhook to get started with real-time notifications.</p>
+            </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>URL</TableHead>
-                  <TableHead>Event Type</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {webhooks.map((webhook) => (
-                  <TableRow key={webhook.id}>
-                    <TableCell>{webhook.id}</TableCell>
-                    <TableCell>{webhook.url}</TableCell>
-                    <TableCell>{webhook.event_type}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDeleteWebhook(webhook.id)}
-                        disabled={deletingWebhookId === webhook.id}
-                      >
-                        {deletingWebhookId === webhook.id ? "Deleting..." : "Delete"}
-                      </Button>
-                    </TableCell>
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>URL</TableHead>
+                    <TableHead>Event Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Triggered</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {webhooks.map((webhook) => (
+                    <TableRow key={webhook.id}>
+                      <TableCell className="font-mono text-sm max-w-xs truncate">
+                        {webhook.url}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{webhook.event_type}</Badge>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(webhook)}</TableCell>
+                      <TableCell>
+                        {webhook.last_triggered ? (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {new Date(webhook.last_triggered).toLocaleDateString()}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Never</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={webhook.is_active || false}
+                            onCheckedChange={(checked) => 
+                              handleToggleStatus(webhook.id, checked)
+                            }
+                            disabled={isDeleting}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTestWebhook(webhook.id)}
+                            disabled={isTesting || !webhook.is_active}
+                          >
+                            <TestTube className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteWebhook(webhook.id)}
+                            disabled={isDeleting}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
+        </div>
+
+        <div className="bg-muted/50 p-4 rounded-lg">
+          <h4 className="font-semibold mb-2">Webhook Information</h4>
+          <ul className="text-sm text-muted-foreground space-y-1">
+            <li>• Webhooks will be automatically disabled after 5 consecutive failures</li>
+            <li>• Test your webhooks to ensure they're working correctly</li>
+            <li>• Webhook payloads include event type, timestamp, and relevant data</li>
+            <li>• Use HTTPS URLs for secure webhook endpoints</li>
+          </ul>
         </div>
       </CardContent>
     </Card>
