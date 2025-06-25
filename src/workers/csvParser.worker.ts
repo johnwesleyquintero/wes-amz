@@ -1,45 +1,95 @@
 import Papa from "papaparse";
-import { CsvRow } from "../lib/csv-utils";
 
-self.onmessage = (event) => {
+interface WorkerMessage {
+  file: File;
+}
+
+interface WorkerResponse {
+  type: "progress" | "chunk" | "complete" | "error";
+  data?: any[];
+  message?: string;
+  progress?: number;
+}
+
+const CHUNK_SIZE = 1000; // Process 1000 rows at a time
+
+self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   const { file } = event.data;
 
-  const totalBytes = file.size;
-  let bytesRead = 0;
+  try {
+    let processedRows = 0;
+    let totalRows = 0;
+    const allData: any[] = [];
 
-  Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    chunk: (results, parser) => {
-      // Post each chunk of data to the main thread
-      self.postMessage({ type: "chunk", data: results.data });
+    // First pass: count total rows for progress tracking
+    Papa.parse(file, {
+      step: () => {
+        totalRows++;
+      },
+      complete: () => {
+        // Second pass: actual parsing with progress updates
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          chunk: (results) => {
+            const validData = results.data.filter((row: any) => {
+              // Basic validation - ensure row has some data
+              return Object.values(row).some(value => 
+                value !== null && value !== undefined && String(value).trim() !== ""
+              );
+            });
 
-      bytesRead += results.meta.cursor; // This is an approximation, as cursor is byte index of the last row.
-      const progress = Math.min(
-        100,
-        Math.round((bytesRead / totalBytes) * 100),
-      );
-      self.postMessage({ type: "progress", progress });
+            allData.push(...validData);
+            processedRows += results.data.length;
 
-      if (results.errors.length > 0) {
-        parser.abort();
+            // Send progress update
+            const progress = Math.round((processedRows / totalRows) * 100);
+            self.postMessage({
+              type: "progress",
+              progress: Math.min(progress, 95) // Cap at 95% until complete
+            } as WorkerResponse);
+
+            // Send chunk data if we have enough rows
+            if (allData.length >= CHUNK_SIZE) {
+              self.postMessage({
+                type: "chunk",
+                data: allData.splice(0, CHUNK_SIZE)
+              } as WorkerResponse);
+            }
+          },
+          complete: () => {
+            // Send any remaining data
+            if (allData.length > 0) {
+              self.postMessage({
+                type: "chunk",
+                data: allData
+              } as WorkerResponse);
+            }
+
+            self.postMessage({
+              type: "complete",
+              progress: 100
+            } as WorkerResponse);
+          },
+          error: (error) => {
+            self.postMessage({
+              type: "error",
+              message: `CSV parsing error: ${error.message}`
+            } as WorkerResponse);
+          }
+        });
+      },
+      error: (error) => {
         self.postMessage({
           type: "error",
-          message: `CSV parsing errors: ${results.errors
-            .map((e) => e.message)
-            .join(", ")}`,
-        });
+          message: `Failed to analyze CSV: ${error.message}`
+        } as WorkerResponse);
       }
-    },
-    complete: () => {
-      // Signal completion without sending accumulated data
-      self.postMessage({ type: "complete" });
-    },
-    error: (error: Error) => {
-      self.postMessage({
-        type: "error",
-        message: `Error parsing CSV: ${error.message}`,
-      });
-    },
-  });
+    });
+  } catch (error) {
+    self.postMessage({
+      type: "error",
+      message: `Worker error: ${error instanceof Error ? error.message : "Unknown error"}`
+    } as WorkerResponse);
+  }
 };
