@@ -7,29 +7,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface Column {
-  key: string;
+import { type Key } from "react";
+
+interface Column<T extends Record<string, React.ReactNode>> {
+  key: keyof T;
   label: string;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
   className?: string;
 }
 
-interface DataTableProps {
-  data: any[];
-  columns: Column[];
+interface DataTableProps<T extends Record<string, React.ReactNode>> {
+  data: T[];
+  columns: Column<T>[];
   className?: string;
   emptyMessage?: string;
 }
 
-const DataTable: React.FC<DataTableProps> = ({
+const DataTable = <T extends Record<string, React.ReactNode>>({
   data,
   columns,
   className,
-  emptyMessage = "No data available"
-}) => {
+  emptyMessage = "No data available",
+}: DataTableProps<T>) => {
   if (data.length === 0) {
     return (
       <div className={cn("text-center py-8 text-muted-foreground", className)}>
@@ -44,7 +45,7 @@ const DataTable: React.FC<DataTableProps> = ({
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead key={column.key} className={column.className}>
+              <TableHead key={column.key as Key} className={column.className}>
                 {column.label}
               </TableHead>
             ))}
@@ -54,11 +55,10 @@ const DataTable: React.FC<DataTableProps> = ({
           {data.map((row, index) => (
             <TableRow key={index}>
               {columns.map((column) => (
-                <TableCell key={column.key} className={column.className}>
-                  {column.render 
+                <TableCell key={column.key as Key} className={column.className}>
+                  {column.render
                     ? column.render(row[column.key], row)
-                    : row[column.key]
-                  }
+                    : (row[column.key] as React.ReactNode)}
                 </TableCell>
               ))}
             </TableRow>

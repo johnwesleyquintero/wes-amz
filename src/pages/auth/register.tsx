@@ -31,7 +31,9 @@ const formSchema = z
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters long." }),
-    confirmPassword: z.string().min(1, { message: "Confirm password is required." }),
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Confirm password is required." }),
     tier: z.enum(["Free", "Enterprise"]),
     organizationName: z.string().optional(),
   })
@@ -40,8 +42,7 @@ const formSchema = z
     path: ["confirmPassword"],
   })
   .refine(
-    (data) =>
-      !(data.tier === "Enterprise" && !data.organizationName?.trim()),
+    (data) => !(data.tier === "Enterprise" && !data.organizationName?.trim()),
     {
       message: "Organization name is required for Enterprise tier.",
       path: ["organizationName"],

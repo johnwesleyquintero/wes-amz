@@ -102,7 +102,7 @@ export default function KeywordAnalyzer() {
 
                 const keywordArray =
                   typeof (item as KeywordItem).keywords === "string"
-                    ? (item as KeywordItem).keywords
+                    ? ((item as KeywordItem).keywords as string)
                         .split(",")
                         .map((k: string) => k.trim())
                     : Array.isArray((item as KeywordItem).keywords)
@@ -122,7 +122,7 @@ export default function KeywordAnalyzer() {
                   : undefined;
 
                 const analysis = await KeywordIntelligence.analyzeBatch(
-                  keywordArray || [],
+                  keywordArray as string[],
                 );
 
                 return {

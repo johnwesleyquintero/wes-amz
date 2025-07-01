@@ -6,7 +6,7 @@ interface WorkerMessage {
 
 interface WorkerResponse {
   type: "progress" | "chunk" | "complete" | "error";
-  data?: any[];
+  data?: unknown[]; // Use unknown for flexible data types
   message?: string;
   progress?: number;
 }
@@ -19,7 +19,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   try {
     let processedRows = 0;
     let totalRows = 0;
-    const allData: any[] = [];
+    const allData: unknown[] = []; // Use unknown[]
 
     // First pass: count total rows for progress tracking
     Papa.parse(file, {
@@ -32,10 +32,15 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           header: true,
           skipEmptyLines: true,
           chunk: (results) => {
-            const validData = results.data.filter((row: any) => {
+            const validData = results.data.filter((row: unknown) => {
+              // Use unknown
               // Basic validation - ensure row has some data
-              return Object.values(row).some(value => 
-                value !== null && value !== undefined && String(value).trim() !== ""
+              if (typeof row !== "object" || row === null) return false;
+              return Object.values(row).some(
+                (value) =>
+                  value !== null &&
+                  value !== undefined &&
+                  String(value).trim() !== "",
               );
             });
 
@@ -46,14 +51,14 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
             const progress = Math.round((processedRows / totalRows) * 100);
             self.postMessage({
               type: "progress",
-              progress: Math.min(progress, 95) // Cap at 95% until complete
+              progress: Math.min(progress, 95), // Cap at 95% until complete
             } as WorkerResponse);
 
             // Send chunk data if we have enough rows
             if (allData.length >= CHUNK_SIZE) {
               self.postMessage({
                 type: "chunk",
-                data: allData.splice(0, CHUNK_SIZE)
+                data: allData.splice(0, CHUNK_SIZE),
               } as WorkerResponse);
             }
           },
@@ -62,34 +67,34 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
             if (allData.length > 0) {
               self.postMessage({
                 type: "chunk",
-                data: allData
+                data: allData,
               } as WorkerResponse);
             }
 
             self.postMessage({
               type: "complete",
-              progress: 100
+              progress: 100,
             } as WorkerResponse);
           },
           error: (error) => {
             self.postMessage({
               type: "error",
-              message: `CSV parsing error: ${error.message}`
+              message: `CSV parsing error: ${error.message}`,
             } as WorkerResponse);
-          }
+          },
         });
       },
       error: (error) => {
         self.postMessage({
           type: "error",
-          message: `Failed to analyze CSV: ${error.message}`
+          message: `Failed to analyze CSV: ${error.message}`,
         } as WorkerResponse);
-      }
+      },
     });
   } catch (error) {
     self.postMessage({
       type: "error",
-      message: `Worker error: ${error instanceof Error ? error.message : "Unknown error"}`
+      message: `Worker error: ${error instanceof Error ? error.message : "Unknown error"}`,
     } as WorkerResponse);
   }
 };

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   registerWebhook,
-  sendWebhookPayload,
   listWebhooks,
   deleteWebhook,
   toggleWebhookStatus,
@@ -42,14 +41,14 @@ import { useToast } from "../ui/use-toast";
 import { useApi } from "@/hooks/use-api";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import ErrorDisplay from "@/components/shared/ErrorDisplay";
-import { 
-  Webhook as WebhookIcon, 
-  Plus, 
-  Trash2, 
-  TestTube, 
+import {
+  Webhook as WebhookIcon,
+  Plus,
+  Trash2,
+  TestTube,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
 } from "lucide-react";
 
 const WebhookManager: React.FC = () => {
@@ -63,16 +62,13 @@ const WebhookManager: React.FC = () => {
   const {
     loading: isLoadingWebhooks,
     error: webhooksError,
-    execute: executeListWebhooks
+    execute: executeListWebhooks,
   } = useApi<Webhook[]>({
     onSuccess: (data) => setWebhooks(data),
-    showErrorToast: true
+    showErrorToast: true,
   });
 
-  const {
-    loading: isRegistering,
-    execute: executeRegisterWebhook
-  } = useApi({
+  const { loading: isRegistering, execute: executeRegisterWebhook } = useApi({
     onSuccess: () => {
       toast({
         title: "Webhook Registered",
@@ -83,13 +79,10 @@ const WebhookManager: React.FC = () => {
       setIsDialogOpen(false);
       fetchWebhooks();
     },
-    showErrorToast: true
+    showErrorToast: true,
   });
 
-  const {
-    loading: isDeleting,
-    execute: executeDeleteWebhook
-  } = useApi({
+  const { loading: isDeleting, execute: executeDeleteWebhook } = useApi({
     onSuccess: () => {
       toast({
         title: "Webhook Deleted",
@@ -97,20 +90,17 @@ const WebhookManager: React.FC = () => {
       });
       fetchWebhooks();
     },
-    showErrorToast: true
+    showErrorToast: true,
   });
 
-  const {
-    loading: isTesting,
-    execute: executeTestWebhook
-  } = useApi({
+  const { loading: isTesting, execute: executeTestWebhook } = useApi({
     onSuccess: () => {
       toast({
         title: "Test Successful",
         description: "Test webhook sent successfully.",
       });
     },
-    showErrorToast: true
+    showErrorToast: true,
   });
 
   useEffect(() => {
@@ -161,8 +151,8 @@ const WebhookManager: React.FC = () => {
       return;
     }
 
-    await executeRegisterWebhook(() => 
-      registerWebhook(webhookUrl.trim(), eventType.trim(), userId)
+    await executeRegisterWebhook(() =>
+      registerWebhook(webhookUrl.trim(), eventType.trim(), userId),
     );
   };
 
@@ -182,10 +172,12 @@ const WebhookManager: React.FC = () => {
         description: `Webhook ${isActive ? "activated" : "deactivated"} successfully.`,
       });
       fetchWebhooks();
-    } catch (error) {
+    } catch (err) {
+      const error =
+        err instanceof Error ? err.message : "An unknown error occurred";
       toast({
         title: "Error",
-        description: "Failed to update webhook status.",
+        description: `Failed to update webhook status: ${error}`,
         variant: "destructive",
       });
     }
@@ -195,7 +187,7 @@ const WebhookManager: React.FC = () => {
     if (!webhook.is_active) {
       return <Badge variant="secondary">Inactive</Badge>;
     }
-    
+
     if (webhook.failure_count && webhook.failure_count > 0) {
       return (
         <Badge variant="destructive" className="flex items-center gap-1">
@@ -204,7 +196,7 @@ const WebhookManager: React.FC = () => {
         </Badge>
       );
     }
-    
+
     return (
       <Badge variant="default" className="flex items-center gap-1">
         <CheckCircle className="h-3 w-3" />
@@ -232,7 +224,8 @@ const WebhookManager: React.FC = () => {
               Webhook Manager
             </CardTitle>
             <CardDescription>
-              Manage your custom webhook integrations for real-time notifications.
+              Manage your custom webhook integrations for real-time
+              notifications.
             </CardDescription>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -271,14 +264,14 @@ const WebhookManager: React.FC = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleRegisterWebhook} 
+                <Button
+                  onClick={handleRegisterWebhook}
                   disabled={isRegistering}
                 >
                   {isRegistering ? (
@@ -297,10 +290,7 @@ const WebhookManager: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         {webhooksError && (
-          <ErrorDisplay 
-            error={webhooksError.message} 
-            onRetry={fetchWebhooks}
-          />
+          <ErrorDisplay error={webhooksError.message} onRetry={fetchWebhooks} />
         )}
 
         <div className="space-y-4">
@@ -309,7 +299,10 @@ const WebhookManager: React.FC = () => {
             <div className="text-center py-8 text-muted-foreground">
               <WebhookIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium">No webhooks registered</p>
-              <p className="text-sm">Add your first webhook to get started with real-time notifications.</p>
+              <p className="text-sm">
+                Add your first webhook to get started with real-time
+                notifications.
+              </p>
             </div>
           ) : (
             <div className="rounded-lg border">
@@ -337,17 +330,21 @@ const WebhookManager: React.FC = () => {
                         {webhook.last_triggered ? (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Clock className="h-3 w-3" />
-                            {new Date(webhook.last_triggered).toLocaleDateString()}
+                            {new Date(
+                              webhook.last_triggered,
+                            ).toLocaleDateString()}
                           </div>
                         ) : (
-                          <span className="text-sm text-muted-foreground">Never</span>
+                          <span className="text-sm text-muted-foreground">
+                            Never
+                          </span>
                         )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={webhook.is_active || false}
-                            onCheckedChange={(checked) => 
+                            onCheckedChange={(checked) =>
                               handleToggleStatus(webhook.id, checked)
                             }
                             disabled={isDeleting}
@@ -381,9 +378,15 @@ const WebhookManager: React.FC = () => {
         <div className="bg-muted/50 p-4 rounded-lg">
           <h4 className="font-semibold mb-2">Webhook Information</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Webhooks will be automatically disabled after 5 consecutive failures</li>
+            <li>
+              • Webhooks will be automatically disabled after 5 consecutive
+              failures
+            </li>
             <li>• Test your webhooks to ensure they're working correctly</li>
-            <li>• Webhook payloads include event type, timestamp, and relevant data</li>
+            <li>
+              • Webhook payloads include event type, timestamp, and relevant
+              data
+            </li>
             <li>• Use HTTPS URLs for secure webhook endpoints</li>
           </ul>
         </div>

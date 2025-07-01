@@ -35,7 +35,9 @@ interface Organization {
 }
 
 const formSchema = z.object({
-  organizationName: z.string().min(1, { message: "Organization name is required." }),
+  organizationName: z
+    .string()
+    .min(1, { message: "Organization name is required." }),
 });
 
 /**

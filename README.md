@@ -92,10 +92,10 @@ npm run build
 
 Here are some notable scripts defined in `package.json`:
 
--   `npm run build:dev`: Builds the project without production optimizations. Useful for debugging or specific development environments.
--   `npm run check`: Executes custom code quality checks using the script in `scripts/code-checker.mjs`.
--   `npm run cli`: Runs the interactive command-line interface (`cli.sh`) for various project tasks.
--   `npm run git-commit`: Runs an interactive script (`scripts/git-commit.mjs`) to help generate conventional commit messages and push changes.
+- `npm run build:dev`: Builds the project without production optimizations. Useful for debugging or specific development environments.
+- `npm run check`: Executes custom code quality checks using the script in `scripts/code-checker.mjs`.
+- `npm run cli`: Runs the interactive command-line interface (`cli.sh`) for various project tasks.
+- `npm run git-commit`: Runs an interactive script (`scripts/git-commit.mjs`) to help generate conventional commit messages and push changes.
 
 ---
 

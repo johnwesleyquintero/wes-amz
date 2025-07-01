@@ -37,7 +37,11 @@ interface Profile {
 const formSchema = z.object({
   username: z.string().optional(),
   fullName: z.string().optional(),
-  avatarUrl: z.string().url({ message: "Invalid URL" }).optional().or(z.literal("")),
+  avatarUrl: z
+    .string()
+    .url({ message: "Invalid URL" })
+    .optional()
+    .or(z.literal("")),
 });
 
 /**
@@ -131,16 +135,18 @@ const ProfileManagement = () => {
     }
   }, [fetchError, toast]);
 
-  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [geminiApiKey, setGeminiApiKey] = useState("");
 
   useEffect(() => {
     const fetchApiKey = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data: profile, error: fetchProfileError } = await supabase
-          .from('profiles')
-          .select('gemini_api_key')
-          .eq('id', user.id)
+          .from("profiles")
+          .select("gemini_api_key")
+          .eq("id", user.id)
           .single();
         if (fetchProfileError) {
           console.error("Error fetching Gemini API key:", fetchProfileError);
@@ -228,9 +234,9 @@ const ProfileManagement = () => {
     const { data: { user } = {} } = await supabase.auth.getUser();
     if (user) {
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ gemini_api_key: geminiApiKey })
-        .eq('id', user.id);
+        .eq("id", user.id);
 
       if (updateError) {
         toast({
@@ -368,7 +374,9 @@ const ProfileManagement = () => {
             </form>
           </Form>
 
-          <h2 className="text-xl font-semibold mt-6 mb-4">AI Integration Settings</h2>
+          <h2 className="text-xl font-semibold mt-6 mb-4">
+            AI Integration Settings
+          </h2>
           <div className="grid gap-2">
             <Label htmlFor="gemini-api-key">Gemini API Key</Label>
             <Input

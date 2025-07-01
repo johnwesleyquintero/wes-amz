@@ -9,10 +9,10 @@ interface ErrorDisplayProps {
   className?: string;
 }
 
-const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ 
-  error, 
-  onRetry, 
-  className 
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
+  error,
+  onRetry,
+  className,
 }) => {
   return (
     <Alert variant="destructive" className={className}>
@@ -20,9 +20,9 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       <AlertDescription className="flex items-center justify-between">
         <span>{error}</span>
         {onRetry && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onRetry}
             className="ml-2"
           >

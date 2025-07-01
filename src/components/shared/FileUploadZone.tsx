@@ -1,8 +1,7 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { FileText, Upload, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 interface FileUploadZoneProps {
   onFileUpload: (file: File) => void;
@@ -21,22 +20,28 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   isLoading = false,
   error,
   className,
-  children
+  children,
 }) => {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      onFileUpload(acceptedFiles[0]);
-    }
-  }, [onFileUpload]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        onFileUpload(acceptedFiles[0]);
+      }
+    },
+    [onFileUpload],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: acceptedFileTypes.reduce((acc, type) => {
-      acc[type] = [];
-      return acc;
-    }, {} as Record<string, string[]>),
+    accept: acceptedFileTypes.reduce(
+      (acc, type) => {
+        acc[type] = [];
+        return acc;
+      },
+      {} as Record<string, string[]>,
+    ),
     maxSize: maxFileSize,
-    disabled: isLoading
+    disabled: isLoading,
   });
 
   return (
@@ -45,14 +50,14 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         {...getRootProps()}
         className={cn(
           "relative flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors",
-          isDragActive 
-            ? "border-primary bg-primary/5" 
+          isDragActive
+            ? "border-primary bg-primary/5"
             : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-          isLoading && "cursor-not-allowed opacity-50"
+          isLoading && "cursor-not-allowed opacity-50",
         )}
       >
         <input {...getInputProps()} />
-        
+
         {isLoading ? (
           <div className="flex flex-col items-center gap-2">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-primary" />
@@ -63,10 +68,13 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
             <FileText className="mb-2 h-8 w-8 text-muted-foreground" />
             <div className="space-y-1">
               <p className="text-sm font-medium">
-                {isDragActive ? "Drop the file here" : "Click to upload or drag and drop"}
+                {isDragActive
+                  ? "Drop the file here"
+                  : "Click to upload or drag and drop"}
               </p>
               <p className="text-xs text-muted-foreground">
-                {acceptedFileTypes.join(", ")} up to {Math.round(maxFileSize / (1024 * 1024))}MB
+                {acceptedFileTypes.join(", ")} up to{" "}
+                {Math.round(maxFileSize / (1024 * 1024))}MB
               </p>
             </div>
           </>

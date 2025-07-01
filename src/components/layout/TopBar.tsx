@@ -53,7 +53,9 @@ const TopBar = () => {
               variant="outline"
               size="icon"
               className="relative"
-              onClick={() => { /* TODO: Implement navigation to notifications page or open a notification modal */ }}
+              onClick={() => {
+                /* TODO: Implement navigation to notifications page or open a notification modal */
+              }}
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
@@ -68,7 +70,9 @@ const TopBar = () => {
             <Button
               variant="outline"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => { /* TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate) */ }}
+              onClick={() => {
+                /* TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate) */
+              }}
             >
               Logout
             </Button>

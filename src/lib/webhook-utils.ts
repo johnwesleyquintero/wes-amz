@@ -16,7 +16,7 @@ export interface Webhook {
 export interface WebhookPayload {
   event: string;
   timestamp: string;
-  data: Record<string, any>;
+  data: unknown; // Use unknown for flexible data types
   webhook_id: string;
 }
 
@@ -43,24 +43,35 @@ export const registerWebhook = async (
       .single();
 
     if (checkError && checkError.code !== "PGRST116") {
-      throw new ServerError("Failed to check existing webhooks", 500, checkError);
+      throw new ServerError(
+        "Failed to check existing webhooks",
+        500,
+        checkError,
+      );
     }
 
     if (existingWebhook) {
-      throw new ClientError("Webhook already exists for this URL and event type", 409);
+      throw new ClientError(
+        "Webhook already exists for this URL and event type",
+        409,
+      );
     }
 
     const webhookId = uuidv4();
-    const { data, error } = await supabase.from("webhooks").insert([
-      {
-        id: webhookId,
-        url,
-        event_type: eventType,
-        user_id: userId,
-        is_active: true,
-        failure_count: 0,
-      },
-    ]).select().single();
+    const { data, error } = await supabase
+      .from("webhooks")
+      .insert([
+        {
+          id: webhookId,
+          url,
+          event_type: eventType,
+          user_id: userId,
+          is_active: true,
+          failure_count: 0,
+        },
+      ])
+      .select()
+      .single();
 
     if (error) {
       throw new ServerError("Failed to register webhook", 500, error);
@@ -71,16 +82,20 @@ export const registerWebhook = async (
     if (error instanceof ApiError) {
       return { success: false, error };
     }
-    return { 
-      success: false, 
-      error: new ServerError("Unexpected error during webhook registration", 500, error)
+    return {
+      success: false,
+      error: new ServerError(
+        "Unexpected error during webhook registration",
+        500,
+        error,
+      ),
     };
   }
 };
 
 export const sendWebhookPayload = async (
   webhookId: string,
-  payload: Record<string, any>,
+  payload: unknown, // Use unknown for flexible payload types
 ) => {
   try {
     // Get webhook details
@@ -124,9 +139,9 @@ export const sendWebhookPayload = async (
       // Update last triggered timestamp and reset failure count
       await supabase
         .from("webhooks")
-        .update({ 
+        .update({
           last_triggered: new Date().toISOString(),
-          failure_count: 0 
+          failure_count: 0,
         })
         .eq("id", webhookId);
 
@@ -134,22 +149,21 @@ export const sendWebhookPayload = async (
     } catch (fetchError) {
       // Increment failure count
       const newFailureCount = (webhook.failure_count || 0) + 1;
-      const updates: any = { failure_count: newFailureCount };
-      
+      const updates: { failure_count: number; is_active?: boolean } = {
+        failure_count: newFailureCount,
+      };
+
       // Deactivate webhook after 5 failures
       if (newFailureCount >= 5) {
         updates.is_active = false;
       }
 
-      await supabase
-        .from("webhooks")
-        .update(updates)
-        .eq("id", webhookId);
+      await supabase.from("webhooks").update(updates).eq("id", webhookId);
 
       throw new ServerError(
         `Failed to send webhook: ${fetchError.message}`,
         500,
-        fetchError
+        fetchError,
       );
     }
   } catch (error) {
@@ -165,7 +179,9 @@ export const listWebhooks = async (userId: string): Promise<Webhook[]> => {
   try {
     const { data, error } = await supabase
       .from("webhooks")
-      .select("id, url, event_type, created_at, is_active, last_triggered, failure_count")
+      .select(
+        "id, url, event_type, created_at, is_active, last_triggered, failure_count",
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
@@ -206,7 +222,7 @@ export const deleteWebhook = async (webhookId: string): Promise<boolean> => {
 
 export const toggleWebhookStatus = async (
   webhookId: string,
-  isActive: boolean
+  isActive: boolean,
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -224,7 +240,11 @@ export const toggleWebhookStatus = async (
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ServerError("Unexpected error updating webhook status", 500, error);
+    throw new ServerError(
+      "Unexpected error updating webhook status",
+      500,
+      error,
+    );
   }
 };
 

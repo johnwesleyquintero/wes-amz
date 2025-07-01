@@ -29,9 +29,14 @@ function App() {
           <Toaster />
           <Sonner />
           <SidebarProvider>
-            <ErrorBoundary> {/* Wrap BrowserRouter with ErrorBoundary */}
+            <ErrorBoundary>
+              {" "}
+              {/* Wrap BrowserRouter with ErrorBoundary */}
               <BrowserRouter
-                future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
               >
                 <Routes>
                   {/* Public Routes */}

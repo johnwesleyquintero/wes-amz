@@ -189,20 +189,24 @@ export const mainNavigation: MainNavigationItem[] = [
   {
     name: "Settings",
     icon: Settings,
-    children: [ // This array contains NavigationCategory, representing sections
-      { // Profile Section
+    children: [
+      // This array contains NavigationCategory, representing sections
+      {
+        // Profile Section
         name: "Profile",
         icon: UsersIcon, // Icon for the section
-        children: [ // This array contains NavigationItem, the links within the section
+        children: [
+          // This array contains NavigationItem, the links within the section
           {
             name: "My Profile", // Link for the profile page
             href: "/settings/profile",
             icon: UsersIcon, // Icon for the link (can be same as section or different)
           },
           // Add other profile-related links here if needed, e.g., "Appearance"
-        ]
+        ],
       },
-       { // Account Section
+      {
+        // Account Section
         name: "Account",
         icon: Key,
         children: [
@@ -216,14 +220,15 @@ export const mainNavigation: MainNavigationItem[] = [
             href: "/settings/account/email-preferences",
             icon: Mail,
           },
-           {
+          {
             name: "Delete Account", // Example of a more sensitive setting
             href: "/settings/account/delete-account",
             icon: UsersIcon, // Or a trash icon etc.
           },
-        ]
+        ],
       },
-       { // Billing Section
+      {
+        // Billing Section
         name: "Billing",
         icon: DollarSign, // Or CreditCard
         children: [
@@ -232,19 +237,20 @@ export const mainNavigation: MainNavigationItem[] = [
             href: "/settings/billing/payment-methods",
             icon: CreditCard,
           },
-           {
+          {
             name: "Subscription Plan",
             href: "/settings/billing/subscription",
             icon: Award,
           },
-           {
+          {
             name: "Billing History",
             href: "/settings/billing/history",
             icon: BarChart3,
           },
-        ]
+        ],
       },
-       { // Notifications Section
+      {
+        // Notifications Section
         name: "Notifications",
         icon: Bell,
         children: [
@@ -253,43 +259,46 @@ export const mainNavigation: MainNavigationItem[] = [
             href: "/settings/notifications/email",
             icon: Mail,
           },
-           {
+          {
             name: "App Notifications",
             href: "/settings/notifications/app",
             icon: Bell,
           },
-        ]
+        ],
       },
-      { // Integrations Section (Settings specific)
+      {
+        // Integrations Section (Settings specific)
         name: "Integrations",
         icon: Cloud,
         children: [
-           {
+          {
             name: "Manage Connections",
             href: "/settings/integrations/manage",
             icon: Cloud,
           },
-           // Note: If these settings control the tool integrations, maybe link from here
-           // to specific integration settings pages, e.g., /settings/integrations/google-workspace
-        ]
+          // Note: If these settings control the tool integrations, maybe link from here
+          // to specific integration settings pages, e.g., /settings/integrations/google-workspace
+        ],
       },
-       { // Security Section
+      {
+        // Security Section
         name: "Security",
         icon: Key,
         children: [
-           {
+          {
             name: "Two-Factor Authentication",
             href: "/settings/security/2fa",
             icon: Key,
           },
-           {
+          {
             name: "Login Activity",
             href: "/settings/security/activity",
             icon: Activity,
           },
-        ]
+        ],
       },
-      { // Legal Section (structured correctly already)
+      {
+        // Legal Section (structured correctly already)
         name: "Legal",
         icon: Scale,
         children: [
@@ -325,7 +334,7 @@ export const getFlattenedNavigation = (
     return [];
   }
   // Use flatMap for a cleaner flatten operation
-  return navigationCategories.flatMap(category => category.children);
+  return navigationCategories.flatMap((category) => category.children);
 };
 
 /**
@@ -333,15 +342,17 @@ export const getFlattenedNavigation = (
  * @param name The name of the MainNavigationItem to find.
  * @returns An array of NavigationCategory or undefined if not found or no children categories.
  */
-const findNavigationCategoriesByName = (name: string): NavigationCategory[] | undefined => {
-  const mainItem = mainNavigation.find(item => item.name === name);
+const findNavigationCategoriesByName = (
+  name: string,
+): NavigationCategory[] | undefined => {
+  const mainItem = mainNavigation.find((item) => item.name === name);
   // Safely check if the item exists, has children, and if children is an array of categories
   // No need for Array.isArray check if we trust the static type, but it adds runtime safety
   if (mainItem?.children && Array.isArray(mainItem.children)) {
     return mainItem.children; // children is already NavigationCategory[] based on type
   }
   return undefined;
-}
+};
 
 // Create secondary navigation objects by finding main items and flattening their children
 // NOTE: For settings, flattening loses the category structure.
@@ -360,7 +371,9 @@ export const secondaryNavigation = {
     // You would pass settingsCategories directly to your rendering component.
     // This `secondaryNavigation["/settings"]` might be useful for a *flat*
     // list elsewhere, but not a typical settings sidebar structure.
-    navigation: settingsCategories ? getFlattenedNavigation(settingsCategories) : [],
+    navigation: settingsCategories
+      ? getFlattenedNavigation(settingsCategories)
+      : [],
     // Consider adding the structured categories here as well if needed elsewhere
     structuredNavigation: settingsCategories,
   },

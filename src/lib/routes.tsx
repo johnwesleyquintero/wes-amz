@@ -1,10 +1,6 @@
 import React from "react";
 import { AppRouteConfig } from "./app-routes";
-import {
-  Pages,
-  AmazonSellerTools,
-  SettingsComponents,
-} from "./app-routes";
+import { Pages, AmazonSellerTools, SettingsComponents } from "./app-routes";
 
 export const ROUTES = {
   DASHBOARD: "/dashboard",
@@ -137,7 +133,11 @@ export const authenticatedAppRoutes: AppRouteConfig[] = [
     component: AmazonSellerTools.ProductResearch,
     breadcrumbName: "Product Research",
   },
-  { path: "settings", component: SettingsComponents.SettingsLayout, breadcrumbName: "Settings" }, // Parent route for settings
+  {
+    path: "settings",
+    component: SettingsComponents.SettingsLayout,
+    breadcrumbName: "Settings",
+  }, // Parent route for settings
   {
     path: "settings/profile",
     component: SettingsComponents.ProfileManagement,
@@ -148,7 +148,11 @@ export const authenticatedAppRoutes: AppRouteConfig[] = [
     component: SettingsComponents.OrganizationSettings,
     breadcrumbName: "Organization",
   },
-  { path: "settings/team", component: SettingsComponents.TeamManagement, breadcrumbName: "Team" },
+  {
+    path: "settings/team",
+    component: SettingsComponents.TeamManagement,
+    breadcrumbName: "Team",
+  },
   {
     path: "tools/gemini-ai-chat",
     component: Pages.GeminiAIChat,
