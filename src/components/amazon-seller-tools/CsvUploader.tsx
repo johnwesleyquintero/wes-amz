@@ -41,6 +41,17 @@ export default function CsvUploader<T extends GenericCsvRow>({
   const [accumulatedData, setAccumulatedData] = useState<T[]>([]);
   const workerRef = useRef<Worker>();
 
+  const showErrorToast = useCallback(
+    (title: string, description: string) => {
+      toast({
+        title: title,
+        description: description,
+        variant: "destructive",
+      });
+    },
+    [toast],
+  );
+
   useEffect(() => {
     workerRef.current = new Worker(
       new URL("../../workers/csvParser.worker.ts", import.meta.url),
@@ -132,56 +143,35 @@ export default function CsvUploader<T extends GenericCsvRow>({
       setFileNameDisplay(null); // Clear previous file name display
       setAccumulatedData([]); // Clear accumulated data on new file drop
       if (acceptedFiles.length === 0) {
-        const errorMessage = "No file selected";
-        setParsingError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        showErrorToast("Upload Error", "No file selected.");
         return;
       }
 
       const file = acceptedFiles[0];
 
       if (!file.name.endsWith(".csv")) {
-        const errorMessage = "Only CSV files are supported";
-        setParsingError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        showErrorToast("Upload Error", "Only CSV files are supported.");
         return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        const errorMessage = `File size exceeds the maximum limit of ${
-          MAX_FILE_SIZE / (1024 * 1024)
-        }MB`;
-        setParsingError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        showErrorToast(
+          "Upload Error",
+          `File size exceeds the maximum limit of ${
+            MAX_FILE_SIZE / (1024 * 1024)
+          }MB.`,
+        );
         return;
       }
 
       if (file.size === 0) {
-        const errorMessage = "The file is empty";
-        setParsingError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        showErrorToast("Upload Error", "The file is empty.");
         return;
       }
 
       parseCsv(file);
     },
-    [parseCsv, toast],
+    [parseCsv, showErrorToast],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });

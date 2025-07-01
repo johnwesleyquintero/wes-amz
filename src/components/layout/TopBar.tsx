@@ -71,7 +71,8 @@ const TopBar = () => {
               variant="outline"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                /* TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate) */
+                localStorage.removeItem("supabase.auth.token"); // Clear authentication token
+                window.location.href = "/auth/login"; // Redirect to login page
               }}
             >
               Logout

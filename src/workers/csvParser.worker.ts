@@ -51,7 +51,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
             const progress = Math.round((processedRows / totalRows) * 100);
             self.postMessage({
               type: "progress",
-              progress: Math.min(progress, 95), // Cap at 95% until complete
+              progress: progress,
             } as WorkerResponse);
 
             // Send chunk data if we have enough rows
@@ -75,6 +75,8 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
               type: "complete",
               progress: 100,
             } as WorkerResponse);
+            // No need to clear allData here, as it's a local variable within this parse call.
+            // The CsvUploader component manages its own state for accumulated data.
           },
           error: (error) => {
             self.postMessage({
