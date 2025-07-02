@@ -170,18 +170,17 @@ export const getAcosRating = (acos: number): string => {
 };
 
 /**
- * Determines the color associated with an ACoS percentage for visual representation.
+ * Determines the semantic color associated with an ACoS percentage for visual representation.
  * @param {number} acos - The ACoS percentage.
- * @returns {"green" | "emerald" | "yellow" | "orange" | "red"} The color string.
+ * @returns {"status-good" | "status-average" | "status-poor" | "status-critical"} The semantic color name.
  */
 export const getAcosColor = (
   acos: number,
-): "green" | "emerald" | "yellow" | "orange" | "red" => {
-  if (acos < 15) return "green";
-  if (acos < 25) return "emerald";
-  if (acos < 35) return "yellow";
-  if (acos < 45) return "orange";
-  return "red";
+): "status-good" | "status-average" | "status-poor" | "status-critical" => {
+  if (acos < 25) return "status-good"; // Combining Excellent and Good
+  if (acos < 35) return "status-average";
+  if (acos < 45) return "status-poor";
+  return "status-critical";
 };
 
 /**

@@ -1,11 +1,7 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
     "baseUrl": ".",
+    "esModuleInterop": true,
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -14,6 +10,8 @@
     "skipLibCheck": true,
     "allowJs": true,
     "noUnusedLocals": false,
-    "strictNullChecks": false
-  }
+    "strictNullChecks": false,
+    "types": ["jest", "vite/client"]
+  },
+  "include": ["src", ".eslintrc.cjs", ".prettierrc.cjs", "src/jest.d.ts"]
 }

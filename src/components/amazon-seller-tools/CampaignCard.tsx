@@ -106,17 +106,21 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
                 <CheckCircle className="h-4 w-4 text-primary" />
               ) : undefined
             }
-            valueClassName={
-              getAcosColor(campaign.acos || 0) === "green"
-                ? "text-green-600 dark:text-green-400"
-                : getAcosColor(campaign.acos || 0) === "emerald"
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : getAcosColor(campaign.acos || 0) === "yellow"
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : getAcosColor(campaign.acos || 0) === "orange"
-                      ? "text-orange-600 dark:text-orange-400"
-                      : "text-red-600 dark:text-red-400"
-            }
+            valueClassName={(() => {
+              const acosColor = getAcosColor(campaign.acos || 0);
+              switch (acosColor) {
+                case "status-good":
+                  return "text-[--color-status-info]"; // Using info for good/success
+                case "status-average":
+                  return "text-[--color-status-warning]"; // Using warning for average/poor
+                case "status-poor":
+                  return "text-[--color-status-warning]"; // Using warning for average/poor
+                case "status-critical":
+                  return "text-[--color-status-error]"; // Using error for critical
+                default:
+                  return "";
+              }
+            })()}
           />
           <MetricDisplay
             label="CTR"

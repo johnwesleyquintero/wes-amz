@@ -44,14 +44,14 @@
     --sidebar-ring: 217 91% 60%; /* Original value, re-evaluating for consistency */
 
     /* Custom color palette - Light Mode */
-    --burnt-sienna: 359 82% 64%; /* #ED595B - Often used for error/danger states, or specific data visualization */
-    --shakespeare: 195 66% 57%; /* #4FBBDA - Could be used for informational alerts, links, or secondary brand elements */
-    --gold: 48 100% 50%; /* #FFD600 - Potentially for warnings, highlights, or specific data points */
-    --apricot: 8 74% 67%; /* #EA7A6C - A warm accent color, possibly for interactive elements or charts */
-    --jaffa: 22 80% 57%; /* #EB7D3E - Another warm accent, similar to apricot, for variety in UI elements */
-    --iceberg: 195 50% 94%; /* #CBEAF1 - A very light cool tone, suitable for backgrounds or subtle borders */
-    --hampton: 47 50% 91%; /* #E4DBAE - A light warm tone, also good for backgrounds or muted elements */
-    --butterfly-bush: 262 34% 48%; /* #7554A2 - A deeper, richer accent, possibly for primary interactive elements or headings */
+    --color-status-error: 359 82% 64%; /* #ED595B - Often used for error/danger states, or specific data visualization */
+    --color-status-info: 195 66% 57%; /* #4FBBDA - Could be used for informational alerts, links, or secondary brand elements */
+    --color-status-warning: 48 100% 50%; /* #FFD600 - Potentially for warnings, highlights, or specific data points */
+    --chart-color-1: 8 74% 67%; /* #EA7A6C - A warm accent color, possibly for interactive elements or charts */
+    --chart-color-2: 22 80% 57%; /* #EB7D3E - Another warm accent, similar to apricot, for variety in UI elements */
+    --chart-color-3: 195 50% 94%; /* #CBEAF1 - A very light cool tone, suitable for backgrounds or subtle borders */
+    --chart-color-4: 47 50% 91%; /* #E4DBAE - A light warm tone, also good for backgrounds or muted elements */
+    --chart-color-5: 262 34% 48%; /* #7554A2 - A deeper, richer accent, possibly for primary interactive elements or headings */
   }
 
   .dark {
@@ -72,14 +72,14 @@
     --skeleton-highlight: 218 17% 35%; /* #5a6270 - Dark mode skeleton highlight for pulse effect */
 
     /* Custom color palette - Dark Mode */
-    --burnt-sienna: 359 60% 75%; /* Dark mode equivalent for error/danger states or data visualization */
-    --shakespeare: 195 50% 70%; /* Dark mode equivalent for informational alerts, links, or secondary brand elements */
-    --gold: 48 80% 65%; /* Dark mode equivalent for warnings, highlights, or specific data points */
-    --apricot: 8 60% 75%; /* Dark mode equivalent for a warm accent color */
-    --jaffa: 22 60% 70%; /* Dark mode equivalent for another warm accent */
-    --iceberg: 195 30% 30%; /* Dark mode equivalent for light cool backgrounds or subtle borders */
-    --hampton: 47 30% 35%; /* Dark mode equivalent for light warm backgrounds or muted elements */
-    --butterfly-bush: 262 25% 65%; /* Dark mode equivalent for a deeper, richer accent */
+    --color-status-error: 359 60% 75%; /* Dark mode equivalent for error/danger states or data visualization */
+    --color-status-info: 195 50% 70%; /* Dark mode equivalent for informational alerts, links, or secondary brand elements */
+    --color-status-warning: 48 80% 65%; /* Dark mode equivalent for warnings, highlights, or specific data points */
+    --chart-color-1: 8 60% 75%; /* Dark mode equivalent for a warm accent color */
+    --chart-color-2: 22 60% 70%; /* Dark mode equivalent for another warm accent */
+    --chart-color-3: 195 30% 30%; /* Dark mode equivalent for light cool backgrounds or subtle borders */
+    --chart-color-4: 47 30% 35%; /* Dark mode equivalent for light warm backgrounds or muted elements */
+    --chart-color-5: 262 25% 65%; /* Dark mode equivalent for a deeper, richer accent */
 
     /* Existing variables that need to be re-evaluated or removed if not used */
     --popover: 218 20% 23%; /* Consistent with --card in dark mode */
@@ -131,7 +131,7 @@
   }
 
   .trend-down {
-    @apply text-burnt-sienna;
+    @apply text-color-status-error;
   }
 
   .nav-link {
