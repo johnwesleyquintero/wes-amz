@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -10,96 +10,13 @@ import {
 import { mainNavigation } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 import { useSidebar } from "@/context/sidebar-context";
-
-interface NavigationItem {
-  name: string;
-  href?: string;
-  icon?: React.ElementType;
-  children?: NavigationItem[];
-}
+import NavigationRenderer from "./NavigationRenderer";
 
 const Sidebar: React.FC = React.memo(() => {
   Sidebar.displayName = "Sidebar";
   const { isCollapsed, toggleSidebar } = useSidebar();
-  const location = useLocation();
-
-  const renderNavigationItems = useCallback(
-    (items: NavigationItem[], parentPath: string = "") => {
-      return items.map((item) => {
-        const currentPath =
-          item.href ||
-          `${parentPath}/${item.name.toLowerCase().replace(/\s/g, "-")}`;
-        const isActive = location.pathname.startsWith(currentPath);
-
-        if (item.children) {
-          const defaultOpen = item.children.some((child) =>
-            location.pathname.startsWith(child.href || ""),
-          );
-
-          return (
-            <Accordion
-              type="single"
-              collapsible
-              key={item.name}
-              defaultValue={defaultOpen ? item.name : undefined}
-            >
-              <AccordionItem value={item.name}>
-                <AccordionTrigger
-                  className={cn("py-2", isCollapsed ? "justify-center" : "")}
-                >
-                  {item.icon && (
-                    <item.icon
-                      className={cn("h-5 w-5", !isCollapsed && "mr-3")}
-                    />
-                  )}
-                  {!isCollapsed && <span>{item.name}</span>}
-                </AccordionTrigger>
-                <AccordionContent className="pl-4 space-y-1">
-                  {renderNavigationItems(item.children, currentPath)}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          );
-        } else {
-          return (
-            <TooltipProvider key={item.name}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={item.href || "#"}
-                    className={cn(
-                      "flex items-center rounded-md transition-colors duration-200",
-                      isCollapsed ? "justify-center h-10 w-10" : "px-3 py-2",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                    )}
-                  >
-                    {item.icon && (
-                      <item.icon
-                        className={cn("h-5 w-5", !isCollapsed && "mr-3")}
-                      />
-                    )}
-                    {!isCollapsed && <span>{item.name}</span>}
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">{item.name}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        }
-      });
-    },
-    [location.pathname, isCollapsed],
-  );
 
   const getSidebarWidthClasses = useCallback(
     () => cn(isCollapsed ? "w-20" : "w-64"),
@@ -143,7 +60,7 @@ const Sidebar: React.FC = React.memo(() => {
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {renderNavigationItems(mainNavigation, "")}
+        <NavigationRenderer items={mainNavigation} isCollapsed={isCollapsed} />
       </nav>
 
       <div

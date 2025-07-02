@@ -6,7 +6,7 @@ import react from "eslint-plugin-react";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "**/*.d.ts"] },
+  { ignores: ["dist"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -33,7 +33,7 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": [
-        "error", // Changed from 'warn' to 'error' to enforce dead code elimination
+        "warn",
         { argsIgnorePattern: "^_" },
       ],
       "react/react-in-jsx-scope": "off", // Disable the rule for React 17+

@@ -34,9 +34,8 @@ FEEDBACK.md
 .feedback
 .env
 bundle-analysis.html
-
-# Compiled JavaScript and TypeScript Declaration Files
-src/**/*.js
-!src/main.js
-!src/App.js
-src/**/*.d.ts
+supabase_setup.sql
+tsconfig.ts.timestamp-*
+wiki/
+data/csv-test-data/
+chrome-extension/images/

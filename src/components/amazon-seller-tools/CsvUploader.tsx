@@ -16,55 +16,11 @@ type CsvUploaderProps<T> = {
   requiredColumns: string[];
   dataType: "fba" | "keyword" | "ppc" | "keyword-dedup" | "acos";
   fileName: string;
-  validationSchema?: { [key: string]: string }; // e.g., { column1: "number", column2: "string" }
 };
 
 export interface GenericCsvRow {
   [key: string]: unknown;
 }
-
-type ValidationResult = {
-  isValid: boolean;
-  errorMessage?: string;
-};
-
-const validateRow = (
-  row: GenericCsvRow,
-  validationSchema: { [key: string]: string },
-): ValidationResult => {
-  for (const column in validationSchema) {
-    const expectedType = validationSchema[column];
-    const value = row[column];
-
-    if (value === undefined || value === null) {
-      return {
-        isValid: false,
-        errorMessage: `Column "${column}" is missing.`,
-      };
-    }
-
-    switch (expectedType) {
-      case "number":
-        if (typeof value !== "number" && isNaN(Number(value))) {
-          return {
-            isValid: false,
-            errorMessage: `Column "${column}" must be a number.`,
-          };
-        }
-        break;
-      case "string":
-        if (typeof value !== "string") {
-          return {
-            isValid: false,
-            errorMessage: `Column "${column}" must be a string.`,
-          };
-        }
-        break;
-      // Add more cases for other data types as needed (e.g., "boolean", "date")
-    }
-  }
-  return { isValid: true };
-};
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -76,7 +32,6 @@ export default function CsvUploader<T extends GenericCsvRow>({
   requiredColumns,
   dataType,
   fileName,
-  validationSchema,
 }: CsvUploaderProps<T>) {
   const { toast } = useToast();
   const [parsingError, setParsingError] = useState<string | null>(null);
@@ -85,24 +40,6 @@ export default function CsvUploader<T extends GenericCsvRow>({
   const [fileNameDisplay, setFileNameDisplay] = useState<string | null>(null);
   const [accumulatedData, setAccumulatedData] = useState<T[]>([]);
   const workerRef = useRef<Worker>();
-  const validationSchemaRef = useRef<{ [key: string]: string } | undefined>(
-    null,
-  );
-
-  useEffect(() => {
-    validationSchemaRef.current = validationSchema;
-  }, [validationSchema]);
-
-  const showErrorToast = useCallback(
-    (title: string, description: string) => {
-      toast({
-        title: title,
-        description: description,
-        variant: "destructive",
-      });
-    },
-    [toast],
-  );
 
   useEffect(() => {
     workerRef.current = new Worker(
@@ -122,12 +59,10 @@ export default function CsvUploader<T extends GenericCsvRow>({
         case "complete": {
           setIsParsing(false);
           setProgress(100);
-
           // Perform column validation on the accumulated data
           const missingColumns = requiredColumns.filter(
             (col) => !Object.keys(accumulatedData[0] || {}).includes(col),
           );
-
           if (missingColumns.length > 0) {
             setParsingError(
               `Missing required columns: ${missingColumns.join(", ")}`,
@@ -142,30 +77,6 @@ export default function CsvUploader<T extends GenericCsvRow>({
             setAccumulatedData([]); // Clear data on error
             return;
           }
-
-          // Validate data types based on validationSchema
-          if (validationSchemaRef.current) {
-            for (const row of accumulatedData) {
-              const validationResult = validateRow(
-                row,
-                validationSchemaRef.current!,
-              );
-              if (!validationResult.isValid) {
-                setParsingError(
-                  validationResult.errorMessage || "Validation failed",
-                );
-                toast({
-                  title: "Error",
-                  description:
-                    validationResult.errorMessage || "Validation failed",
-                  variant: "destructive",
-                });
-                setAccumulatedData([]); // Clear data on error
-                return;
-              }
-            }
-          }
-
           onUploadSuccess(accumulatedData);
           toast({
             title: "Success",
@@ -206,20 +117,14 @@ export default function CsvUploader<T extends GenericCsvRow>({
     };
   }, [onUploadSuccess, requiredColumns, toast, accumulatedData]);
 
-  const parseCsv = useCallback(
-    (file: File) => {
-      setIsParsing(true);
-      setParsingError(null);
-      setProgress(0);
-      setFileNameDisplay(file.name); // Set file name for display
-      setAccumulatedData([]); // Clear accumulated data before new parse
-      workerRef.current?.postMessage({
-        file,
-        validationSchema: validationSchemaRef.current,
-      });
-    },
-    [validationSchemaRef],
-  );
+  const parseCsv = useCallback((file: File) => {
+    setIsParsing(true);
+    setParsingError(null);
+    setProgress(0);
+    setFileNameDisplay(file.name); // Set file name for display
+    setAccumulatedData([]); // Clear accumulated data before new parse
+    workerRef.current?.postMessage({ file });
+  }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -227,35 +132,56 @@ export default function CsvUploader<T extends GenericCsvRow>({
       setFileNameDisplay(null); // Clear previous file name display
       setAccumulatedData([]); // Clear accumulated data on new file drop
       if (acceptedFiles.length === 0) {
-        showErrorToast("Upload Error", "No file selected.");
+        const errorMessage = "No file selected";
+        setParsingError(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
         return;
       }
 
       const file = acceptedFiles[0];
 
       if (!file.name.endsWith(".csv")) {
-        showErrorToast("Upload Error", "Only CSV files are supported.");
+        const errorMessage = "Only CSV files are supported";
+        setParsingError(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
         return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        showErrorToast(
-          "Upload Error",
-          `File size exceeds the maximum limit of ${
-            MAX_FILE_SIZE / (1024 * 1024)
-          }MB.`,
-        );
+        const errorMessage = `File size exceeds the maximum limit of ${
+          MAX_FILE_SIZE / (1024 * 1024)
+        }MB`;
+        setParsingError(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
         return;
       }
 
       if (file.size === 0) {
-        showErrorToast("Upload Error", "The file is empty.");
+        const errorMessage = "The file is empty";
+        setParsingError(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
         return;
       }
 
       parseCsv(file);
     },
-    [parseCsv, showErrorToast],
+    [parseCsv, toast],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });

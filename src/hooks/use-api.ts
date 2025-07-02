@@ -2,14 +2,14 @@ import { useState, useCallback } from "react";
 import { ApiError } from "@/lib/api-errors";
 import { useToast } from "@/hooks/use-toast";
 
-interface UseApiOptions<T> {
-  onSuccess?: (data: T) => void;
+interface UseApiOptions {
+  onSuccess?: (data: any) => void;
   onError?: (error: ApiError) => void;
   showSuccessToast?: boolean;
   showErrorToast?: boolean;
 }
 
-export function useApi<T>(options: UseApiOptions<T> = {}) {
+export function useApi<T = any>(options: UseApiOptions = {}) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);

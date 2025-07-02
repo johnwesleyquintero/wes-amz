@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   registerWebhook,
+  sendWebhookPayload,
   listWebhooks,
   deleteWebhook,
   toggleWebhookStatus,
@@ -172,12 +173,10 @@ const WebhookManager: React.FC = () => {
         description: `Webhook ${isActive ? "activated" : "deactivated"} successfully.`,
       });
       fetchWebhooks();
-    } catch (err) {
-      const error =
-        err instanceof Error ? err.message : "An unknown error occurred";
+    } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to update webhook status: ${error}`,
+        description: "Failed to update webhook status.",
         variant: "destructive",
       });
     }
@@ -290,12 +289,7 @@ const WebhookManager: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         {webhooksError && (
-          <ErrorDisplay
-            error={webhooksError.message}
-            details="Failed to retrieve webhooks. Please check your network connection and try again."
-            onRetry={fetchWebhooks}
-            supportEmail="support@example.com"
-          />
+          <ErrorDisplay error={webhooksError.message} onRetry={fetchWebhooks} />
         )}
 
         <div className="space-y-4">

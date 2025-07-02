@@ -6,7 +6,7 @@ interface WorkerMessage {
 
 interface WorkerResponse {
   type: "progress" | "chunk" | "complete" | "error";
-  data?: unknown[]; // Use unknown for flexible data types
+  data?: any[];
   message?: string;
   progress?: number;
 }
@@ -19,7 +19,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   try {
     let processedRows = 0;
     let totalRows = 0;
-    const allData: unknown[] = []; // Use unknown[]
+    const allData: any[] = [];
 
     // First pass: count total rows for progress tracking
     Papa.parse(file, {
@@ -32,10 +32,8 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           header: true,
           skipEmptyLines: true,
           chunk: (results) => {
-            const validData = results.data.filter((row: unknown) => {
-              // Use unknown
+            const validData = results.data.filter((row: any) => {
               // Basic validation - ensure row has some data
-              if (typeof row !== "object" || row === null) return false;
               return Object.values(row).some(
                 (value) =>
                   value !== null &&
@@ -51,7 +49,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
             const progress = Math.round((processedRows / totalRows) * 100);
             self.postMessage({
               type: "progress",
-              progress: progress,
+              progress: Math.min(progress, 95), // Cap at 95% until complete
             } as WorkerResponse);
 
             // Send chunk data if we have enough rows
@@ -75,8 +73,6 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
               type: "complete",
               progress: 100,
             } as WorkerResponse);
-            // No need to clear allData here, as it's a local variable within this parse call.
-            // The CsvUploader component manages its own state for accumulated data.
           },
           error: (error) => {
             self.postMessage({

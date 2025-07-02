@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle } from "lucide-react";
-import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 interface ToolContainerProps {
   title: string;
@@ -14,7 +13,6 @@ interface ToolContainerProps {
   progress?: number;
   error?: string | null;
   isLoading?: boolean;
-  loadingMessage?: string;
   children: ReactNode;
 }
 
@@ -25,7 +23,6 @@ export function ToolContainer({
   progress = 0,
   error = null,
   isLoading = false,
-  loadingMessage,
   children,
 }: ToolContainerProps) {
   return (
@@ -41,14 +38,7 @@ export function ToolContainer({
         </div>
         {description && <p className="text-gray-600 mb-4">{description}</p>}
 
-        {isLoading && loadingMessage && (
-          <div className="mb-4 flex items-center">
-            <LoadingSpinner size="sm" className="mr-2" />
-            <span>{loadingMessage}</span>
-          </div>
-        )}
-
-        {isLoading && !loadingMessage && (
+        {isLoading && (
           <div className="mb-4">
             <Progress value={progress} className="w-full" />
           </div>

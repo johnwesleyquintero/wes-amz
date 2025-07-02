@@ -16,7 +16,7 @@ export interface Webhook {
 export interface WebhookPayload {
   event: string;
   timestamp: string;
-  data: unknown; // Use unknown for flexible data types
+  data: Record<string, any>;
   webhook_id: string;
 }
 
@@ -95,7 +95,7 @@ export const registerWebhook = async (
 
 export const sendWebhookPayload = async (
   webhookId: string,
-  payload: unknown, // Use unknown for flexible payload types
+  payload: Record<string, any>,
 ) => {
   try {
     // Get webhook details
@@ -149,9 +149,7 @@ export const sendWebhookPayload = async (
     } catch (fetchError) {
       // Increment failure count
       const newFailureCount = (webhook.failure_count || 0) + 1;
-      const updates: { failure_count: number; is_active?: boolean } = {
-        failure_count: newFailureCount,
-      };
+      const updates: any = { failure_count: newFailureCount };
 
       // Deactivate webhook after 5 failures
       if (newFailureCount >= 5) {

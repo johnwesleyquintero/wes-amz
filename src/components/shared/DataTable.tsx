@@ -7,30 +7,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-import { type Key } from "react";
-
-interface Column<T extends Record<string, React.ReactNode>> {
-  key: keyof T;
+interface Column {
+  key: string;
   label: string;
-  render?: (value: T[keyof T], row: T) => React.ReactNode;
+  render?: (value: any, row: any) => React.ReactNode;
   className?: string;
 }
 
-interface DataTableProps<T extends Record<string, React.ReactNode>> {
-  data: T[];
-  columns: Column<T>[];
+interface DataTableProps {
+  data: any[];
+  columns: Column[];
   className?: string;
   emptyMessage?: string;
 }
 
-const DataTable = <T extends Record<string, React.ReactNode>>({
+const DataTable: React.FC<DataTableProps> = ({
   data,
   columns,
   className,
   emptyMessage = "No data available",
-}: DataTableProps<T>) => {
+}) => {
   if (data.length === 0) {
     return (
       <div className={cn("text-center py-8 text-muted-foreground", className)}>
@@ -45,7 +44,7 @@ const DataTable = <T extends Record<string, React.ReactNode>>({
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead key={column.key as Key} className={column.className}>
+              <TableHead key={column.key} className={column.className}>
                 {column.label}
               </TableHead>
             ))}
@@ -55,10 +54,10 @@ const DataTable = <T extends Record<string, React.ReactNode>>({
           {data.map((row, index) => (
             <TableRow key={index}>
               {columns.map((column) => (
-                <TableCell key={column.key as Key} className={column.className}>
+                <TableCell key={column.key} className={column.className}>
                   {column.render
                     ? column.render(row[column.key], row)
-                    : (row[column.key] as React.ReactNode)}
+                    : row[column.key]}
                 </TableCell>
               ))}
             </TableRow>

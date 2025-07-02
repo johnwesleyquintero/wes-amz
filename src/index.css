@@ -19,21 +19,19 @@
     --date-text: 210 9% 45%; /* #6c757d */
     --testimonial-bg: 0 0% 98%; /* #f9f9f9 */
     --testimonial-quote: 0 0% 33%; /* #555 */
-    --skeleton-bg: 210 17% 93%; /* #e9ecef - Light mode skeleton background */
-    --skeleton-highlight: 210 17% 90%; /* #e6e9ec - Light mode skeleton highlight for pulse effect */
 
     --radius: 0.5rem;
 
     /* Existing variables that need to be re-evaluated or removed if not used */
     --popover: 0 0% 100%;
-    --popover-foreground: 210 10% 14%; /* Consistent with --foreground */
-    --primary-foreground: 0 0% 100%; /* White for primary text on primary background */
-    --secondary-foreground: 210 10% 14%; /* Consistent with --foreground */
-    --muted: 210 17% 93%; /* Consistent with --code-bg */
-    --accent-foreground: 210 10% 14%; /* Consistent with --foreground */
-    --destructive: 0 84% 60%; /* Red for destructive actions */
-    --destructive-foreground: 210 40% 98%; /* White for text on destructive background */
-    --ring: 216 100% 40%; /* Consistent with --primary */
+    --popover-foreground: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 222 84% 5%;
     --sidebar-background: 220 80% 98%;
     --sidebar-foreground: 240 5% 26%;
     --sidebar-primary: 240 6% 10%;
@@ -41,17 +39,17 @@
     --sidebar-accent: 240 5% 96%;
     --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%; /* Original value, re-evaluating for consistency */
+    --sidebar-ring: 217 91% 60%;
 
     /* Custom color palette - Light Mode */
-    --color-status-error: 359 82% 64%; /* #ED595B - Often used for error/danger states, or specific data visualization */
-    --color-status-info: 195 66% 57%; /* #4FBBDA - Could be used for informational alerts, links, or secondary brand elements */
-    --color-status-warning: 48 100% 50%; /* #FFD600 - Potentially for warnings, highlights, or specific data points */
-    --chart-color-1: 8 74% 67%; /* #EA7A6C - A warm accent color, possibly for interactive elements or charts */
-    --chart-color-2: 22 80% 57%; /* #EB7D3E - Another warm accent, similar to apricot, for variety in UI elements */
-    --chart-color-3: 195 50% 94%; /* #CBEAF1 - A very light cool tone, suitable for backgrounds or subtle borders */
-    --chart-color-4: 47 50% 91%; /* #E4DBAE - A light warm tone, also good for backgrounds or muted elements */
-    --chart-color-5: 262 34% 48%; /* #7554A2 - A deeper, richer accent, possibly for primary interactive elements or headings */
+    --burnt-sienna: 359 82% 64%; /* #ED595B */
+    --shakespeare: 195 66% 57%; /* #4FBBDA */
+    --gold: 48 100% 50%; /* #FFD600 */
+    --apricot: 8 74% 67%; /* #EA7A6C */
+    --jaffa: 22 80% 57%; /* #EB7D3E */
+    --iceberg: 195 50% 94%; /* #CBEAF1 */
+    --hampton: 47 50% 91%; /* #E4DBAE */
+    --butterfly-bush: 262 34% 48%; /* #7554A2 */
   }
 
   .dark {
@@ -68,29 +66,27 @@
     --date-text: 216 17% 63%; /* #a0aec0 */
     --testimonial-bg: 220 17% 30%; /* #3a445d */
     --testimonial-quote: 210 17% 90%; /* #e0e6ed */
-    --skeleton-bg: 218 17% 28%; /* #4a5568 - Dark mode skeleton background, consistent with input/code-bg */
-    --skeleton-highlight: 218 17% 35%; /* #5a6270 - Dark mode skeleton highlight for pulse effect */
 
     /* Custom color palette - Dark Mode */
-    --color-status-error: 359 60% 75%; /* Dark mode equivalent for error/danger states or data visualization */
-    --color-status-info: 195 50% 70%; /* Dark mode equivalent for informational alerts, links, or secondary brand elements */
-    --color-status-warning: 48 80% 65%; /* Dark mode equivalent for warnings, highlights, or specific data points */
-    --chart-color-1: 8 60% 75%; /* Dark mode equivalent for a warm accent color */
-    --chart-color-2: 22 60% 70%; /* Dark mode equivalent for another warm accent */
-    --chart-color-3: 195 30% 30%; /* Dark mode equivalent for light cool backgrounds or subtle borders */
-    --chart-color-4: 47 30% 35%; /* Dark mode equivalent for light warm backgrounds or muted elements */
-    --chart-color-5: 262 25% 65%; /* Dark mode equivalent for a deeper, richer accent */
+    --burnt-sienna: 359 60% 75%;
+    --shakespeare: 195 50% 70%;
+    --gold: 48 80% 65%;
+    --apricot: 8 60% 75%;
+    --jaffa: 22 60% 70%;
+    --iceberg: 195 30% 30%;
+    --hampton: 47 30% 35%;
+    --butterfly-bush: 262 25% 65%;
 
     /* Existing variables that need to be re-evaluated or removed if not used */
-    --popover: 218 20% 23%; /* Consistent with --card in dark mode */
-    --popover-foreground: 210 17% 93%; /* Consistent with --foreground */
-    --primary-foreground: 0 0% 100%; /* White for primary text on primary background */
-    --secondary-foreground: 210 17% 93%; /* Consistent with --foreground */
-    --muted: 218 17% 28%; /* Consistent with --input and --code-bg */
-    --accent-foreground: 210 17% 93%; /* Consistent with --foreground */
-    --destructive: 0 63% 31%; /* Darker red for destructive actions */
-    --destructive-foreground: 210 40% 98%; /* White for text on destructive background */
-    --ring: 216 100% 70%; /* Consistent with --primary in dark mode */
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 217 33% 18%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 213 27% 84%;
     --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 240 5% 96%;
     --sidebar-primary: 224 76% 48%;
@@ -98,7 +94,7 @@
     --sidebar-accent: 240 4% 16%;
     --sidebar-accent-foreground: 240 5% 96%;
     --sidebar-border: 240 4% 16%;
-    --sidebar-ring: 217 91% 60%; /* Original value, re-evaluating for consistency */
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -131,7 +127,7 @@
   }
 
   .trend-down {
-    @apply text-color-status-error;
+    @apply text-burnt-sienna;
   }
 
   .nav-link {
@@ -140,19 +136,5 @@
 
   .nav-link.active {
     @apply bg-primary/10 text-primary font-medium;
-  }
-
-  @keyframes pulse-custom {
-    0%,
-    100% {
-      background-color: hsl(var(--skeleton-bg));
-    }
-    50% {
-      background-color: hsl(var(--skeleton-highlight));
-    }
-  }
-
-  .animate-pulse-custom {
-    animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }

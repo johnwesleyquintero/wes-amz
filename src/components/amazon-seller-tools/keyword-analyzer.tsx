@@ -6,14 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, Download, Search, Info } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import {
+  Upload,
+  FileText,
+  AlertCircle,
+  Download,
+  Search,
+  Info,
+} from "lucide-react";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   ResponsiveContainer,
+  CartesianGrid,
   Tooltip,
   Legend,
 } from "recharts";
@@ -21,7 +29,6 @@ import Papa from "papaparse";
 import SampleCsvButton from "./sample-csv-button";
 import { useToast } from "@/hooks/use-toast";
 import { KeywordIntelligence } from "@/lib/keyword-intelligence";
-import { ToolContainer } from "./shared/ToolContainer"; // Import ToolContainer
 
 type KeywordData = {
   product: string;
@@ -95,7 +102,7 @@ export default function KeywordAnalyzer() {
 
                 const keywordArray =
                   typeof (item as KeywordItem).keywords === "string"
-                    ? ((item as KeywordItem).keywords as string)
+                    ? (item as KeywordItem).keywords
                         .split(",")
                         .map((k: string) => k.trim())
                     : Array.isArray((item as KeywordItem).keywords)
@@ -115,7 +122,7 @@ export default function KeywordAnalyzer() {
                   : undefined;
 
                 const analysis = await KeywordIntelligence.analyzeBatch(
-                  keywordArray as string[],
+                  keywordArray || [],
                 );
 
                 return {
@@ -269,13 +276,7 @@ export default function KeywordAnalyzer() {
   };
 
   return (
-    <ToolContainer
-      title="Keyword Analyzer"
-      description="Analyze keywords for your products, get search volume, competition, and suggestions."
-      isLoading={isLoading}
-      loadingMessage="Analyzing keywords..."
-      error={error}
-    >
+    <div className="space-y-8">
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start gap-3">
         <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
         <div className="text-sm text-blue-700 dark:text-blue-300">
@@ -292,8 +293,8 @@ export default function KeywordAnalyzer() {
             Example: <code>product,keywords,searchVolume,competition</code>
             <br />
             <code>
-              Wireless Earbuds,"bluetooth earbuds, wireless headphones,
-              earphones",135000,High
+              Wireless Earbuds,&quot;bluetooth earbuds, wireless headphones,
+              earphones&quot;,135000,High
             </code>
           </p>
         </div>
@@ -379,6 +380,20 @@ export default function KeywordAnalyzer() {
         </Card>
       </div>
 
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg bg-red-100 p-3 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+          <AlertCircle className="h-5 w-5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="space-y-2 py-4 text-center">
+          <Progress value={45} className="h-2" />
+          <p className="text-sm text-muted-foreground">Analyzing keywords...</p>
+        </div>
+      )}
+
       {products.length > 0 && (
         <>
           <div className="flex justify-end">
@@ -439,16 +454,8 @@ export default function KeywordAnalyzer() {
                             <BarChart
                               data={[
                                 {
-                                  name: product.product,
-                                  "Search Volume": product.searchVolume,
-                                  Competition:
-                                    product.competition === "Low"
-                                      ? 1
-                                      : product.competition === "Medium"
-                                        ? 2
-                                        : product.competition === "High"
-                                          ? 3
-                                          : 0, // Map competition to numerical value
+                                  name: "Search Volume",
+                                  value: product.searchVolume,
                                 },
                               ]}
                               margin={{
@@ -460,28 +467,10 @@ export default function KeywordAnalyzer() {
                             >
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="name" />
-                              <YAxis
-                                yAxisId="left"
-                                orientation="left"
-                                stroke="#8884d8"
-                              />
-                              <YAxis
-                                yAxisId="right"
-                                orientation="right"
-                                stroke="#82ca9d"
-                              />
+                              <YAxis />
                               <Tooltip />
                               <Legend />
-                              <Bar
-                                yAxisId="left"
-                                dataKey="Search Volume"
-                                fill="#8884d8"
-                              />
-                              <Bar
-                                yAxisId="right"
-                                dataKey="Competition"
-                                fill="#82ca9d"
-                              />
+                              <Bar dataKey="value" fill="#8884d8" />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -508,6 +497,6 @@ export default function KeywordAnalyzer() {
           </div>
         </>
       )}
-    </ToolContainer>
+    </div>
   );
 }

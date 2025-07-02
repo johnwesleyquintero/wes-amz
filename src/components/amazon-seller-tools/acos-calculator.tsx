@@ -17,7 +17,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ACOS_EXCELLENT_THRESHOLD, ACOS_GOOD_THRESHOLD } from "@/lib/constants";
 import { ManualCampaignInput, AcosCampaignData } from "./acos-calculator/types";
 import { ApiError } from "@/lib/api-errors"; // Import ApiError
-import { ToolContainer } from "./shared/ToolContainer"; // Import ToolContainer
 
 /**
  * ACoSCalculator component for calculating and displaying ACoS (Advertising Cost of Sales) data.
@@ -247,11 +246,7 @@ export default function AcosCalculator() {
   );
 
   return (
-    <ToolContainer
-      title="ACoS Calculator"
-      description="Calculate and analyze your Advertising Cost of Sales (ACoS) for Amazon campaigns. Upload a CSV or manually input data."
-      isLoading={isLoading}
-    >
+    <div className="space-y-6">
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start gap-3">
         <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
         <div className="text-sm text-blue-700 dark:text-blue-300">
@@ -455,6 +450,6 @@ export default function AcosCalculator() {
           </div>
         </>
       )}
-    </ToolContainer>
+    </div>
   );
 }
