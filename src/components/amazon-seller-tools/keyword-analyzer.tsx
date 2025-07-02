@@ -273,6 +273,7 @@ export default function KeywordAnalyzer() {
       title="Keyword Analyzer"
       description="Analyze keywords for your products, get search volume, competition, and suggestions."
       isLoading={isLoading}
+      loadingMessage="Analyzing keywords..."
       error={error}
     >
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start gap-3">

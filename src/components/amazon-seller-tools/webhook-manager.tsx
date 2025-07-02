@@ -290,7 +290,12 @@ const WebhookManager: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         {webhooksError && (
-          <ErrorDisplay error={webhooksError.message} onRetry={fetchWebhooks} />
+          <ErrorDisplay
+            error={webhooksError.message}
+            details="Failed to retrieve webhooks. Please check your network connection and try again."
+            onRetry={fetchWebhooks}
+            supportEmail="support@example.com"
+          />
         )}
 
         <div className="space-y-4">
