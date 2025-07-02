@@ -1,12 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Bell, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabaseClient";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ModeToggle } from "@/components/theme/mode-toggle";
 import { Breadcrumb } from "./Breadcrumb";
 
 const TopBar = () => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   // TODO: Replace with dynamic notification count from state management or API
@@ -72,9 +75,15 @@ const TopBar = () => {
             <Button
               variant="outline"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => {
+              onClick={async () => {
                 console.log("Logout initiated");
-                // TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate)
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                  console.error("Error logging out:", error);
+                  // Optionally, show a toast notification for the error
+                } else {
+                  navigate("/auth/login"); // Redirect to login page after successful logout
+                }
               }}
             >
               Logout
