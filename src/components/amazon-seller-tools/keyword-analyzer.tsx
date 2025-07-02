@@ -100,13 +100,13 @@ export default function KeywordAnalyzer() {
                   [key: string]: unknown;
                 }
 
+                const keywordItem = item as KeywordItem;
+                const keywords = keywordItem.keywords;
                 const keywordArray =
-                  typeof (item as KeywordItem).keywords === "string"
-                    ? (item as KeywordItem).keywords
-                        .split(",")
-                        .map((k: string) => k.trim())
-                    : Array.isArray((item as KeywordItem).keywords)
-                      ? (item as KeywordItem).keywords
+                  typeof keywords === "string"
+                    ? keywords.split(",").map((k: string) => k.trim())
+                    : Array.isArray(keywords)
+                      ? keywords
                       : [];
 
                 const searchVolume = (item as KeywordItem).searchVolume
@@ -293,8 +293,8 @@ export default function KeywordAnalyzer() {
             Example: <code>product,keywords,searchVolume,competition</code>
             <br />
             <code>
-              Wireless Earbuds,&quot;bluetooth earbuds, wireless headphones,
-              earphones&quot;,135000,High
+              Wireless Earbuds,"bluetooth earbuds, wireless headphones,
+              earphones",135000,High
             </code>
           </p>
         </div>

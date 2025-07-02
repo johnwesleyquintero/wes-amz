@@ -1,8 +1,7 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { FileText, Upload, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 interface FileUploadZoneProps {
   onFileUpload: (file: File) => void;

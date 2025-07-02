@@ -3,13 +3,13 @@ import { ApiError } from "@/lib/api-errors";
 import { useToast } from "@/hooks/use-toast";
 
 interface UseApiOptions {
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: unknown) => void;
   onError?: (error: ApiError) => void;
   showSuccessToast?: boolean;
   showErrorToast?: boolean;
 }
 
-export function useApi<T = any>(options: UseApiOptions = {}) {
+export function useApi<T = unknown>(options: UseApiOptions = {}) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);

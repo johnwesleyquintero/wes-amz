@@ -9,7 +9,8 @@ import { Breadcrumb } from "./Breadcrumb";
 const TopBar = () => {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
-  const [notificationCount] = useState(3); // TODO: Replace with dynamic notification count from state management or API
+  // TODO: Replace with dynamic notification count from state management or API
+  const [notificationCount] = useState(3);
 
   return (
     <header className="border-b border-border bg-background dark:bg-sidebar h-16 px-6 flex items-center justify-between">
@@ -54,7 +55,8 @@ const TopBar = () => {
               size="icon"
               className="relative"
               onClick={() => {
-                /* TODO: Implement navigation to notifications page or open a notification modal */
+                console.log("Navigate to notifications or open modal");
+                // TODO: Implement actual navigation to notifications page or open a notification modal
               }}
             >
               <Bell className="h-5 w-5" />
@@ -71,7 +73,8 @@ const TopBar = () => {
               variant="outline"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                /* TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate) */
+                console.log("Logout initiated");
+                // TODO: Implement actual logout logic (e.g., API call to invalidate session, clear local storage, then navigate)
               }}
             >
               Logout

@@ -16,7 +16,7 @@ export interface Webhook {
 export interface WebhookPayload {
   event: string;
   timestamp: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   webhook_id: string;
 }
 
@@ -95,7 +95,7 @@ export const registerWebhook = async (
 
 export const sendWebhookPayload = async (
   webhookId: string,
-  payload: Record<string, any>,
+  payload: Record<string, unknown>,
 ) => {
   try {
     // Get webhook details
@@ -149,7 +149,7 @@ export const sendWebhookPayload = async (
     } catch (fetchError) {
       // Increment failure count
       const newFailureCount = (webhook.failure_count || 0) + 1;
-      const updates: any = { failure_count: newFailureCount };
+      const updates: Partial<Webhook> = { failure_count: newFailureCount };
 
       // Deactivate webhook after 5 failures
       if (newFailureCount >= 5) {

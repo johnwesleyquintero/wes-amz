@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import {
   registerWebhook,
-  sendWebhookPayload,
   listWebhooks,
   deleteWebhook,
   toggleWebhookStatus,
@@ -65,7 +64,7 @@ const WebhookManager: React.FC = () => {
     error: webhooksError,
     execute: executeListWebhooks,
   } = useApi<Webhook[]>({
-    onSuccess: (data) => setWebhooks(data),
+    onSuccess: (data: Webhook[]) => setWebhooks(data),
     showErrorToast: true,
   });
 
@@ -173,7 +172,7 @@ const WebhookManager: React.FC = () => {
         description: `Webhook ${isActive ? "activated" : "deactivated"} successfully.`,
       });
       fetchWebhooks();
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update webhook status.",

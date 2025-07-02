@@ -6,7 +6,7 @@ interface WorkerMessage {
 
 interface WorkerResponse {
   type: "progress" | "chunk" | "complete" | "error";
-  data?: any[];
+  data?: unknown[];
   message?: string;
   progress?: number;
 }
@@ -19,7 +19,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   try {
     let processedRows = 0;
     let totalRows = 0;
-    const allData: any[] = [];
+    const allData: Record<string, unknown>[] = [];
 
     // First pass: count total rows for progress tracking
     Papa.parse(file, {
@@ -32,15 +32,17 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           header: true,
           skipEmptyLines: true,
           chunk: (results) => {
-            const validData = results.data.filter((row: any) => {
-              // Basic validation - ensure row has some data
-              return Object.values(row).some(
-                (value) =>
-                  value !== null &&
-                  value !== undefined &&
-                  String(value).trim() !== "",
-              );
-            });
+            const validData = results.data.filter(
+              (row: Record<string, unknown>) => {
+                // Basic validation - ensure row has some data
+                return Object.values(row).some(
+                  (value) =>
+                    value !== null &&
+                    value !== undefined &&
+                    String(value).trim() !== "",
+                );
+              },
+            );
 
             allData.push(...validData);
             processedRows += results.data.length;

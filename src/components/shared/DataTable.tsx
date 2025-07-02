@@ -7,18 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface Column {
   key: string;
   label: string;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: unknown) => React.ReactNode;
   className?: string;
 }
 
 interface DataTableProps {
-  data: any[];
+  data: unknown[];
   columns: Column[];
   className?: string;
   emptyMessage?: string;
