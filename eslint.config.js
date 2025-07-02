@@ -33,7 +33,7 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": [
-        "warn",
+        "error", // Changed from 'warn' to 'error' to enforce dead code elimination
         { argsIgnorePattern: "^_" },
       ],
       "react/react-in-jsx-scope": "off", // Disable the rule for React 17+
