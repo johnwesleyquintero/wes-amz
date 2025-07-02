@@ -73,6 +73,10 @@ export default {
         hampton: "hsl(var(--hampton))",
         "butterfly-bush": "hsl(var(--butterfly-bush))",
         "catskill-white": "hsl(var(--catskill-white))",
+        skeleton: {
+          DEFAULT: "hsl(var(--skeleton-bg))",
+          highlight: "hsl(var(--skeleton-highlight))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

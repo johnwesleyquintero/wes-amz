@@ -14,7 +14,10 @@ const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   return (
     <div className={`animate-pulse space-y-2 ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className={`bg-gray-200 rounded ${height}`}></div>
+        <div
+          key={index}
+          className={`bg-skeleton rounded ${height} animate-pulse-custom`}
+        ></div>
       ))}
     </div>
   );

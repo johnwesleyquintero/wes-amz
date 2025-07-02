@@ -97,6 +97,15 @@ Here are some notable scripts defined in `package.json`:
 - `npm run cli`: Runs the interactive command-line interface (`cli.sh`) for various project tasks.
 - `npm run git-commit`: Runs an interactive script (`scripts/git-commit.mjs`) to help generate conventional commit messages and push changes.
 
+### Image Optimization
+
+To ensure optimal loading times and performance, especially for images in the `public/images` directory, consider the following:
+
+- **Compression:** Use tools like [TinyPNG](https://tinypng.com/) or [ImageOptim](https://imageoptim.com/mac) to compress images without significant loss of quality.
+- **Modern Formats:** Convert images to modern formats like WebP. This can be done using tools like `cwebp` (from libwebp) or online converters.
+- **Lazy Loading:** Implement lazy loading for images that are not immediately visible on page load to prioritize critical content. For React applications, `react-lazyload` or native `loading="lazy"` attribute can be used.
+- **Responsive Images:** Use `srcset` and `sizes` attributes with the `<img>` tag to serve different image resolutions based on the user's device and screen size.
+
 ---
 
 ## 📈 Feature Roadmap
