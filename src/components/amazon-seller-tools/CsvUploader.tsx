@@ -4,7 +4,6 @@ import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { FileText, Info, AlertCircle, CheckCircle2 } from "lucide-react";
-import SampleCsvButton from "./sample-csv-button";
 import { Progress } from "../ui/progress";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,8 +13,6 @@ type CsvUploaderProps<T> = {
   onClear: () => void;
   hasData: boolean;
   requiredColumns: string[];
-  dataType: "fba" | "keyword" | "ppc" | "keyword-dedup" | "acos";
-  fileName: string;
 };
 
 export interface GenericCsvRow {
@@ -30,8 +27,6 @@ export default function CsvUploader<T extends GenericCsvRow>({
   onClear,
   hasData,
   requiredColumns,
-  dataType,
-  fileName,
 }: CsvUploaderProps<T>) {
   const { toast } = useToast();
   const [parsingError, setParsingError] = useState<string | null>(null);
@@ -238,11 +233,6 @@ export default function CsvUploader<T extends GenericCsvRow>({
             <span>{parsingError}</span>
           </div>
         )}
-        <SampleCsvButton
-          dataType={dataType}
-          fileName={fileName}
-          className="mt-4"
-        />
       </div>
       {hasData && (
         <Button variant="outline" onClick={onClear}>

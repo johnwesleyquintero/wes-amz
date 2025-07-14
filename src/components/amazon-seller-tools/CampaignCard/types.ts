@@ -1,4 +1,4 @@
-import { CampaignData } from "../ppc-campaign-auditor";
+import { CampaignData } from "@/types/ppc-audit-types";
 
 /**
  * Props for the CampaignCard component.

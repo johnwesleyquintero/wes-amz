@@ -40,7 +40,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
     );
   }
 
-  const roas = campaign.sales / campaign.adSpend;
+  const roas = campaign.sales / campaign.spend;
   const isAcosHigh = campaign.acos > MAX_ACOS_THRESHOLD;
   const isCtrLow = campaign.ctr < MIN_CTR_THRESHOLD;
   const isConversionRateLow =

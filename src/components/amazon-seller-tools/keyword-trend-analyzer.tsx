@@ -115,8 +115,6 @@ const KeywordTrendAnalyzer: React.FC = () => {
         onClear={handleClearData}
         hasData={hasData}
         requiredColumns={["date"]}
-        dataType="keyword"
-        fileName="sample-keyword-trend.csv"
       />
 
       {error && (

@@ -16,7 +16,6 @@ import {
   Info,
 } from "lucide-react";
 import {
-  BarChart,
   Bar,
   XAxis,
   YAxis,
@@ -25,6 +24,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { ComposedChart, Brush } from "recharts";
 import Papa from "papaparse";
 import SampleCsvButton from "./sample-csv-button";
 import { useToast } from "@/hooks/use-toast";
@@ -451,7 +451,9 @@ export default function KeywordAnalyzer() {
                             Keyword Performance
                           </h4>
                           <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
+                            <ComposedChart
+                              width={500}
+                              height={400}
                               data={[
                                 {
                                   name: "Search Volume",
@@ -459,19 +461,24 @@ export default function KeywordAnalyzer() {
                                 },
                               ]}
                               margin={{
-                                top: 5,
-                                right: 30,
+                                top: 20,
+                                right: 20,
+                                bottom: 20,
                                 left: 20,
-                                bottom: 5,
                               }}
                             >
-                              <CartesianGrid strokeDasharray="3 3" />
+                              <CartesianGrid stroke="#f5f5f5" />
                               <XAxis dataKey="name" />
                               <YAxis />
                               <Tooltip />
                               <Legend />
                               <Bar dataKey="value" fill="#8884d8" />
-                            </BarChart>
+                              <Brush
+                                dataKey="name"
+                                height={30}
+                                stroke="#8884d8"
+                              />
+                            </ComposedChart>
                           </ResponsiveContainer>
                         </div>
                       )}

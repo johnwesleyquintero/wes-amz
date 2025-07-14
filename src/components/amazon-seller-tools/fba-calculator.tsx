@@ -5,21 +5,13 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { FixedSizeList as List } from "react-window";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Upload, FileUp, AlertCircle, Download, Info } from "lucide-react";
 import Papa from "papaparse";
 import SampleCsvButton from "./sample-csv-button";
 import { useToast } from "@/hooks/use-toast";
+import DataTable from "@/components/shared/DataTable";
 
 type ProductData = {
   product: string;
@@ -375,93 +367,82 @@ export default function FbaCalculator() {
             </Button>
           </div>
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Cost ($)</TableHead>
-                  <TableHead className="text-right">Price ($)</TableHead>
-                  <TableHead className="text-right">Fees ($)</TableHead>
-                  <TableHead className="text-right">Profit ($)</TableHead>
-                  <TableHead className="text-right">ROI (%)</TableHead>
-                  <TableHead className="text-right">Margin (%)</TableHead>
-                  <TableHead>Profitability</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <List
-                  height={300}
-                  itemCount={products.length}
-                  itemSize={40}
-                  width="100%"
-                >
-                  {({ index, style }) => {
-                    const item = products[index];
-                    return (
-                      <TableRow key={index} style={style}>
-                        <TableCell className="font-medium">
-                          {item.product}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.cost.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {item.fees.toFixed(2)}
-                        </TableCell>
-                        <TableCell
-                          className={`text-right font-semibold ${
-                            item.profit && item.profit < 0
-                              ? "text-red-500"
-                              : "text-green-500"
-                          }`}
-                        >
-                          {item.profit?.toFixed(2)}
-                        </TableCell>
-                        <TableCell
-                          className={`text-right ${
-                            item.roi && item.roi < 0
-                              ? "text-red-500"
-                              : "text-green-500"
-                          }`}
-                        >
-                          {item.roi?.toFixed(2)}%
-                        </TableCell>
-                        <TableCell
-                          className={`text-right ${
-                            item.margin && item.margin < 0
-                              ? "text-red-500"
-                              : "text-green-500"
-                          }`}
-                        >
-                          {item.margin?.toFixed(2)}%
-                        </TableCell>
-                        <TableCell>
-                          <div className="w-full">
-                            <Progress
-                              value={
-                                item.margin && item.margin > 0
-                                  ? Math.min(item.margin, 100)
-                                  : 0
-                              }
-                              className={`h-2 ${
-                                item.margin && item.margin < 15
-                                  ? "bg-red-200"
-                                  : item.margin && item.margin < 30
-                                    ? "bg-yellow-200"
-                                    : "bg-green-200"
-                              }`}
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }}
-                </List>
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={[
+                {
+                  key: "product",
+                  label: "Product",
+                  sortable: true,
+                },
+                {
+                  key: "cost",
+                  label: "Cost ($)",
+                  sortable: true,
+                  className: "text-right",
+                  render: (row: ProductData) => row.cost.toFixed(2),
+                },
+                {
+                  key: "price",
+                  label: "Price ($)",
+                  sortable: true,
+                  className: "text-right",
+                  render: (row: ProductData) => row.price.toFixed(2),
+                },
+                {
+                  key: "fees",
+                  label: "Fees ($)",
+                  sortable: true,
+                  className: "text-right",
+                  render: (row: ProductData) => row.fees.toFixed(2),
+                },
+                {
+                  key: "profit",
+                  label: "Profit ($)",
+                  sortable: true,
+                  className: "text-right",
+                  render: (row: ProductData) => row.profit?.toFixed(2),
+                },
+                {
+                  key: "roi",
+                  label: "ROI (%)",
+                  sortable: true,
+                  className: "text-right",
+                  render: (row: ProductData) => row.roi?.toFixed(2) + "%",
+                },
+                {
+                  key: "margin",
+                  label: "Margin (%)",
+                  sortable: true,
+                  className: "text-right",
+                  render: (row: ProductData) => row.margin?.toFixed(2) + "%",
+                },
+                {
+                  key: "profitability",
+                  label: "Profitability",
+                  sortable: false,
+                  render: (item: ProductData) => (
+                    <div className="w-full">
+                      <Progress
+                        value={
+                          item.margin && item.margin > 0
+                            ? Math.min(item.margin, 100)
+                            : 0
+                        }
+                        className={`h-2 ${
+                          item.margin && item.margin < 15
+                            ? "bg-red-200"
+                            : item.margin && item.margin < 30
+                              ? "bg-yellow-200"
+                              : "bg-green-200"
+                        }`}
+                      />
+                    </div>
+                  ),
+                },
+              ]}
+              data={products}
+              filterable
+            />
           </div>
         </div>
       )}

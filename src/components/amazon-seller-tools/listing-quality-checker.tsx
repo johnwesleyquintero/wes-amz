@@ -79,6 +79,16 @@ interface BadgeProps {
   className?: string;
 }
 
+type MockListingData = {
+  asin: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  price: number;
+  rating: number;
+  reviewCount: number;
+};
+
 const ListingDetailCheck = ({
   isPresent,
   label,
@@ -99,6 +109,42 @@ const ListingDetailCheck = ({
       </span>
     </div>
   );
+};
+
+const getMockListingData = async (asin: string) => {
+  // Simulate API endpoint that returns sample listing data
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const sampleListingData = {
+        asin: asin,
+        title: "Sample Product Title",
+        description: "Sample product description.",
+        imageUrl: "https://example.com/sample-image.jpg",
+        price: 25.99,
+        rating: 4.5,
+        reviewCount: 123,
+      };
+      resolve(sampleListingData);
+    }, 500);
+  }).then((data) => {
+    const { title, description } = data as MockListingData;
+    const newListing: ListingData = {
+      product: `Product (ASIN: ${asin})`,
+      title,
+      description,
+      bulletPoints: ["Bullet 1", "Bullet 2"],
+      images: 5,
+      keywords: ["keyword1", "keyword2"],
+      issues: ["No major issues found"],
+      suggestions: ["Listing looks good!"],
+    };
+
+    const listingWithScore = {
+      ...newListing,
+      score: calculateListingScore(newListing),
+    };
+    return listingWithScore;
+  });
 };
 
 export default function ListingQualityChecker() {
@@ -235,53 +281,10 @@ export default function ListingQualityChecker() {
     setIsLoading(true);
     setError(null);
 
-    // Simulate API call for ASIN lookup
-    setTimeout(() => {
-      // Generate a random listing with issues
-      const issues = [
-        "Title missing main keywords",
-        "Description too short",
-        "Not enough bullet points",
-        "Missing backend keywords",
-        "Low-quality main image",
-      ];
-
-      const selectedIssues = issues.filter(() => Math.random() > 0.5);
-
-      const suggestions = [
-        "Add main keywords to the beginning of your title",
-        "Expand description to at least 1000 characters",
-        "Add 5-6 detailed bullet points highlighting benefits",
-        "Add more backend keywords to improve searchability",
-        "Use a high-resolution main image with white background",
-      ];
-
-      const selectedSuggestions = suggestions.filter((_, i) =>
-        selectedIssues.length > i ? true : false,
-      );
-
-      const newListing: ListingData = {
-        product: `Product (ASIN: ${asin})`,
-        title: Math.random() > 0.3 ? "Product Title Example" : "",
-        description:
-          Math.random() > 0.3 ? "Product description example..." : "",
-        bulletPoints: Math.random() > 0.5 ? ["Bullet 1", "Bullet 2"] : [],
-        images: Math.floor(Math.random() * 7),
-        keywords: Math.random() > 0.4 ? ["keyword1", "keyword2"] : [],
-        issues: selectedIssues.length
-          ? selectedIssues
-          : ["No major issues found"],
-        suggestions: selectedSuggestions.length
-          ? selectedSuggestions
-          : ["Listing looks good!"],
-      };
-
-      const listingWithScore = {
-        ...newListing,
-        score: calculateListingScore(newListing),
-      };
-
-      setListings([...listings, listingWithScore]);
+    // Mock API call for ASIN lookup
+    setTimeout(async () => {
+      const mockListingData = await getMockListingData(asin);
+      setListings([...listings, mockListingData]);
       setAsin("");
       setIsLoading(false);
     }, 1500);
@@ -304,11 +307,10 @@ export default function ListingQualityChecker() {
             <code>product,title,description,bullet_points,images,keywords</code>
             <br />
             <code>
-              Wireless Earbuds,&quot;Premium Wireless
-              Earbuds&quot;,&quot;Experience superior sound
-              quality...&quot;,&quot;Crystal Clear Audio;Long Battery
-              Life;Comfortable Fit&quot;,7,&quot;wireless earbuds, bluetooth
-              earbuds, noise cancelling earbuds&quot;
+              Wireless Earbuds,"Premium Wireless Earbuds","Experience superior
+              sound quality...","Crystal Clear Audio;Long Battery
+              Life;Comfortable Fit",7,"wireless earbuds, bluetooth earbuds,
+              noise cancelling earbuds"
             </code>
           </p>
         </div>

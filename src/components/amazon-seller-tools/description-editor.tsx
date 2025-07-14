@@ -176,158 +176,109 @@ export default function DescriptionEditor() {
   };
 
   const countKeywords = (text: string, targetKeywords: string[]): number => {
-    // This is a simplified keyword counter
-    // In a real app, you'd have a more sophisticated algorithm
-    const stopWords = [
-      "the",
-      "a",
-      "is",
-      "are",
-      "was",
-      "were",
-      "be",
-      "been",
-      "being",
-      "have",
-      "has",
-      "had",
-      "do",
-      "does",
-      "did",
-      "an",
-      "and",
-      "but",
-      "if",
-      "or",
-      "because",
-      "as",
-      "until",
-      "while",
-      "of",
-      "at",
-      "by",
-      "for",
-      "with",
-      "about",
-      "against",
-      "between",
-      "into",
-      "through",
-      "during",
-      "before",
-      "after",
-      "above",
-      "below",
-      "to",
-      "from",
-      "up",
-      "down",
-      "in",
-      "out",
-      "on",
-      "off",
-      "over",
-      "under",
-      "again",
-      "further",
-      "then",
-      "once",
-      "here",
-      "there",
-      "when",
-      "where",
-      "why",
-      "how",
-      "all",
-      "any",
-      "both",
-      "each",
-      "few",
-      "more",
-      "most",
-      "other",
-      "some",
-      "such",
-      "no",
-      "nor",
-      "not",
-      "only",
-      "own",
-      "same",
-      "so",
-      "than",
-      "too",
-      "very",
-      "can",
-      "will",
-      "just",
-    ];
+    // Enhanced keyword counter with stemming and synonym consideration
+    const synonyms = {
+      good: ["great", "excellent", "amazing"],
+      fast: ["quick", "rapid"],
+      // Expand this with more synonyms as needed
+    };
 
-    const stemWord = (word: string) => {
+    const stemmer = (word: string): string => {
+      // Basic stemming (remove common suffixes)
       word = word.replace(/ing$|ed$|s$/i, "");
       return word;
     };
 
-    const cleanedText = text
-      .toLowerCase()
-      .split(/\s+/)
-      .filter((word) => !stopWords.includes(word))
-      .join(" ");
+    const normalizeText = (text: string): string => {
+      return text
+        .toLowerCase()
+        .replace(/[^a-z\s]/g, "")
+        .trim();
+    };
 
-    const stemmedKeywords = targetKeywords.map((keyword) =>
-      stemWord(keyword.toLowerCase()),
-    );
+    const textWords = normalizeText(text).split(/\s+/);
+    const stemmedTextWords = textWords.map(stemmer);
 
     let keywordCount = 0;
-    stemmedKeywords.forEach((keyword) => {
-      const regex = new RegExp(`\\b${keyword}\\b`, "g");
-      const matches = cleanedText.match(regex);
-      keywordCount += matches ? matches.length : 0;
+
+    targetKeywords.forEach((targetKeyword) => {
+      const normalizedKeyword = normalizeText(targetKeyword);
+      const stemmedKeyword = stemmer(normalizedKeyword);
+
+      // Direct keyword match
+      keywordCount += stemmedTextWords.filter(
+        (word) => word === stemmedKeyword,
+      ).length;
+
+      // Synonym matching
+      if (synonyms[normalizedKeyword]) {
+        synonyms[normalizedKeyword].forEach((synonym) => {
+          const stemmedSynonym = stemmer(normalizeText(synonym));
+          keywordCount += stemmedTextWords.filter(
+            (word) => word === stemmedSynonym,
+          ).length;
+        });
+      }
     });
 
     return keywordCount;
   };
 
   const calculateScore = (text: string, targetKeywords: string[]): number => {
-    // This is a more sophisticated scoring algorithm
+    // Comprehensive scoring algorithm considering keyword density, placement, and readability
     let score = 0;
 
-    // --- Keyword Density Score (0-30 points) ---
+    // Keyword Density Score (0-40 points)
     const wordCount = text.split(/\s+/).length;
     const keywordCount = countKeywords(text, targetKeywords);
     const keywordDensity = wordCount > 0 ? keywordCount / wordCount : 0;
 
     if (keywordDensity >= 0.02 && keywordDensity <= 0.05) {
-      score += 30;
+      score += 40;
     } else if (keywordDensity > 0.01 && keywordDensity < 0.06) {
-      score += 20;
+      score += 30;
     } else {
       score += 10;
     }
 
-    // --- Keyword Placement Score (0-20 points) ---
-    const firstSentence = text.split(/[.!?]+/).filter(Boolean)[0] || "";
+    // Keyword Placement Score (0-30 points)
+    const sentences = text.split(/[.!?]+/).filter(Boolean);
+    const firstSentence = sentences[0] || "";
     let placementScore = 0;
+
     targetKeywords.forEach((keyword) => {
       if (firstSentence.toLowerCase().includes(keyword.toLowerCase())) {
-        placementScore += 5;
+        placementScore += 7.5; // Increased weight for first sentence
       }
+      sentences.slice(1).forEach((sentence) => {
+        if (sentence.toLowerCase().includes(keyword.toLowerCase())) {
+          placementScore += 2.5; // Reduced weight for subsequent sentences
+        }
+      });
     });
-    score += Math.min(placementScore, 20); // Cap at 20
+    score += Math.min(placementScore, 30);
 
-    // --- Flesch-Kincaid Readability Score (0-30 points) ---
-    const sentences = text.split(/[.!?]+/).filter(Boolean).length;
-    const syllables = text
+    // Flesch-Kincaid Readability Score (0-30 points)
+    const syllableCount = (word: string): number => {
+      word = word.toLowerCase();
+      if (word.length <= 3) return 1;
+      word = word.replace(/(?:es|ed)$/, "");
+      word = word.replace(/^y/, "");
+      const matches = word.match(/[aeiouy]{1,2}/g);
+      return matches ? matches.length : 0;
+    };
+
+    const totalSyllables = text
       .split(/\s+/)
-      .reduce(
-        (count, word) => count + (word.match(/[aeiouy]+/gi)?.length || 0),
-        0,
-      );
+      .reduce((sum, word) => sum + syllableCount(word), 0);
+    const totalSentences = sentences.length;
 
     const fleschKincaid =
-      206.835 -
-      1.015 * (wordCount / sentences) -
-      84.6 * (syllables / wordCount);
+      totalSentences > 0
+        ? 206.835 -
+          1.015 * (wordCount / totalSentences) -
+          84.6 * (totalSyllables / wordCount)
+        : 0;
 
     if (fleschKincaid > 90) {
       score += 30; // Very easy to read

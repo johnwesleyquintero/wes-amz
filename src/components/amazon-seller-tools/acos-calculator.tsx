@@ -4,11 +4,8 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
-import {
-  calculateMetrics,
-  getAcosColor,
-  getAcosRating,
-} from "@/lib/acos-utils";
+import DataTable from "@/components/shared/DataTable";
+import { calculateMetrics, getAcosRating } from "@/lib/acos-utils";
 import { Calculator, Download, Info } from "lucide-react";
 import Papa from "papaparse";
 import { useState, useCallback } from "react";
@@ -277,8 +274,6 @@ export default function AcosCalculator() {
               onClear={clearData}
               hasData={campaigns.length > 0}
               requiredColumns={["campaign", "adSpend", "sales"]}
-              dataType="acos"
-              fileName="sample-acos-calculator.csv"
             />
           </CardContent>
         </Card>
@@ -376,78 +371,63 @@ export default function AcosCalculator() {
               Export Data
             </Button>
           </div>
-          <div className="rounded-lg border">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-left text-sm font-medium">
-                      Campaign
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
-                      Ad Spend
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
-                      Sales
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
-                      ACoS
-                    </th>
-                    <th className="px-4 py-3 text-right text-sm font-medium">
-                      ROAS
-                    </th>
-                    <th className="px-4 py-3 text-center text-sm font-medium">
-                      Rating
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {campaigns.map((campaign, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="px-4 py-3 text-sm">{campaign.campaign}</td>
-                      <td className="px-4 py-3 text-right text-sm">
-                        ${campaign.adSpend.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm">
-                        ${campaign.sales.toFixed(2)}
-                      </td>
-                      <td
-                        className={`px-4 py-3 text-right text-sm font-medium ${
-                          {
-                            green: "text-green-600 dark:text-green-400",
-                            emerald: "text-emerald-600 dark:text-emerald-400",
-                            yellow: "text-yellow-600 dark:text-yellow-400",
-                            orange: "text-orange-600 dark:text-orange-400",
-                            red: "text-red-600 dark:text-red-400",
-                          }[getAcosColor(campaign.acos || 0)]
-                        }`}
-                      >
-                        {campaign.acos?.toFixed(2)}%
-                      </td>
-                      <td className="px-4 py-3 text-right text-sm font-medium">
-                        {campaign.roas?.toFixed(2)}x
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge
-                          variant={
-                            campaign.acos &&
-                            campaign.acos < ACOS_EXCELLENT_THRESHOLD
-                              ? "default"
-                              : campaign.acos &&
-                                  campaign.acos < ACOS_GOOD_THRESHOLD
-                                ? "secondary"
-                                : "destructive"
-                          }
-                        >
-                          {getAcosRating(campaign.acos || 0)}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <DataTable
+            columns={[
+              {
+                key: "campaign",
+                label: "Campaign",
+                sortable: true,
+              },
+              {
+                key: "adSpend",
+                label: "Ad Spend",
+                sortable: true,
+                className: "text-right",
+                render: (row: AcosCampaignData) => `$${row.adSpend.toFixed(2)}`,
+              },
+              {
+                key: "sales",
+                label: "Sales",
+                sortable: true,
+                className: "text-right",
+                render: (row: AcosCampaignData) => `$${row.sales.toFixed(2)}`,
+              },
+              {
+                key: "acos",
+                label: "ACoS",
+                sortable: true,
+                className: "text-right",
+                render: (row: AcosCampaignData) => `${row.acos?.toFixed(2)}%`,
+              },
+              {
+                key: "roas",
+                label: "ROAS",
+                sortable: true,
+                className: "text-right",
+                render: (row: AcosCampaignData) => `${row.roas?.toFixed(2)}x`,
+              },
+              {
+                key: "rating",
+                label: "Rating",
+                className: "text-center",
+                render: (campaign: AcosCampaignData) => (
+                  <Badge
+                    variant={
+                      campaign.acos && campaign.acos < ACOS_EXCELLENT_THRESHOLD
+                        ? "default"
+                        : campaign.acos && campaign.acos < ACOS_GOOD_THRESHOLD
+                          ? "secondary"
+                          : "destructive"
+                    }
+                  >
+                    {getAcosRating(campaign.acos || 0)}
+                  </Badge>
+                ),
+              },
+            ]}
+            data={campaigns}
+            filterable
+          />
         </>
       )}
     </div>

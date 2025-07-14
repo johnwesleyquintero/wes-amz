@@ -10,7 +10,6 @@ import {
 } from "../ui/card";
 import {
   ResponsiveContainer,
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -18,6 +17,7 @@ import {
   Legend,
   Tooltip as RechartsTooltip,
 } from "recharts";
+import { ComposedChart, Brush } from "recharts";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -491,22 +491,19 @@ export default function CompetitorAnalyzer() {
         {chartData ? (
           <div className="mt-4 h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <ComposedChart
+                width={500}
+                height={400}
                 data={chartData}
                 margin={{
                   top: 20,
-                  right: 30,
+                  right: 20,
+                  bottom: 20,
                   left: 20,
-                  bottom: 5,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  angle={isMobile ? 45 : 0}
-                  textAnchor={isMobile ? "start" : "middle"}
-                  tick={{ fontSize: isMobile ? 10 : 14 }}
-                />
+                <CartesianGrid stroke="#f5f5f5" />
+                <XAxis dataKey="name" scale="band" />
                 <YAxis />
                 <RechartsTooltip />
                 <Legend wrapperStyle={{ paddingTop: 20 }} />
@@ -520,7 +517,8 @@ export default function CompetitorAnalyzer() {
                     dot={{ r: 4 }}
                   />
                 ))}
-              </LineChart>
+                <Brush dataKey="name" height={30} stroke="#8884d8" />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         ) : null}
