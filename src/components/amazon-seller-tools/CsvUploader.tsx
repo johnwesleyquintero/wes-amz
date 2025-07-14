@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { FileText, Info, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Progress } from "../ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useCsvUploaderStore } from "@/store/csv-uploader-store";
+import { useCsvWorker } from "@/hooks/use-csv-worker";
 
 type CsvUploaderProps = {
   onUploadSuccess: (data: GenericCsvRow[]) => void;
   requiredColumns: string[];
-  isLoading: boolean;
   onClear: () => void;
   hasData: boolean;
+  isLoading: boolean; // Add isLoading prop
 };
 
 export interface GenericCsvRow {
@@ -24,7 +25,6 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function CsvUploader({
   onUploadSuccess,
-  isLoading,
   onClear,
   hasData,
   requiredColumns,
@@ -35,167 +35,124 @@ export default function CsvUploader({
     progress,
     parsingError,
     fileNameDisplay,
-    accumulatedData,
-    setData,
-    setParsingStatus,
-    setProgress,
-    setError,
     setFileName,
+    setError,
     clearState,
   } = useCsvUploaderStore();
-  const workerRef = useRef<Worker>();
 
-  useEffect(() => {
-    workerRef.current = new Worker(
-      new URL("../../workers/csvParser.worker.ts", import.meta.url),
-      { type: "module" },
-    );
+  const { parseCsv } = useCsvWorker({ onUploadSuccess, requiredColumns });
 
-    workerRef.current.onmessage = (event: MessageEvent) => {
-      const { type, data, message, progress } = event.data;
-      switch (type) {
-        case "progress":
-          setProgress(progress);
-          break;
-        case "chunk":
-          setData([...accumulatedData, ...data]);
-          break;
-        case "complete": {
-          setParsingStatus(false);
-          setProgress(100);
-          const missingColumns = requiredColumns.filter(
-            (col) => !Object.keys(accumulatedData[0] || {}).includes(col),
-          );
-          if (missingColumns.length > 0) {
-            const errorMsg = `Missing required columns: ${missingColumns.join(
-              ", ",
-            )}`;
-            setError(errorMsg);
-            toast({
-              title: "Error",
-              description: errorMsg,
-              variant: "destructive",
-            });
-            setData([]);
-            return;
-          }
-          onUploadSuccess(accumulatedData);
-          toast({
-            title: "Success",
-            description: `File processed successfully`,
-            variant: "default",
-          });
-          setData([]);
-          break;
-        }
-        case "error":
-          setParsingStatus(false);
-          setError(message);
-          setData([]);
-          toast({
-            title: "Error",
-            description: message,
-            variant: "destructive",
-          });
-          break;
-      }
-    };
-
-    workerRef.current.onerror = (error: ErrorEvent) => {
-      setParsingStatus(false);
-      setError(`Worker error: ${error.message}`);
-      setData([]);
-      toast({
-        title: "Error",
-        description: `Worker error: ${error.message}`,
-        variant: "destructive",
-      });
-    };
-
-    return () => {
-      if (workerRef.current) {
-        workerRef.current.terminate();
-      }
-    };
-  }, [
-    onUploadSuccess,
-    requiredColumns,
-    toast,
-    accumulatedData,
-    setData,
-    setError,
-    setParsingStatus,
-    setProgress,
-  ]);
-
-  const parseCsv = useCallback(
+  const handleFileValidationAndParse = useCallback(
     (file: File) => {
-      clearState();
-      setParsingStatus(true);
-      setFileName(file.name);
-      workerRef.current?.postMessage({ file });
+      if (!file.name.endsWith(".csv")) {
+        setError("Only CSV files are supported");
+        toast({
+          title: "Error",
+          description: "Only CSV files are supported",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        setError(
+          `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+        );
+        toast({
+          title: "Error",
+          description: `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      if (file.size === 0) {
+        setError("The file is empty");
+        toast({
+          title: "Error",
+          description: "The file is empty",
+          variant: "destructive",
+        });
+        return false;
+      }
+      return true;
     },
-    [clearState, setParsingStatus, setFileName],
+    [setError, toast],
   );
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       clearState();
       if (acceptedFiles.length === 0) {
-        const errorMessage = "No file selected";
-        setError(errorMessage);
+        setError("No file selected");
         toast({
           title: "Error",
-          description: errorMessage,
+          description: "No file selected",
           variant: "destructive",
         });
         return;
       }
 
       const file = acceptedFiles[0];
+      setFileName(file.name);
 
-      if (!file.name.endsWith(".csv")) {
-        const errorMessage = "Only CSV files are supported";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        return;
+      if (handleFileValidationAndParse(file)) {
+        parseCsv(file);
       }
-
-      if (file.size > MAX_FILE_SIZE) {
-        const errorMessage = `File size exceeds the maximum limit of ${
-          MAX_FILE_SIZE / (1024 * 1024)
-        }MB`;
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (file.size === 0) {
-        const errorMessage = "The file is empty";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      parseCsv(file);
     },
-    [parseCsv, toast, clearState, setError],
+    [
+      clearState,
+      setFileName,
+      handleFileValidationAndParse,
+      parseCsv,
+      setError,
+      toast,
+    ],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
+  return (
+    <CsvUploaderContent
+      requiredColumns={requiredColumns}
+      fileNameDisplay={fileNameDisplay}
+      isParsing={isParsing}
+      parsingError={parsingError}
+      getInputProps={getInputProps}
+      getRootProps={getRootProps}
+      isDragActive={isDragActive}
+      progress={progress}
+      hasData={hasData}
+      onClear={onClear}
+    />
+  );
+}
+
+interface CsvUploaderContentProps {
+  requiredColumns: string[];
+  fileNameDisplay: string | null;
+  isParsing: boolean;
+  parsingError: string | null;
+  getInputProps: () => React.HTMLProps<HTMLInputElement>;
+  getRootProps: () => React.HTMLProps<HTMLDivElement>;
+  isDragActive: boolean;
+  progress: number;
+  hasData: boolean;
+  onClear: () => void;
+}
+
+const CsvUploaderContent: React.FC<CsvUploaderContentProps> = ({
+  requiredColumns,
+  fileNameDisplay,
+  isParsing,
+  parsingError,
+  getInputProps,
+  getRootProps,
+  isDragActive,
+  progress,
+  hasData,
+  onClear,
+}) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex items-start gap-3">
@@ -226,13 +183,13 @@ export default function CsvUploader({
             ? `File uploaded: ${fileNameDisplay}`
             : "Click to upload CSV"}
         </span>
-        <input {...getInputProps()} disabled={isLoading || isParsing} />
+        <input {...getInputProps()} disabled={isParsing} />
         {isDragActive ? (
           <p>Drop the files here ...</p>
         ) : (
           <p>Drag 'n' drop some files here, or click to select files</p>
         )}
-        {(isLoading || isParsing) && (
+        {isParsing && (
           <div aria-live="polite" aria-atomic="true" className="w-full mt-4">
             <Progress value={progress} className="h-2" />
             <p className="text-sm text-gray-500 mt-1">Parsing: {progress}%</p>
@@ -256,4 +213,4 @@ export default function CsvUploader({
       )}
     </div>
   );
-}
+};

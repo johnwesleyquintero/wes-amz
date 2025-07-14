@@ -11,6 +11,7 @@ export interface AppRouteConfig {
   component: LazyComponent; // The component to be lazy-loaded for this route
   props?: Record<string, unknown>; // Optional props to pass to the component
   breadcrumbName?: string; // Optional name for breadcrumbs generated from routes
+  index?: boolean; // Added for nested routes
 }
 
 // Grouped lazy-loaded components for better organization and maintainability.

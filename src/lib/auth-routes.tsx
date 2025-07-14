@@ -1,45 +1,20 @@
-import React, { Suspense } from "react";
-import { Route } from "react-router-dom";
-import { AuthComponents } from "./app-routes";
-import { DEFAULT_SUSPENSE_FALLBACK } from "./routes";
+import { AuthComponents, AppRouteConfig } from "./app-routes";
 
-export const authRoutes = (
-  <Route path="/auth">
-    <Route
-      key="register"
-      path="register"
-      element={
-        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-          <AuthComponents.Register />
-        </Suspense>
-      }
-    />
-    <Route
-      key="login"
-      path="login"
-      element={
-        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-          <AuthComponents.Login />
-        </Suspense>
-      }
-    />
-    <Route
-      key="forgot-password"
-      path="forgot-password"
-      element={
-        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-          <AuthComponents.ForgotPassword />
-        </Suspense>
-      }
-    />
-    <Route
-      key="update-password"
-      path="update-password"
-      element={
-        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-          <AuthComponents.UpdatePassword />
-        </Suspense>
-      }
-    />
-  </Route>
-);
+export const authRoutes: AppRouteConfig[] = [
+  {
+    path: "register",
+    component: AuthComponents.Register,
+  },
+  {
+    path: "login",
+    component: AuthComponents.Login,
+  },
+  {
+    path: "forgot-password",
+    component: AuthComponents.ForgotPassword,
+  },
+  {
+    path: "update-password",
+    component: AuthComponents.UpdatePassword,
+  },
+];

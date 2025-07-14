@@ -6,15 +6,26 @@ import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { SidebarProvider } from "./context/sidebar-context.tsx";
-import MainLayout from "./components/layout/MainLayout";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import { ErrorBoundary } from "./components/shared/ErrorBoundary"; // Import ErrorBoundary
-import { Pages, SettingsComponents } from "./lib/app-routes.tsx"; // Removed AuthComponents
-import { DEFAULT_SUSPENSE_FALLBACK } from "./lib/routes.tsx";
+import { LazyExoticComponent, lazy } from "react";
+import type { FC } from "react";
+
+const MainLayout: LazyExoticComponent<FC> = lazy(
+  () => import("./components/layout/MainLayout"),
+);
+const ProtectedRoute: LazyExoticComponent<FC> = lazy(
+  () => import("./components/auth/ProtectedRoute"),
+);
+import { ErrorBoundary } from "./components/shared/ErrorBoundary";
+import { Pages, SettingsComponents } from "./lib/app-routes.tsx";
+import { DEFAULT_SUSPENSE_FALLBACK } from "./lib/constants";
 import { authenticatedAppRoutes } from "./lib/route-config.tsx";
-import { queryClient } from "./lib/queryClient.ts"; // Import the shared queryClient
-import { publicRoutes } from "./lib/public-routes.tsx"; // Import PublicRoutes
-import { authRoutes } from "./lib/auth-routes.tsx"; // Import AuthRoutes
+import { queryClient } from "./lib/queryClient.ts";
+import { publicRoutes } from "./lib/public-routes.tsx";
+import { authRoutes } from "./lib/auth-routes.tsx";
+import {
+  generateAuthenticatedAppRoutes,
+  generateRoutes,
+} from "./lib/route-utils.tsx";
 
 function App() {
   return (
@@ -25,8 +36,6 @@ function App() {
           <Sonner />
           <SidebarProvider>
             <ErrorBoundary>
-              {" "}
-              {/* Wrap BrowserRouter with ErrorBoundary */}
               <BrowserRouter
                 future={{
                   v7_startTransition: true,
@@ -35,78 +44,46 @@ function App() {
               >
                 <Routes>
                   {/* Public Routes */}
-                  {publicRoutes}
+                  {generateRoutes(publicRoutes)}
 
                   {/* Authentication Routes - No MainLayout */}
-                  {authRoutes}
+                  {generateRoutes(authRoutes)}
 
                   {/* Protected Routes (within MainLayout) */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/dashboard" element={<MainLayout />}>
-                      <Route
-                        index
-                        element={
-                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                            <Pages.DashboardContent />
-                          </Suspense>
-                        }
-                      />
-                    </Route>
-                    <Route path="/" element={<MainLayout />}>
-                      {authenticatedAppRoutes.map((route) => (
-                        <Route
-                          key={route.path}
-                          path={route.path}
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <route.component {...route.props} />
-                            </Suspense>
-                          }
-                        />
-                      ))}
-                      {/* Settings Routes */}
-                      <Route
-                        path="settings"
-                        element={
-                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                            <SettingsComponents.SettingsLayout />
-                          </Suspense>
-                        }
-                      >
-                        <Route
-                          index
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsComponents.ProfileManagement />
-                            </Suspense>
-                          }
-                        />
-                        <Route
-                          path="profile"
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsComponents.ProfileManagement />
-                            </Suspense>
-                          }
-                        />
-                        <Route
-                          path="organization"
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsComponents.OrganizationSettings />
-                            </Suspense>
-                          }
-                        />
-                        <Route
-                          path="team"
-                          element={
-                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsComponents.TeamManagement />
-                            </Suspense>
-                          }
-                        />
-                      </Route>
-                    </Route>
+                  {generateAuthenticatedAppRoutes(
+                    authenticatedAppRoutes,
+                    MainLayout,
+                    ProtectedRoute,
+                  )}
+
+                  {/* Settings Routes */}
+                  <Route
+                    path="settings"
+                    element={
+                      <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                        <SettingsComponents.SettingsLayout />
+                      </Suspense>
+                    }
+                  >
+                    {generateRoutes([
+                      {
+                        path: "",
+                        component: SettingsComponents.ProfileManagement,
+                        index: true,
+                      },
+                      {
+                        path: "profile",
+                        component: SettingsComponents.ProfileManagement,
+                      },
+                      {
+                        path: "organization",
+                        component: SettingsComponents.OrganizationSettings,
+                      },
+                      {
+                        path: "team",
+                        component: SettingsComponents.TeamManagement,
+                      },
+                    ])}
                   </Route>
 
                   <Route path="*" element={<Pages.NotFound />} />
