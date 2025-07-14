@@ -4,59 +4,76 @@ import { useToast } from "@/hooks/use-toast";
 import { analyzeCampaignData } from "@/lib/utils/ppc-analyzer";
 import type { CampaignData } from "@/types/ppc-audit-types";
 import { GenericCsvRow } from "@/components/amazon-seller-tools/CsvUploader";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const PPC_CAMPAIGN_QUERY_KEY = ["ppcCampaigns"];
+
+// Mock function to simulate fetching data (will be replaced by mutation)
+const fetchPpcCampaigns = async (): Promise<CampaignData[]> => {
+  // In a real app, this would fetch from an API.
+  // For now, we'll return an empty array or cached data if available.
+  return [];
+};
 
 export function usePpcAuditor() {
   const { toast } = useToast();
-  const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const processUploadedData = useCallback(
-    (data: GenericCsvRow[]) => {
-      setIsLoading(true);
-      try {
-        const parsedData = data
-          .map((row) => ({
-            name: String(row.name || ""),
-            type: String(row.type || ""),
-            spend: Number(row.spend || 0),
-            sales: Number(row.sales || 0),
-            impressions: Number(row.impressions || 0),
-            clicks: Number(row.clicks || 0),
-          }))
-          .filter((item) => item.name && item.type);
+  const { data: campaigns = [], isLoading } = useQuery<CampaignData[]>({
+    queryKey: PPC_CAMPAIGN_QUERY_KEY,
+    queryFn: fetchPpcCampaigns,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false, // We'll trigger refetches manually
+  });
 
-        if (parsedData.length === 0) {
-          throw new Error(
-            "No valid campaign data found. Please check your CSV columns: name, type, spend, sales, impressions, clicks.",
-          );
-        }
+  const processUploadedDataMutation = useMutation({
+    mutationFn: async (data: GenericCsvRow[]) => {
+      const parsedData = data
+        .map((row) => ({
+          name: String(row.name || ""),
+          type: String(row.type || ""),
+          spend: Number(row.spend || 0),
+          sales: Number(row.sales || 0),
+          impressions: Number(row.impressions || 0),
+          clicks: Number(row.clicks || 0),
+        }))
+        .filter((item) => item.name && item.type);
 
-        const analyzedData = parsedData.map(analyzeCampaignData);
-        setCampaigns(analyzedData);
-
-        toast({
-          title: "Analysis Complete",
-          description: `${analyzedData.length} campaigns successfully audited.`,
-        });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "An unknown error occurred during processing.";
-        toast({
-          title: "Processing Failed",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+      if (parsedData.length === 0) {
+        throw new Error(
+          "No valid campaign data found. Please check your CSV columns: name, type, spend, sales, impressions, clicks.",
+        );
       }
+
+      const analyzedData = parsedData.map(analyzeCampaignData);
+      return analyzedData;
     },
-    [toast],
-  );
+    onSuccess: (analyzedData) => {
+      queryClient.setQueryData(PPC_CAMPAIGN_QUERY_KEY, analyzedData);
+      toast({
+        title: "Analysis Complete",
+        description: `${analyzedData.length} campaigns successfully audited.`,
+      });
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unknown error occurred during processing.";
+      toast({
+        title: "Processing Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
 
   const exportResultsToCsv = useCallback(() => {
-    if (campaigns.length === 0) {
+    const currentCampaigns = queryClient.getQueryData<CampaignData[]>([
+      "ppcCampaigns",
+    ]);
+
+    if (!currentCampaigns || currentCampaigns.length === 0) {
       toast({
         title: "Export Error",
         description: "No data to export.",
@@ -65,7 +82,7 @@ export function usePpcAuditor() {
       return;
     }
 
-    const exportData = campaigns.map((c) => ({
+    const exportData = currentCampaigns.map((c) => ({
       Name: c.name,
       Type: c.type,
       Spend: c.spend.toFixed(2),
@@ -94,20 +111,20 @@ export function usePpcAuditor() {
       title: "Export Successful",
       description: "Your PPC audit report has been downloaded.",
     });
-  }, [campaigns, toast]);
+  }, [toast, queryClient]);
 
   const clearData = useCallback(() => {
-    setCampaigns([]);
+    queryClient.invalidateQueries({ queryKey: PPC_CAMPAIGN_QUERY_KEY });
     toast({
       title: "Data Cleared",
       description: "All campaign data has been removed.",
     });
-  }, [toast]);
+  }, [toast, queryClient]);
 
   return {
     campaigns,
-    isLoading,
-    processUploadedData,
+    isLoading: processUploadedDataMutation.isPending,
+    processUploadedData: processUploadedDataMutation.mutate,
     exportResultsToCsv,
     clearData,
     hasData: campaigns.length > 0,

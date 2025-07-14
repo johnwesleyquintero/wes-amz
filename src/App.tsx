@@ -1,23 +1,20 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { SidebarProvider } from "./context/sidebar-context.tsx";
 import MainLayout from "./components/layout/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import ErrorBoundary from "./components/shared/ErrorBoundary"; // Import ErrorBoundary
-import {
-  Pages,
-  AuthComponents,
-  SettingsComponents,
-} from "./lib/app-routes.tsx";
+import { ErrorBoundary } from "./components/shared/ErrorBoundary"; // Import ErrorBoundary
+import { Pages, SettingsComponents } from "./lib/app-routes.tsx"; // Removed AuthComponents
 import { DEFAULT_SUSPENSE_FALLBACK } from "./lib/routes.tsx";
 import { authenticatedAppRoutes } from "./lib/route-config.tsx";
-
-const queryClient = new QueryClient();
+import { queryClient } from "./lib/queryClient.ts"; // Import the shared queryClient
+import { publicRoutes } from "./lib/public-routes.tsx"; // Import PublicRoutes
+import { authRoutes } from "./lib/auth-routes.tsx"; // Import AuthRoutes
 
 function App() {
   return (
@@ -38,66 +35,10 @@ function App() {
               >
                 <Routes>
                   {/* Public Routes */}
-                  <Route
-                    path="/"
-                    element={
-                      <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <Pages.LandingPage />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="/privacy-policy"
-                    element={
-                      <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <Pages.PrivacyPolicy />
-                      </Suspense>
-                    }
-                  />
-                  <Route
-                    path="/terms-of-service"
-                    element={
-                      <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <Pages.TermsOfService />
-                      </Suspense>
-                    }
-                  />
+                  {publicRoutes}
 
                   {/* Authentication Routes - No MainLayout */}
-                  <Route path="/auth">
-                    <Route
-                      path="register"
-                      element={
-                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <AuthComponents.Register />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="login"
-                      element={
-                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <AuthComponents.Login />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="forgot-password"
-                      element={
-                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <AuthComponents.ForgotPassword />
-                        </Suspense>
-                      }
-                    />
-                    <Route
-                      path="update-password"
-                      element={
-                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                          <AuthComponents.UpdatePassword />
-                        </Suspense>
-                      }
-                    />
-                  </Route>
+                  {authRoutes}
 
                   {/* Protected Routes (within MainLayout) */}
                   <Route element={<ProtectedRoute />}>
@@ -111,8 +52,6 @@ function App() {
                         }
                       />
                     </Route>
-
-                    {/* Direct routes for tools and settings */}
                     <Route path="/" element={<MainLayout />}>
                       {authenticatedAppRoutes.map((route) => (
                         <Route

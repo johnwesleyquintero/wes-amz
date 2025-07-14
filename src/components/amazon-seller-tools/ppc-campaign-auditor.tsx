@@ -40,12 +40,14 @@ const AuditorInfoPanel = () => (
 export default function PpcCampaignAuditor() {
   const {
     campaigns,
-    isLoading,
     processUploadedData,
     exportResultsToCsv,
+    isLoading,
     clearData,
-    hasData,
   } = usePpcAuditor();
+
+  // Determine if there's data to display based on the campaigns array from the hook
+  const hasData = campaigns.length > 0;
 
   return (
     <div className="space-y-6">
@@ -53,10 +55,10 @@ export default function PpcCampaignAuditor() {
 
       <CsvUploader
         onUploadSuccess={processUploadedData}
+        requiredColumns={REQUIRED_COLUMNS}
         isLoading={isLoading}
         onClear={clearData}
         hasData={hasData}
-        requiredColumns={REQUIRED_COLUMNS}
       />
       <SampleCsvButton
         dataType="ppc"

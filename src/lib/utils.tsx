@@ -40,3 +40,33 @@ export type { VariantProps };
 export function renderIf(condition: boolean, component: React.ReactNode) {
   return condition ? component : null;
 }
+
+export type MetricType =
+  | "price"
+  | "reviews"
+  | "rating"
+  | "sales_velocity"
+  | "inventory_levels"
+  | "conversion_rate"
+  | "click_through_rate";
+
+export const getChartColor = (metric: MetricType): string => {
+  switch (metric) {
+    case "price":
+      return "#8884d8";
+    case "reviews":
+      return "#82ca9d";
+    case "rating":
+      return "#ffc658";
+    case "sales_velocity":
+      return "#a4de6c";
+    case "inventory_levels":
+      return "#d0ed57";
+    case "conversion_rate":
+      return "#cc79cd";
+    case "click_through_rate":
+      return "#7ac5d8";
+    default:
+      return "hsl(var(--foreground))";
+  }
+};

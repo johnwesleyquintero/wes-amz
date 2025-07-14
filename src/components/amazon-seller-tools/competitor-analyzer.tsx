@@ -17,7 +17,7 @@ import {
   Legend,
   Tooltip as RechartsTooltip,
 } from "recharts";
-import { ComposedChart, Brush } from "recharts";
+import { ComposedChart, Brush, Area, ReferenceLine } from "recharts";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";

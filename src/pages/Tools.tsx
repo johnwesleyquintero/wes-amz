@@ -6,7 +6,7 @@ import React, { Suspense } from "react";
 import LoadingSkeleton from "@/components/shared/LoadingSkeleton";
 import { Outlet } from "react-router-dom";
 import TextBlock from "@/components/shared/TextBlock";
-import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 export default function AmazonSellerTools() {
   const introText = [

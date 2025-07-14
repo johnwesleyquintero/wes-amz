@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { FileText, Info, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Progress } from "../ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useCsvUploaderStore } from "@/store/csv-uploader-store";
 
-type CsvUploaderProps<T> = {
-  onUploadSuccess: (data: T[]) => void;
+type CsvUploaderProps = {
+  onUploadSuccess: (data: GenericCsvRow[]) => void;
+  requiredColumns: string[];
   isLoading: boolean;
   onClear: () => void;
   hasData: boolean;
-  requiredColumns: string[];
 };
 
 export interface GenericCsvRow {
@@ -21,19 +22,27 @@ export interface GenericCsvRow {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export default function CsvUploader<T extends GenericCsvRow>({
+export default function CsvUploader({
   onUploadSuccess,
   isLoading,
   onClear,
   hasData,
   requiredColumns,
-}: CsvUploaderProps<T>) {
+}: CsvUploaderProps) {
   const { toast } = useToast();
-  const [parsingError, setParsingError] = useState<string | null>(null);
-  const [isParsing, setIsParsing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [fileNameDisplay, setFileNameDisplay] = useState<string | null>(null);
-  const [accumulatedData, setAccumulatedData] = useState<T[]>([]);
+  const {
+    isParsing,
+    progress,
+    parsingError,
+    fileNameDisplay,
+    accumulatedData,
+    setData,
+    setParsingStatus,
+    setProgress,
+    setError,
+    setFileName,
+    clearState,
+  } = useCsvUploaderStore();
   const workerRef = useRef<Worker>();
 
   useEffect(() => {
@@ -49,27 +58,25 @@ export default function CsvUploader<T extends GenericCsvRow>({
           setProgress(progress);
           break;
         case "chunk":
-          setAccumulatedData((prevData) => [...prevData, ...data]);
+          setData([...accumulatedData, ...data]);
           break;
         case "complete": {
-          setIsParsing(false);
+          setParsingStatus(false);
           setProgress(100);
-          // Perform column validation on the accumulated data
           const missingColumns = requiredColumns.filter(
             (col) => !Object.keys(accumulatedData[0] || {}).includes(col),
           );
           if (missingColumns.length > 0) {
-            setParsingError(
-              `Missing required columns: ${missingColumns.join(", ")}`,
-            );
+            const errorMsg = `Missing required columns: ${missingColumns.join(
+              ", ",
+            )}`;
+            setError(errorMsg);
             toast({
               title: "Error",
-              description: `Missing required columns: ${missingColumns.join(
-                ", ",
-              )}`,
+              description: errorMsg,
               variant: "destructive",
             });
-            setAccumulatedData([]); // Clear data on error
+            setData([]);
             return;
           }
           onUploadSuccess(accumulatedData);
@@ -78,13 +85,13 @@ export default function CsvUploader<T extends GenericCsvRow>({
             description: `File processed successfully`,
             variant: "default",
           });
-          setAccumulatedData([]); // Clear data after successful upload
+          setData([]);
           break;
         }
         case "error":
-          setIsParsing(false);
-          setParsingError(message);
-          setAccumulatedData([]); // Clear data on error
+          setParsingStatus(false);
+          setError(message);
+          setData([]);
           toast({
             title: "Error",
             description: message,
@@ -95,9 +102,9 @@ export default function CsvUploader<T extends GenericCsvRow>({
     };
 
     workerRef.current.onerror = (error: ErrorEvent) => {
-      setIsParsing(false);
-      setParsingError(`Worker error: ${error.message}`);
-      setAccumulatedData([]); // Clear data on error
+      setParsingStatus(false);
+      setError(`Worker error: ${error.message}`);
+      setData([]);
       toast({
         title: "Error",
         description: `Worker error: ${error.message}`,
@@ -110,25 +117,33 @@ export default function CsvUploader<T extends GenericCsvRow>({
         workerRef.current.terminate();
       }
     };
-  }, [onUploadSuccess, requiredColumns, toast, accumulatedData]);
+  }, [
+    onUploadSuccess,
+    requiredColumns,
+    toast,
+    accumulatedData,
+    setData,
+    setError,
+    setParsingStatus,
+    setProgress,
+  ]);
 
-  const parseCsv = useCallback((file: File) => {
-    setIsParsing(true);
-    setParsingError(null);
-    setProgress(0);
-    setFileNameDisplay(file.name); // Set file name for display
-    setAccumulatedData([]); // Clear accumulated data before new parse
-    workerRef.current?.postMessage({ file });
-  }, []);
+  const parseCsv = useCallback(
+    (file: File) => {
+      clearState();
+      setParsingStatus(true);
+      setFileName(file.name);
+      workerRef.current?.postMessage({ file });
+    },
+    [clearState, setParsingStatus, setFileName],
+  );
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      setParsingError(null); // Clear previous errors
-      setFileNameDisplay(null); // Clear previous file name display
-      setAccumulatedData([]); // Clear accumulated data on new file drop
+      clearState();
       if (acceptedFiles.length === 0) {
         const errorMessage = "No file selected";
-        setParsingError(errorMessage);
+        setError(errorMessage);
         toast({
           title: "Error",
           description: errorMessage,
@@ -141,7 +156,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
 
       if (!file.name.endsWith(".csv")) {
         const errorMessage = "Only CSV files are supported";
-        setParsingError(errorMessage);
+        setError(errorMessage);
         toast({
           title: "Error",
           description: errorMessage,
@@ -154,7 +169,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
         const errorMessage = `File size exceeds the maximum limit of ${
           MAX_FILE_SIZE / (1024 * 1024)
         }MB`;
-        setParsingError(errorMessage);
+        setError(errorMessage);
         toast({
           title: "Error",
           description: errorMessage,
@@ -165,7 +180,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
 
       if (file.size === 0) {
         const errorMessage = "The file is empty";
-        setParsingError(errorMessage);
+        setError(errorMessage);
         toast({
           title: "Error",
           description: errorMessage,
@@ -176,7 +191,7 @@ export default function CsvUploader<T extends GenericCsvRow>({
 
       parseCsv(file);
     },
-    [parseCsv, toast],
+    [parseCsv, toast, clearState, setError],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });

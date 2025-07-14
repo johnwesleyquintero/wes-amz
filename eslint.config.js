@@ -36,10 +36,19 @@ export default tseslint.config(
         "warn",
         { argsIgnorePattern: "^_" },
       ],
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
       "react/react-in-jsx-scope": "off", // Disable the rule for React 17+
       "react/no-unescaped-entities": "off", // Disable the rule for unescaped entities
       "react/prop-types": "off", // Disable prop-types validation for TypeScript projects
-      "react/no-unknown-property": "off", // Disable unknown property warnings
+      "react/no-unknown-property": "warn", // Re-enable as a warning to catch typos
+      "max-lines-per-function": [
+        "warn",
+        { max: 100, skipBlankLines: true, skipComments: true },
+      ], // Warn for functions over 100 lines
+      complexity: ["warn", 15], // Warn for functions with cyclomatic complexity over 15
     },
     settings: {
       react: {
