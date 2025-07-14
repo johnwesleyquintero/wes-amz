@@ -14,10 +14,8 @@ import {
   AuthComponents,
   SettingsComponents,
 } from "./lib/app-routes.tsx";
-import {
-  DEFAULT_SUSPENSE_FALLBACK,
-  authenticatedAppRoutes,
-} from "./lib/routes.tsx";
+import { DEFAULT_SUSPENSE_FALLBACK } from "./lib/routes.tsx";
+import { authenticatedAppRoutes } from "./lib/route-config.tsx";
 
 const queryClient = new QueryClient();
 
@@ -103,74 +101,71 @@ function App() {
 
                   {/* Protected Routes (within MainLayout) */}
                   <Route element={<ProtectedRoute />}>
-                    {/* Protected Routes (within MainLayout) */}
-                    <Route element={<ProtectedRoute />}>
-                      <Route path="/dashboard" element={<MainLayout />}>
+                    <Route path="/dashboard" element={<MainLayout />}>
+                      <Route
+                        index
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <Pages.DashboardContent />
+                          </Suspense>
+                        }
+                      />
+                    </Route>
+
+                    {/* Direct routes for tools and settings */}
+                    <Route path="/" element={<MainLayout />}>
+                      {authenticatedAppRoutes.map((route) => (
+                        <Route
+                          key={route.path}
+                          path={route.path}
+                          element={
+                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                              <route.component {...route.props} />
+                            </Suspense>
+                          }
+                        />
+                      ))}
+                      {/* Settings Routes */}
+                      <Route
+                        path="settings"
+                        element={
+                          <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                            <SettingsComponents.SettingsLayout />
+                          </Suspense>
+                        }
+                      >
                         <Route
                           index
                           element={
                             <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <Pages.DashboardContent />
+                              <SettingsComponents.ProfileManagement />
                             </Suspense>
                           }
                         />
-                      </Route>
-
-                      {/* Direct routes for tools and settings */}
-                      <Route path="/" element={<MainLayout />}>
-                        {authenticatedAppRoutes.map((route) => (
-                          <Route
-                            key={route.path}
-                            path={route.path}
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <route.component {...route.props} />
-                              </Suspense>
-                            }
-                          />
-                        ))}
-                        {/* Settings Routes */}
                         <Route
-                          path="settings"
+                          path="profile"
                           element={
                             <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                              <SettingsComponents.SettingsLayout />
+                              <SettingsComponents.ProfileManagement />
                             </Suspense>
                           }
-                        >
-                          <Route
-                            index
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <SettingsComponents.ProfileManagement />
-                              </Suspense>
-                            }
-                          />
-                          <Route
-                            path="profile"
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <SettingsComponents.ProfileManagement />
-                              </Suspense>
-                            }
-                          />
-                          <Route
-                            path="organization"
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <SettingsComponents.OrganizationSettings />
-                              </Suspense>
-                            }
-                          />
-                          <Route
-                            path="team"
-                            element={
-                              <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                                <SettingsComponents.TeamManagement />
-                              </Suspense>
-                            }
-                          />
-                        </Route>
+                        />
+                        <Route
+                          path="organization"
+                          element={
+                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                              <SettingsComponents.OrganizationSettings />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path="team"
+                          element={
+                            <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                              <SettingsComponents.TeamManagement />
+                            </Suspense>
+                          }
+                        />
                       </Route>
                     </Route>
                   </Route>

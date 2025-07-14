@@ -7,7 +7,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { authenticatedAppRoutes } from "@/lib/routes.tsx";
+import { authenticatedAppRoutes } from "@/lib/route-config.tsx";
 
 const Breadcrumb: React.FC = () => {
   const location = useLocation();
