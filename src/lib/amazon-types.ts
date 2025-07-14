@@ -125,6 +125,8 @@ export type MetricType =
   | "price"
   | "reviews"
   | "rating"
+  | "sales_velocity"
+  | "inventory_levels"
   | "conversion_rate"
   | "click_through_rate";
 

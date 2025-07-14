@@ -41,14 +41,7 @@ export function renderIf(condition: boolean, component: React.ReactNode) {
   return condition ? component : null;
 }
 
-export type MetricType =
-  | "price"
-  | "reviews"
-  | "rating"
-  | "sales_velocity"
-  | "inventory_levels"
-  | "conversion_rate"
-  | "click_through_rate";
+import { MetricType } from "./amazon-types";
 
 export const getChartColor = (metric: MetricType): string => {
   switch (metric) {
