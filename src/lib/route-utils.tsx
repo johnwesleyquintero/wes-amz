@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Route } from "react-router-dom";
 import { AppRouteConfig, LazyComponent, Pages } from "./app-routes";
-import { DEFAULT_SUSPENSE_FALLBACK } from "./constants";
+import { DEFAULT_SUSPENSE_FALLBACK } from "./routes";
 
 interface RouteDefinition {
   path: string;

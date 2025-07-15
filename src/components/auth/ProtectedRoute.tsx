@@ -3,6 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/components/ui/use-toast";
 import { ApiError, AuthenticationError } from "@/lib/api-errors";
+import LoadingSpinner from "@/components/shared/LoadingSpinner"; // Import LoadingSpinner
 
 const ProtectedRoute: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -78,7 +79,11 @@ const ProtectedRoute: React.FC = () => {
 
   if (isAuthenticated === null) {
     // Optionally render a loading spinner or null while checking auth
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
   return isAuthenticated ? <Outlet /> : <Navigate to="/auth/login" />;

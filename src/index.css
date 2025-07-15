@@ -57,14 +57,14 @@
     --secondary: 210 100% 65%; /* #4da6ff */
     --accent: 32 92% 75%; /* #f7c38a */
     --foreground: 210 17% 93%; /* #e9ecef */
-    --muted-foreground: 210 17% 85%; /* #ced4da */
+    --muted-foreground: 210 17% 75%; /* Adjusted for better contrast */
     --background: 220 20% 13%; /* #1a202c */
     --card: 218 20% 23%; /* #2d3748 */
-    --border: 218 17% 28%; /* #4a5568 */
-    --input: 218 17% 28%; /* #4a5568 */
-    --code-bg: 218 17% 28%; /* #4a5568 */
+    --border: 218 17% 35%; /* Adjusted for better visibility */
+    --input: 218 17% 35%; /* Adjusted for better visibility */
+    --code-bg: 218 17% 35%; /* Adjusted for better visibility */
     --date-text: 216 17% 63%; /* #a0aec0 */
-    --testimonial-bg: 220 17% 30%; /* #3a445d */
+    --testimonial-bg: 220 17% 38%; /* Adjusted for better visibility */
     --testimonial-quote: 210 17% 90%; /* #e0e6ed */
 
     /* Custom color palette - Dark Mode */

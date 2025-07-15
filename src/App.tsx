@@ -17,7 +17,7 @@ const ProtectedRoute: LazyExoticComponent<FC> = lazy(
 );
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
 import { Pages, SettingsComponents } from "./lib/app-routes.tsx";
-import { DEFAULT_SUSPENSE_FALLBACK } from "./lib/constants";
+import { DEFAULT_SUSPENSE_FALLBACK } from "./lib/routes"; // Corrected import path
 import { authenticatedAppRoutes } from "./lib/route-config.tsx";
 import { queryClient } from "./lib/queryClient.ts";
 import { publicRoutes } from "./lib/public-routes.tsx";
@@ -47,9 +47,7 @@ function App() {
                   {generateRoutes(publicRoutes)}
 
                   {/* Authentication Routes - No MainLayout */}
-                  <Route path="/auth">
-                    {generateRoutes(authRoutes)}
-                  </Route>
+                  <Route path="/auth">{generateRoutes(authRoutes)}</Route>
 
                   {/* Protected Routes (within MainLayout) */}
                   {generateAuthenticatedAppRoutes(

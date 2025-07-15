@@ -11,19 +11,34 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className,
 }) => {
   const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-6 w-6",
-    lg: "h-8 w-8",
+    sm: "h-2 w-2",
+    md: "h-3 w-3",
+    lg: "h-4 w-4",
   };
 
   return (
     <div
-      className={cn(
-        "animate-spin rounded-full border-2 border-gray-300 border-t-primary",
-        sizeClasses[size],
-        className,
-      )}
-    />
+      className={cn("flex items-center justify-center space-x-1", className)}
+    >
+      <div
+        className={cn(
+          "rounded-full bg-primary animate-bounce-slow",
+          sizeClasses[size],
+        )}
+      />
+      <div
+        className={cn(
+          "rounded-full bg-primary animate-bounce-slow delay-150",
+          sizeClasses[size],
+        )}
+      />
+      <div
+        className={cn(
+          "rounded-full bg-primary animate-bounce-slow delay-300",
+          sizeClasses[size],
+        )}
+      />
+    </div>
   );
 };
 

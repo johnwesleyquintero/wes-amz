@@ -5,5 +5,3 @@ export const MIN_CONVERSION_RATE_THRESHOLD = 8;
 
 export const ACOS_EXCELLENT_THRESHOLD = 25;
 export const ACOS_GOOD_THRESHOLD = 35;
-
-export const DEFAULT_SUSPENSE_FALLBACK = <div>Loading...</div>;
