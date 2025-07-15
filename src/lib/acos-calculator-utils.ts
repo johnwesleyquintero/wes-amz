@@ -6,26 +6,15 @@ import {
 } from "@/components/amazon-seller-tools/acos-calculator/types";
 import { GenericCsvRow } from "@/components/amazon-seller-tools/CsvUploader";
 import { ApiError } from "@/lib/api-errors";
-import { useToast } from "@/hooks/use-toast"; // Re-add useToast import
 import { useError } from "@/context/error-context"; // Import useError
 
 // Helper function for showing toasts (now uses useError)
 export const showToast = (
-  toast: ReturnType<typeof useToast>["toast"], // Keep toast for success messages
   showError: ReturnType<typeof useError>["showError"],
   title: string,
   description: string,
-  variant: "default" | "destructive" = "default",
 ) => {
-  if (variant === "destructive") {
-    showError(title, description);
-  } else {
-    toast({
-      title: title,
-      description: description,
-      variant: variant,
-    });
-  }
+  showError(title, description);
 };
 
 // Helper function for validating manual input
@@ -70,7 +59,6 @@ export const handleManualCalculateLogic = (
   campaigns: AcosCampaignData[],
   setCampaigns: (campaigns: AcosCampaignData[]) => void,
   setManualCampaign: (manualCampaign: ManualCampaignInput) => void,
-  toast: ReturnType<typeof useToast>["toast"],
   showError: ReturnType<typeof useError>["showError"], // Use showError from useError
   validateInput: (
     manualCampaign: ManualCampaignInput,
@@ -110,19 +98,18 @@ export const handleManualCalculateLogic = (
 
   setCampaigns([...campaigns, newCampaign]);
   setManualCampaign({ campaign: "", adSpend: "", sales: "" });
-  showToast(
-    toast,
-    showError,
-    "Campaign Added",
-    "Campaign data added successfully",
-  );
+  // showToast(
+  //   toast,
+  //   showError,
+  //   "Campaign Added",
+  //   "Campaign data added successfully",
+  // ); // This will be handled by useAcosCalculator directly
 };
 
 // Helper function for handling export
 export const handleExportLogic = (
   campaigns: AcosCampaignData[],
   showError: ReturnType<typeof useError>["showError"], // Use showError from useError
-  toast: ReturnType<typeof useToast>["toast"], // Keep toast for success messages
 ) => {
   if (campaigns.length === 0) {
     showError("Export Error", "No data to export");
@@ -152,12 +139,12 @@ export const handleExportLogic = (
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(
-      toast,
-      showError,
-      "Export Success",
-      "Campaign data exported successfully",
-    );
+    // showToast(
+    //   toast,
+    //   showError,
+    //   "Export Success",
+    //   "Campaign data exported successfully",
+    // ); // This will be handled by useAcosCalculator directly
   } catch (error) {
     const apiError =
       error instanceof ApiError
@@ -179,11 +166,10 @@ export const handleExportLogic = (
 // Helper function for clearing data
 export const clearDataLogic = (
   clearAllData: () => void,
-  toast: ReturnType<typeof useToast>["toast"], // Keep toast for success messages
   showError: ReturnType<typeof useError>["showError"], // Use showError from useError
 ) => {
   clearAllData();
-  showToast(toast, showError, "Data Cleared", "Campaign data cleared");
+  // showToast(toast, showError, "Data Cleared", "Campaign data cleared"); // This will be handled by useAcosCalculator directly
 };
 
 // Helper function for handling upload success

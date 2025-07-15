@@ -4,7 +4,6 @@ import { GenericCsvRow } from "../../CsvUploader";
 import { useAcosCalculatorStore } from "@/store/acos-calculator-store";
 import { useError } from "@/context/error-context"; // Import useError
 import {
-  showToast,
   validateManualInput,
   handleManualCalculateLogic,
   handleExportLogic,
@@ -28,44 +27,45 @@ export const useAcosCalculator = () => {
 
   const { showError } = useError(); // Use showError from ErrorContext
 
-  const showErrorToast = useCallback(
-    (title: string, description: string) =>
-      showToast(toast, showError, title, description, "destructive"),
-    [toast, showError],
-  );
-
-  const handleManualCalculate = useCallback(
-    () =>
-      handleManualCalculateLogic(
-        manualCampaign,
-        campaigns,
-        setCampaigns,
-        setManualCampaign,
-        toast,
-        showError, // Pass showError from ErrorContext
-        validateManualInput,
-        setManualErrors,
-      ),
-    [
+  const handleManualCalculate = useCallback(() => {
+    handleManualCalculateLogic(
       manualCampaign,
       campaigns,
       setCampaigns,
       setManualCampaign,
-      toast,
-      showError, // Add showError to dependencies
+      showError,
+      validateManualInput,
       setManualErrors,
-    ],
-  );
+    );
+    toast({
+      title: "Campaign Added",
+      description: "Campaign data added successfully",
+    });
+  }, [
+    manualCampaign,
+    campaigns,
+    setCampaigns,
+    setManualCampaign,
+    showError,
+    setManualErrors,
+    toast,
+  ]);
 
-  const handleExport = useCallback(
-    () => handleExportLogic(campaigns, showError, toast), // Pass showError from ErrorContext
-    [campaigns, showError, toast], // Add showError to dependencies
-  );
+  const handleExport = useCallback(() => {
+    handleExportLogic(campaigns, showError);
+    toast({
+      title: "Export Success",
+      description: "Campaign data exported successfully",
+    });
+  }, [campaigns, showError, toast]);
 
-  const clearData = useCallback(
-    () => clearDataLogic(clearAllData, toast, showError), // Pass showError from ErrorContext
-    [clearAllData, toast, showError], // Add showError to dependencies
-  );
+  const clearData = useCallback(() => {
+    clearDataLogic(clearAllData, showError);
+    toast({
+      title: "Data Cleared",
+      description: "Campaign data cleared",
+    });
+  }, [clearAllData, showError, toast]);
 
   const handleUploadSuccess = useCallback(
     (data: GenericCsvRow[]) =>
