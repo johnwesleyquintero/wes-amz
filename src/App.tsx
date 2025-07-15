@@ -47,7 +47,9 @@ function App() {
                   {generateRoutes(publicRoutes)}
 
                   {/* Authentication Routes - No MainLayout */}
-                  {generateRoutes(authRoutes)}
+                  <Route path="/auth">
+                    {generateRoutes(authRoutes)}
+                  </Route>
 
                   {/* Protected Routes (within MainLayout) */}
                   {generateAuthenticatedAppRoutes(
