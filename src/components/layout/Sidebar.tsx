@@ -11,12 +11,12 @@ import { mainNavigation } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
-import { useSidebar } from "@/context/sidebar-context";
+import { useSidebarStore } from "@/store/sidebar-store";
 import NavigationRenderer from "./NavigationRenderer";
 
 const Sidebar: React.FC = React.memo(() => {
   Sidebar.displayName = "Sidebar";
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, toggleSidebar } = useSidebarStore();
 
   const getSidebarWidthClasses = useCallback(
     () => cn(isCollapsed ? "w-20" : "w-64"),

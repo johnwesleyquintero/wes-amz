@@ -4,13 +4,13 @@ import { useCsvUploaderStore } from "@/store/csv-uploader-store";
 import { GenericCsvRow } from "@/components/amazon-seller-tools/CsvUploader";
 
 interface UseCsvWorkerProps {
-  onUploadSuccess: (data: GenericCsvRow[]) => void;
   requiredColumns: string[];
+  onParseComplete: (data: GenericCsvRow[]) => void; // New prop for callback
 }
 
 export const useCsvWorker = ({
-  onUploadSuccess,
   requiredColumns,
+  onParseComplete,
 }: UseCsvWorkerProps) => {
   const { toast } = useToast();
   const {
@@ -77,19 +77,19 @@ export const useCsvWorker = ({
         return;
       }
 
-      onUploadSuccess(data);
+      onParseComplete(data); // Call the new callback with the parsed data
       toast({
         title: "Success",
         description: "File processed successfully",
         variant: "default",
       });
-      setData([]);
+      setData([]); // Clear accumulated data after successful processing
     },
     [
       requiredColumns,
       toast,
       setData,
-      onUploadSuccess,
+      onParseComplete,
       setParsingStatus,
       setProgress,
       validateColumns,

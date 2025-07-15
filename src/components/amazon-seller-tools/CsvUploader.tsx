@@ -38,9 +38,14 @@ export default function CsvUploader({
     setFileName,
     setError,
     clearState,
+    accumulatedData, // Access accumulatedData from the store
   } = useCsvUploaderStore();
 
-  const { parseCsv } = useCsvWorker({ onUploadSuccess, requiredColumns });
+  // Pass onParseComplete to useCsvWorker
+  const { parseCsv } = useCsvWorker({
+    requiredColumns,
+    onParseComplete: onUploadSuccess, // Use onUploadSuccess as the callback
+  });
 
   const handleFileValidationAndParse = useCallback(
     (file: File) => {
@@ -122,7 +127,7 @@ export default function CsvUploader({
       getRootProps={getRootProps}
       isDragActive={isDragActive}
       progress={progress}
-      hasData={hasData}
+      hasData={hasData || accumulatedData.length > 0} // Use accumulatedData to check for data
       onClear={onClear}
     />
   );

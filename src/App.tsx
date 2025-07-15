@@ -5,9 +5,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { SidebarProvider } from "./context/sidebar-context.tsx";
 import { LazyExoticComponent, lazy } from "react";
 import type { FC } from "react";
+import { ThemeProvider } from "./components/theme/theme-provider.tsx";
 
 const MainLayout: LazyExoticComponent<FC> = lazy(
   () => import("./components/layout/MainLayout"),
@@ -26,72 +26,77 @@ import {
   generateAuthenticatedAppRoutes,
   generateRoutes,
 } from "./lib/route-utils.tsx";
+import { ErrorProvider } from "./context/error-context.tsx"; // Import ErrorProvider
 
 function App() {
   return (
     <Suspense fallback={null}>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <SidebarProvider>
-            <ErrorBoundary>
-              <BrowserRouter
-                future={{
-                  v7_startTransition: true,
-                  v7_relativeSplatPath: true,
-                }}
-              >
-                <Routes>
-                  {/* Public Routes */}
-                  {generateRoutes(publicRoutes)}
+        <ThemeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <ErrorProvider>
+              {" "}
+              {/* Wrap ErrorBoundary with ErrorProvider */}
+              <ErrorBoundary>
+                <BrowserRouter
+                  future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true,
+                  }}
+                >
+                  <Routes>
+                    {/* Public Routes */}
+                    {generateRoutes(publicRoutes)}
 
-                  {/* Authentication Routes - No MainLayout */}
-                  <Route path="/auth">{generateRoutes(authRoutes)}</Route>
+                    {/* Authentication Routes - No MainLayout */}
+                    <Route path="/auth">{generateRoutes(authRoutes)}</Route>
 
-                  {/* Protected Routes (within MainLayout) */}
-                  {generateAuthenticatedAppRoutes(
-                    authenticatedAppRoutes,
-                    MainLayout,
-                    ProtectedRoute,
-                  )}
+                    {/* Protected Routes (within MainLayout) */}
+                    {generateAuthenticatedAppRoutes(
+                      authenticatedAppRoutes,
+                      MainLayout,
+                      ProtectedRoute,
+                    )}
 
-                  {/* Settings Routes */}
-                  <Route
-                    path="settings"
-                    element={
-                      <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
-                        <SettingsComponents.SettingsLayout />
-                      </Suspense>
-                    }
-                  >
-                    {generateRoutes([
-                      {
-                        path: "",
-                        component: SettingsComponents.ProfileManagement,
-                        index: true,
-                      },
-                      {
-                        path: "profile",
-                        component: SettingsComponents.ProfileManagement,
-                      },
-                      {
-                        path: "organization",
-                        component: SettingsComponents.OrganizationSettings,
-                      },
-                      {
-                        path: "team",
-                        component: SettingsComponents.TeamManagement,
-                      },
-                    ])}
-                  </Route>
+                    {/* Settings Routes */}
+                    <Route
+                      path="settings"
+                      element={
+                        <Suspense fallback={DEFAULT_SUSPENSE_FALLBACK}>
+                          <SettingsComponents.SettingsLayout />
+                        </Suspense>
+                      }
+                    >
+                      {generateRoutes([
+                        {
+                          path: "",
+                          component: SettingsComponents.ProfileManagement,
+                          index: true,
+                        },
+                        {
+                          path: "profile",
+                          component: SettingsComponents.ProfileManagement,
+                        },
+                        {
+                          path: "organization",
+                          component: SettingsComponents.OrganizationSettings,
+                        },
+                        {
+                          path: "team",
+                          component: SettingsComponents.TeamManagement,
+                        },
+                      ])}
+                    </Route>
 
-                  <Route path="*" element={<Pages.NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </ErrorBoundary>
-          </SidebarProvider>
-        </TooltipProvider>
+                    <Route path="*" element={<Pages.NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </ErrorBoundary>
+            </ErrorProvider>
+          </TooltipProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </Suspense>
   );

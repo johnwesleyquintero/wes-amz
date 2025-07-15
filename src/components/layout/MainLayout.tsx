@@ -3,12 +3,12 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/context/sidebar-context";
+import { useSidebarStore } from "@/store/sidebar-store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileSidebar from "./MobileSidebar";
 
 const MainLayout: React.FC = () => {
-  const { isCollapsed } = useSidebar();
+  const isCollapsed = useSidebarStore((state) => state.isCollapsed);
   const isMobile = useIsMobile();
 
   return (
