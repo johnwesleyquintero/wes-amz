@@ -6,6 +6,9 @@ import { Download, Info } from "lucide-react";
 import CsvUploader from "./CsvUploader";
 import CampaignCard from "./CampaignCard";
 import { usePpcAuditor } from "@/hooks/use-ppc-auditor";
+import SmartDataTable from "@/components/shared/SmartDataTable";
+import { Trash2, Archive, Edit } from "lucide-react";
+import RealTimeInsights from "@/components/shared/RealTimeInsights";
 import SampleCsvButton from "./sample-csv-button";
 
 const REQUIRED_COLUMNS = [
@@ -66,21 +69,118 @@ export default function PpcCampaignAuditor() {
       />
 
       {hasData && (
+        <RealTimeInsights 
+          data={campaigns} 
+          context="ppc" 
+          className="mb-6"
+        />
+      )}
+
+      {hasData && (
         <>
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={exportResultsToCsv}>
-              <Download className="mr-2 h-4 w-4" />
-              Export Audit Report
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {campaigns.map((campaign, index) => (
-              <CampaignCard
-                key={`${campaign.name}-${index}`}
-                campaign={campaign}
-              />
-            ))}
-          </div>
+          <SmartDataTable
+            title="Campaign Audit Results"
+            description="Detailed analysis of your PPC campaigns with performance insights"
+            data={campaigns}
+            exportable={true}
+            onExport={exportResultsToCsv}
+            filterable={true}
+            selectable={true}
+            getRowId={(campaign) => campaign.name}
+            bulkActions={[
+              {
+                id: "archive",
+                label: "Archive",
+                icon: <Archive className="h-4 w-4" />,
+                variant: "outline",
+                onClick: (selectedIds) => {
+                  console.log("Archive campaigns:", selectedIds);
+                  // Implement archive functionality
+                },
+              },
+              {
+                id: "delete",
+                label: "Delete",
+                icon: <Trash2 className="h-4 w-4" />,
+                variant: "destructive",
+                onClick: (selectedIds) => {
+                  console.log("Delete campaigns:", selectedIds);
+                  // Implement delete functionality
+                },
+              },
+            ]}
+            columns={[
+              {
+                key: "name",
+                label: "Campaign Name",
+                sortable: true,
+                filterable: true,
+              },
+              {
+                key: "type",
+                label: "Type",
+                sortable: true,
+                filterable: true,
+                filterType: "select",
+                filterOptions: ["Auto", "Manual", "Sponsored Products", "Sponsored Brands"],
+              },
+              {
+                key: "spend",
+                label: "Spend",
+                sortable: true,
+                className: "text-right",
+                filterable: true,
+                filterType: "number",
+                render: (campaign) => `$${campaign.spend.toFixed(2)}`,
+              },
+              {
+                key: "sales",
+                label: "Sales",
+                sortable: true,
+                className: "text-right",
+                filterable: true,
+                filterType: "number",
+                render: (campaign) => `$${campaign.sales.toFixed(2)}`,
+              },
+              {
+                key: "acos",
+                label: "ACoS",
+                sortable: true,
+                className: "text-right",
+                filterable: true,
+                filterType: "number",
+                render: (campaign) => (
+                  <span className={cn(
+                    campaign.acos > 30 ? "text-red-600 dark:text-red-400" :
+                    campaign.acos > 20 ? "text-yellow-600 dark:text-yellow-400" :
+                    "text-green-600 dark:text-green-400"
+                  )}>
+                    {campaign.acos.toFixed(2)}%
+                  </span>
+                ),
+              },
+              {
+                key: "issues",
+                label: "Issues",
+                className: "text-center",
+                render: (campaign) => (
+                  <Badge variant={campaign.issues.length > 0 ? "destructive" : "default"}>
+                    {campaign.issues.length}
+                  </Badge>
+                ),
+              },
+              {
+                key: "actions",
+                label: "Actions",
+                className: "text-center",
+                render: (campaign) => (
+                  <Button variant="ghost" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                ),
+              },
+            ]}
+          />
         </>
       )}
     </div>

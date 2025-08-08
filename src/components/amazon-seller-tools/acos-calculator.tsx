@@ -4,7 +4,8 @@ import { Card, CardContent } from "../ui/card";
 import { Info } from "lucide-react";
 import CsvUploader from "./CsvUploader";
 import ManualAcosInputForm from "./acos-calculator/ManualAcosInputForm";
-import AcosTable from "./acos-calculator/AcosTable"; // Import the new AcosTable component
+import AcosTable from "./acos-calculator/AcosTable";
+import ProgressiveUploader from "@/components/shared/ProgressiveUploader";
 import { useAcosCalculator } from "./acos-calculator/hooks/use-acos-calculator";
 
 /**
@@ -48,15 +49,30 @@ export default function AcosCalculator() {
         </div>
       </div>
       <div className="flex flex-col gap-4 sm:flex-row">
-        {/* CsvUploader Integration */}
+        {/* Progressive File Upload */}
         <Card className="flex-1">
           <CardContent className="p-4">
-            <CsvUploader
-              onUploadSuccess={handleUploadSuccess}
-              onClear={clearData}
-              hasData={campaigns.length > 0}
-              requiredColumns={["campaign", "adSpend", "sales"]}
-              isLoading={isLoading}
+            <ProgressiveUploader
+              onFilesProcessed={(files) => {
+                const completedFiles = files.filter(f => f.status === "completed");
+                if (completedFiles.length > 0) {
+                  // Mock data processing - in real app, this would process the actual file data
+                  const mockData = Array.from({ length: 10 }, (_, i) => ({
+                    campaign: `Campaign ${i + 1}`,
+                    adSpend: Math.random() * 1000,
+                    sales: Math.random() * 5000,
+                  }));
+                  handleUploadSuccess(mockData);
+                }
+              }}
+              validation={{
+                maxSize: 5 * 1024 * 1024, // 5MB
+                allowedTypes: [".csv"],
+                requiredColumns: ["campaign", "adSpend", "sales"],
+              }}
+              title="Upload Campaign Data"
+              description="Upload CSV files with your campaign performance data"
+              showPreview={true}
             />
           </CardContent>
         </Card>

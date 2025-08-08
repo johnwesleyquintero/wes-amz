@@ -20,25 +20,26 @@ export default function AcosTable({ campaigns, handleExport }: AcosTableProps) {
   }
 
   return (
-    <>
-      <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" />
-          Export Data
-        </Button>
-      </div>
       <DataTable
+        title="Campaign Analysis Results"
+        description="ACoS performance analysis for your campaigns"
+        exportable={true}
+        onExport={handleExport}
+        filterable={true}
         columns={[
           {
             key: "campaign",
             label: "Campaign",
             sortable: true,
+            filterable: true,
           },
           {
             key: "adSpend",
             label: "Ad Spend",
             sortable: true,
             className: "text-right",
+            filterable: true,
+            filterType: "number",
             render: (row: AcosCampaignData) => `$${row.adSpend.toFixed(2)}`,
           },
           {
@@ -46,6 +47,8 @@ export default function AcosTable({ campaigns, handleExport }: AcosTableProps) {
             label: "Sales",
             sortable: true,
             className: "text-right",
+            filterable: true,
+            filterType: "number",
             render: (row: AcosCampaignData) => `$${row.sales.toFixed(2)}`,
           },
           {
@@ -53,6 +56,8 @@ export default function AcosTable({ campaigns, handleExport }: AcosTableProps) {
             label: "ACoS",
             sortable: true,
             className: "text-right",
+            filterable: true,
+            filterType: "number",
             render: (row: AcosCampaignData) => `${row.acos?.toFixed(2)}%`,
           },
           {
@@ -60,12 +65,17 @@ export default function AcosTable({ campaigns, handleExport }: AcosTableProps) {
             label: "ROAS",
             sortable: true,
             className: "text-right",
+            filterable: true,
+            filterType: "number",
             render: (row: AcosCampaignData) => `${row.roas?.toFixed(2)}x`,
           },
           {
             key: "rating",
             label: "Rating",
             className: "text-center",
+            filterable: true,
+            filterType: "select",
+            filterOptions: ["Excellent", "Good", "Average", "Poor", "Critical"],
             render: (campaign: AcosCampaignData) => (
               <Badge
                 variant={
@@ -82,8 +92,6 @@ export default function AcosTable({ campaigns, handleExport }: AcosTableProps) {
           },
         ]}
         data={campaigns}
-        filterable
       />
-    </>
   );
 }

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -10,9 +11,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
 import { CaretSortIcon, ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons";
 import { Badge } from "@/components/ui/badge";
+import BulkActionToolbar from "./BulkActionToolbar";
 
 interface Column<T> {
   key: keyof T | "actions" | string;
@@ -25,7 +26,15 @@ interface Column<T> {
   filterOptions?: string[];
 }
 
-interface DataTableProps<T> {
+interface BulkAction {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  variant?: "default" | "destructive" | "outline" | "secondary";
+  onClick: (selectedIds: string[]) => void;
+}
+
+interface SmartDataTableProps<T> {
   data: T[];
   columns: Column<T>[];
   className?: string;
@@ -35,9 +44,12 @@ interface DataTableProps<T> {
   onExport?: () => void;
   title?: string;
   description?: string;
+  selectable?: boolean;
+  bulkActions?: BulkAction[];
+  getRowId?: (row: T) => string;
 }
 
-const DataTable = <T extends Record<string, unknown>>({
+const SmartDataTable = <T extends Record<string, unknown>>({
   data,
   columns,
   className,
@@ -47,7 +59,10 @@ const DataTable = <T extends Record<string, unknown>>({
   onExport,
   title,
   description,
-}: DataTableProps<T>) => {
+  selectable = false,
+  bulkActions = [],
+  getRowId = (_, index) => String(index),
+}: SmartDataTableProps<T>) => {
   const [sorting, setSorting] = useState<{
     columnKey: string | null;
     direction: "asc" | "desc" | null;
@@ -58,6 +73,7 @@ const DataTable = <T extends Record<string, unknown>>({
   const [filter, setFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const sortedData = useMemo(() => {
     if (!sorting.columnKey) return data;
@@ -125,7 +141,25 @@ const DataTable = <T extends Record<string, unknown>>({
     setColumnFilters({});
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedRows(filteredData.map((row, index) => getRowId(row, index)));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleRowSelect = (rowId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRows(prev => [...prev, rowId]);
+    } else {
+      setSelectedRows(prev => prev.filter(id => id !== rowId));
+    }
+  };
+
   const activeFiltersCount = Object.values(columnFilters).filter(Boolean).length + (filter ? 1 : 0);
+  const isAllSelected = selectedRows.length === filteredData.length && filteredData.length > 0;
+  const isIndeterminate = selectedRows.length > 0 && selectedRows.length < filteredData.length;
 
   if (filteredData.length === 0 && data.length > 0) {
     return (
@@ -177,7 +211,7 @@ const DataTable = <T extends Record<string, unknown>>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {(title || description || filterable || exportable) && (
+      {(title || description || filterable || exportable || selectable) && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             {title && <h3 className="text-lg font-semibold">{title}</h3>}
@@ -201,6 +235,16 @@ const DataTable = <T extends Record<string, unknown>>({
             )}
           </div>
         </div>
+      )}
+
+      {selectable && selectedRows.length > 0 && (
+        <BulkActionToolbar
+          selectedItems={selectedRows}
+          totalItems={filteredData.length}
+          onSelectAll={handleSelectAll}
+          onClearSelection={() => setSelectedRows([])}
+          actions={bulkActions}
+        />
       )}
 
       {filterable && isFilterExpanded && (
@@ -245,68 +289,98 @@ const DataTable = <T extends Record<string, unknown>>({
       )}
 
       <div className="rounded-lg border overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => {
-              const isSortable = column.sortable !== false;
-              return (
-                <TableHead
-                  key={column.key as React.Key}
-                  className={cn(
-                    column.className,
-                    isSortable && "cursor-pointer hover:bg-muted/50",
-                    sorting.columnKey === column.key && "font-bold",
-                  )}
-                  onClick={() => {
-                    if (!isSortable) return;
-                    if (sorting.columnKey === column.key) {
-                      setSorting({
-                        columnKey: column.key as string,
-                        direction: sorting.direction === "asc" ? "desc" : "asc",
-                      });
-                    } else {
-                      setSorting({
-                        columnKey: column.key as string,
-                        direction: "asc",
-                      });
-                    }
-                  }}
-                >
-                  <div className="flex items-center">
-                    {column.label}
-                    {isSortable && sorting.columnKey === column.key && (
-                      <CaretSortIcon
-                        className={cn(
-                          "ml-2 h-4 w-4",
-                          sorting.direction === "desc" && "rotate-0",
-                          sorting.direction === "asc" && "rotate-180",
-                        )}
-                      />
-                    )}
-                  </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {selectable && (
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={isAllSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = isIndeterminate;
+                    }}
+                    onCheckedChange={handleSelectAll}
+                  />
                 </TableHead>
+              )}
+              {columns.map((column) => {
+                const isSortable = column.sortable !== false;
+                return (
+                  <TableHead
+                    key={column.key as React.Key}
+                    className={cn(
+                      column.className,
+                      isSortable && "cursor-pointer hover:bg-muted/50",
+                      sorting.columnKey === column.key && "font-bold",
+                    )}
+                    onClick={() => {
+                      if (!isSortable) return;
+                      if (sorting.columnKey === column.key) {
+                        setSorting({
+                          columnKey: column.key as string,
+                          direction: sorting.direction === "asc" ? "desc" : "asc",
+                        });
+                      } else {
+                        setSorting({
+                          columnKey: column.key as string,
+                          direction: "asc",
+                        });
+                      }
+                    }}
+                  >
+                    <div className="flex items-center">
+                      {column.label}
+                      {isSortable && sorting.columnKey === column.key && (
+                        <CaretSortIcon
+                          className={cn(
+                            "ml-2 h-4 w-4",
+                            sorting.direction === "desc" && "rotate-0",
+                            sorting.direction === "asc" && "rotate-180",
+                          )}
+                        />
+                      )}
+                    </div>
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredData.map((row: T, index) => {
+              const rowId = getRowId(row, index);
+              const isSelected = selectedRows.includes(rowId);
+              
+              return (
+                <TableRow 
+                  key={rowId} 
+                  className={cn(
+                    "hover:bg-muted/50",
+                    isSelected && "bg-primary/5"
+                  )}
+                >
+                  {selectable && (
+                    <TableCell>
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(checked) => handleRowSelect(rowId, checked as boolean)}
+                      />
+                    </TableCell>
+                  )}
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.key as string}
+                      className={column.className}
+                    >
+                      {column.render
+                        ? column.render(row)
+                        : (row[column.key as keyof T] as React.ReactNode)}
+                    </TableCell>
+                  ))}
+                </TableRow>
               );
             })}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredData.map((row: T, index) => (
-            <TableRow key={index} className="hover:bg-muted/50">
-              {columns.map((column) => (
-                <TableCell
-                  key={column.key as string}
-                  className={column.className}
-                >
-                  {column.render
-                    ? column.render(row)
-                    : (row[column.key as keyof T] as React.ReactNode)}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
       </div>
 
       {filteredData.length > 0 && (
@@ -315,10 +389,15 @@ const DataTable = <T extends Record<string, unknown>>({
             Showing {filteredData.length} of {data.length} results
             {activeFiltersCount > 0 && ` (${activeFiltersCount} filter${activeFiltersCount === 1 ? '' : 's'} applied)`}
           </span>
+          {selectable && selectedRows.length > 0 && (
+            <span>
+              {selectedRows.length} row{selectedRows.length === 1 ? '' : 's'} selected
+            </span>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default DataTable;
+export default SmartDataTable;
